@@ -24,7 +24,8 @@ try {
     const from = path.join(DATA, dir);
     if (fs.existsSync(from)) fs.cpSync(from, path.join(stage, dir), { recursive: true });
   }
-  execFileSync("tar", ["-czf", OUT, "-C", stage, "."]);
+  // COPYFILE_DISABLE: macOS tar would otherwise add "._*" metadata files.
+  execFileSync("tar", ["-czf", OUT, "-C", stage, "."], { env: { ...process.env, COPYFILE_DISABLE: "1" } });
   const counts = FOLDERS.map((d) => [d, fs.existsSync(path.join(stage, d)) ? fs.readdirSync(path.join(stage, d)).length : 0]);
   console.log(`Wrote ${OUT} (${(fs.statSync(OUT).size / 1e6).toFixed(1)} MB): portal.db + ${counts.map(([d, n]) => `${d} ${n}`).join(", ")}`);
 } finally {
