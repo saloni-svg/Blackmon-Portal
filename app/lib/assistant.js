@@ -172,7 +172,10 @@ export function createAssistant({ db, root, dataDir, campFile, loadContent, stor
 
   // ----- embeddings (local model, loaded on first use) -----
   let embedderP = null;
+  // ASK_EMBEDDINGS=0 skips the model (it needs a few hundred MB of memory, more than a 512 MB host has);
+  // questions are then matched to sections by keyword scoring alone.
   function embedder() {
+    if (process.env.ASK_EMBEDDINGS === "0") return (embedderP ||= Promise.resolve(null));
     embedderP ||= import("@huggingface/transformers")
       .then(({ pipeline, env }) => { env.cacheDir = modelsDir; return pipeline("feature-extraction", EMBED_MODEL, { dtype: "q8" }); })
       .catch((err) => { console.error(`  Ask Blackmon: embedding model unavailable (${err.message}); using keyword search.`); return null; });
