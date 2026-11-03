@@ -123,7 +123,11 @@ function childCheckWarning(contact, text) {
 }
 
 // Admin dashboard at /admin (separate email + password sign-in). PORTAL_URL is used in emailed links.
-const PORTAL_URL = (process.env.PORTAL_URL || "http://localhost:3000").replace(/\/+$/, "");
+// The portal's address: every emailed / texted link is built from it (no trailing slash).
+const PORTAL_URL = (process.env.PORTAL_URL || "https://portal.blackmontutoring.com").replace(/\/+$/, "");
+// Production: the one address the portal answers on. Any other host (e.g. the service's own
+// *.onrender.com address) is 301-redirected to the same path on PORTAL_URL.
+const CANONICAL_HOST = new URL(PORTAL_URL).host;
 // Cookies are Secure (sent over HTTPS only) whenever the portal is served over https.
 const SECURE_COOKIE = /^https:/i.test(PORTAL_URL) ? "; Secure" : "";
 // In production (NODE_ENV=production on the host) emails never carry a localhost link: invites are
@@ -996,6 +1000,10 @@ const server = http.createServer(async (req, res) => {
   // service and it's put in place (above).
   if (url.pathname === "/_import" && req.method === "PUT") return importPart(req, res, url);
   // Production: HTTPS only. The host's proxy terminates TLS and says how the visitor came in.
+  if (PRODUCTION && req.headers.host && req.headers.host !== CANONICAL_HOST) {
+    res.writeHead(301, { Location: `${PORTAL_URL}${req.url}` });
+    return res.end();
+  }
   if (PRODUCTION && req.headers["x-forwarded-proto"] === "http") {
     res.writeHead(301, { Location: `https://${req.headers.host}${req.url}` });
     return res.end();
