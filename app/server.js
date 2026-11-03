@@ -94,17 +94,6 @@ if (!fs.existsSync(CAMP_FILE)) {
   fs.copyFileSync(path.join(ROOT, "content", "camp.json"), CAMP_FILE);
   console.log(`  Camp content: copied content/camp.json to ${CAMP_FILE} (admin edits are saved there).`);
 }
-// Puts back the Plano camp, week and team in the live camp.json if they're missing (they were removed
-// by a change that was rolled back), taken from content/camp.json. Nothing else in the file changes.
-{
-  const live = JSON.parse(fs.readFileSync(CAMP_FILE, "utf8")), shipped = JSON.parse(fs.readFileSync(path.join(ROOT, "content", "camp.json"), "utf8"));
-  const missing = ["locations", "weeks", "teams"].filter((k) => shipped[k]?.plano && !live[k]?.plano);
-  if (missing.length) {
-    for (const k of missing) live[k] = { plano: shipped[k].plano, ...live[k] };
-    fs.writeFileSync(CAMP_FILE, JSON.stringify(live, null, 2) + "\n");
-    console.log(`  Camp content: restored Plano (${missing.join(", ")}) in ${CAMP_FILE}.`);
-  }
-}
 const docs = createDocuments({ db, store, root: ROOT, base: DATA_BASE });
 // Before launch (PARENT_MESSAGES isn't "live"), the portal changes and emails real GHL contacts only
 // when they're tagged portal-test; everyone else is left alone until launch.
