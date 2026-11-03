@@ -23,7 +23,7 @@ Then open http://localhost:3000. Stop it with `Ctrl+C`.
 | Checklist: Meal plan | Saves to the meal fields on the contact (sub, tacos, nuggets, pizza + special requests). |
 | Checklist: Waiver | Reads **E-Sign Status** / **Docs Signed**. Once it's Completed, This week, A day at camp and Camp team unlock (same rule as **Parent Documents Signed**). |
 | Payment plan | Reads the Portal - Plan Total, Amount Paid, Balance, Next Due Date and Installments Remaining fields. The button uses the **Portal Payment Link** custom value. |
-| Staff/Tutor onboarding | Follows **Portal - Onboarding Status**. Training opens the **Portal Login Link**. The last step opens **WhatsApp Little Elm** or **Wise Invite**. |
+| Staff/Tutor onboarding | Follows **Portal - Onboarding Status**. Training opens the **Portal Login Link**. The last step opens **WhatsApp Plano / Little Elm** or **Wise Invite**. |
 | Intro video upload | Uploads to **Portal - Intro Video** and sets Onboarding Status to **Video Submitted**. |
 
 ## Admin dashboard (`/admin`)

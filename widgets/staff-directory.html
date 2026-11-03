@@ -7,7 +7,7 @@
     Memberships > Parent portal > "Your camp team" lesson > add a
     "Custom HTML/Code" element and paste EVERYTHING between
     BEGIN WIDGET and END WIDGET below.
-    Set data-location="littleelm" on the
+    Set data-location="plano" or data-location="littleelm" on the
     <div class="bt-team"> line (use one element per location).
 
   WHAT TO EDIT
@@ -16,7 +16,7 @@
       role  : "Supervisor", "Counselor", or any title. Supervisors are
               always listed first and get a badge.
       phone : 10-digit number, e.g. "XXX-XXX-XXXX" (any format; becomes a tap-to-call button)
-      photo : optional. Either a file name (e.g. "littleelm-jane.jpg", looked up in
+      photo : optional. Either a file name (e.g. "plano-jane.jpg", looked up in
               photoBase) or a full image URL from the GHL Media library.
               Leave "" to show the person's initials instead.
     photoBase: folder for photo file names. On GHL, relative paths like
@@ -40,7 +40,7 @@
 <body>
 
 <!-- ===== BEGIN WIDGET ===== -->
-<div class="bt-team" data-location="littleelm">
+<div class="bt-team" data-location="plano">
 <script>
   /* =====================================================================
      EDIT THE TEAM — change the text between the quotes only.
@@ -49,6 +49,11 @@
 
     photoBase: "../assets/images/",
 
+    plano: [
+      { name: "[STAFF_NAME]", role: "Supervisor", phone: "[STAFF_PHONE]", photo: "" },
+      { name: "[STAFF_NAME]", role: "Counselor",  phone: "[STAFF_PHONE]", photo: "" },
+      { name: "[STAFF_NAME]", role: "Counselor",  phone: "[STAFF_PHONE]", photo: "" }
+    ],
 
     littleelm: [
       { name: "[STAFF_NAME]", role: "Supervisor", phone: "[STAFF_PHONE]", photo: "" },
@@ -184,7 +189,8 @@
 (function () {
   var SEL = ".bt-team";
   var PLACES = {
-    littleelm: "Little Elm camp · 520 Lobo Lane"
+    plano: "Plano camp · 6300 Independence Pkwy, Unit A",
+    littleelm: "Little Elm camp · 528 Lake Ln"
   };
   var PHONE_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2"/></svg>';
   var STAR_SVG = '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="m12 3 2.7 5.6 6.1.8-4.5 4.2 1.1 6.1L12 16.8l-5.4 2.9 1.1-6.1-4.5-4.2 6.1-.8z"/></svg>';
@@ -213,7 +219,7 @@
     if (root.getAttribute("data-bt-ready")) return;
     root.setAttribute("data-bt-ready", "1");
     var cfg = root.btTeam || {};
-    var loc = (root.getAttribute("data-location") || "littleelm").toLowerCase().replace(/[^a-z]/g, "");
+    var loc = (root.getAttribute("data-location") || "plano").toLowerCase().replace(/[^a-z]/g, "");
     root.querySelector('[data-bt-out="where"]').textContent = PLACES[loc] || "Camp";
 
     var people = (cfg[loc] || []).slice();

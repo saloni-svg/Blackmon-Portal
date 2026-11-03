@@ -3,7 +3,7 @@
 
 export const GENDERS = ["Male", "Female", "Other", "Prefer not to say"];
 export const STAFF_ROLES = ["Camp Staff", "Tutor"];
-export const LOCATIONS = ["Little Elm"]; // Blackmon runs one camp, in Little Elm
+export const LOCATIONS = ["Plano", "Little Elm"];
 export const ACCESS = { none: "No access", view: "View only", admin: "Admin" };
 
 export const ID_PROOF = { maxBytes: 5 * 1024 * 1024, types: { "application/pdf": "pdf", "image/jpeg": "jpg", "image/png": "png" }, label: "PDF, JPG or PNG", accept: ".pdf,.jpg,.jpeg,.png" };

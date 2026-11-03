@@ -4,6 +4,11 @@
     "embedBase": "https://link.msgsndr.com/widget/form/"
   },
   "locations": {
+    "plano": {
+      "name": "Plano camp",
+      "address": "6300 Independence Pkwy, Unit A, Plano, TX",
+      "photo": "/img/plano-camp.jpg"
+    },
     "littleelm": {
       "name": "Little Elm camp",
       "address": "520 Lobo Lane, Little Elm, TX",
@@ -89,6 +94,46 @@
     ]
   },
   "weeks": {
+    "plano": {
+      "label": "Week of June 8",
+      "days": [
+        {
+          "day": "Monday",
+          "date": "June 8",
+          "title": "[MONDAY_TITLE]",
+          "description": "[Short description of Monday's activity of the day.]",
+          "tag": ""
+        },
+        {
+          "day": "Tuesday",
+          "date": "June 9",
+          "title": "Sports clinic",
+          "description": "[Which sport / what campers will practice.]",
+          "tag": "Sports clinic"
+        },
+        {
+          "day": "Wednesday",
+          "date": "June 10",
+          "title": "[WEDNESDAY_TITLE]",
+          "description": "[Short description of Wednesday's activity.]",
+          "tag": ""
+        },
+        {
+          "day": "Thursday",
+          "date": "June 11",
+          "title": "Field trip: [FIELD_TRIP_DESTINATION]",
+          "description": "[Where we're going and what to wear.]",
+          "tag": "Field trip"
+        },
+        {
+          "day": "Friday",
+          "date": "June 12",
+          "title": "[FRIDAY_TITLE]",
+          "description": "[Short description of Friday's activity.]",
+          "tag": ""
+        }
+      ]
+    },
     "littleelm": {
       "label": "Week of December 21",
       "days": [
@@ -384,6 +429,23 @@
     "sections": []
   },
   "teams": {
+    "plano": [
+      {
+        "name": "[STAFF_NAME]",
+        "role": "Supervisor",
+        "phone": "[STAFF_PHONE]"
+      },
+      {
+        "name": "[STAFF_NAME]",
+        "role": "Counselor",
+        "phone": "[STAFF_PHONE]"
+      },
+      {
+        "name": "[STAFF_NAME]",
+        "role": "Counselor",
+        "phone": "[STAFF_PHONE]"
+      }
+    ],
     "littleelm": [
       {
         "name": "[STAFF_NAME]",

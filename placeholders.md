@@ -13,6 +13,7 @@ These are no longer placeholders. The files use the same merge tags as the GHL e
 | `{{custom_values.portal_login_link}}` | Portal Login Link | pages/portal-signin, emails/welcome-after-payment, emails/documents-ready, emails/staff-approved, emails/staff-training-complete, emails/parent-dashboard-unlocked | |
 | `{{custom_values.portal_payment_link}}` | Portal Payment Link | widgets/plan-summary, emails/installment-reminder, emails/payment-failed, emails/payment-failed-reminder | |
 | `{{custom_values.portal_intro_video_form_link}}` | Portal Intro Video Form Link | emails/staff-approved, emails/staff-contract-signed | |
+| `{{custom_values.portal_whatsapp_plano_link}}` | Portal WhatsApp Plano Link | emails/onboarding-complete-links, emails/onboarding-staff-plano | |
 | `{{custom_values.portal_whatsapp_little_elm_link}}` | Portal WhatsApp Little Elm Link | emails/onboarding-complete-links, emails/onboarding-staff-littleelm | |
 | `{{custom_values.portal_wise_invite_link}}` | Portal Wise Invite Link | emails/onboarding-complete-links, emails/onboarding-tutor-wise | |
 
@@ -62,7 +63,7 @@ Checked in your GHL account (location `dbijRKgKjGLpLDU9lJxv`) on Oct 22, 2026. *
 |---|---|---|
 | `{{contact.first_name}}` | Standard field | all emails |
 | `{{contact.portal__program}}` | Dropdown: Summer - Full 10 Weeks · Summer - Monthly with Sports · Summer - Monthly without Sports · Winter Camp | widgets/plan-summary, emails/welcome-after-payment |
-| `{{contact.portal__location}}` | Dropdown: Little Elm (the one camp) | widgets/plan-summary, widgets/documents-checklist (step 1 is "Done" once set by the enrollment form), emails/welcome-after-payment, emails/onboarding-complete-links |
+| `{{contact.portal__location}}` | Dropdown: Plano · Little Elm | widgets/plan-summary, widgets/documents-checklist (step 1 is "Done" once set by the enrollment form), emails/welcome-after-payment, emails/onboarding-complete-links |
 | `{{contact.portal__payment_plan}}` | Dropdown: Pay in Full · Installments ("Pay in Full" shows the Paid in full badge) | widgets/plan-summary, emails/welcome-after-payment |
 | `{{contact.portal__plan_total}}` | Money | widgets/plan-summary |
 | `{{contact.portal__amount_paid}}` | Money | widgets/plan-summary |
@@ -84,6 +85,7 @@ Other portal fields in GHL that aren't used in the code yet: `portal__access_gra
 
 | Item | Where it goes | Status |
 |---|---|---|
+| `plano-camp.jpg` | assets/images/, then upload to GHL Media and paste the URL in website-fixes/summer-camp-locations and pages/portal-signin | Stock stand-in (Unsplash), replace with a real Plano camp photo |
 | `littleelm-camp.jpg` | same as above | Stock stand-in (Unsplash), replace with a real Little Elm camp photo |
 | Staff photos (optional) | assets/images/ or GHL Media, then file name/URL in widgets/staff-directory EDIT block | Missing |
 | Logo files | assets/logo/ | Added: blackmon-tutoring-logo.png (full logo) + blackmon-mark.png (B icon). Emails still use a text wordmark until the logo has a GHL Media URL |

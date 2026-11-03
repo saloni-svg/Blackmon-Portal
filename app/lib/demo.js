@@ -16,7 +16,7 @@ const OPTIONS = {
     "Vegetarian with black beans, corn, and salsa",
   ],
   chicken_nuggets_chips_included: ["Regular chicken nuggets", "Grilled chicken nuggets"],
-  portal__location: ["Little Elm"],
+  portal__location: ["Plano", "Little Elm"],
   pizza: [
     "Cheese with marinara sauce",
     "Pepperoni with marinara sauce",
@@ -30,7 +30,7 @@ function seed() {
       id: "demo-parent-1", firstName: "Maria", lastName: "Lopez", email: "parent@demo.test", phone: "+14695550101",
       tags: ["enrollment-submitted"],
       fields: {
-        portal__role: "Parent", portal__location: "Little Elm", portal__program: "Summer - Monthly with Sports",
+        portal__role: "Parent", portal__location: "Plano", portal__program: "Summer - Monthly with Sports",
         portal__payment_plan: "Installments", portal__plan_total: 1800, portal__amount_paid: 600, portal__balance: 1200,
         portal__next_due_date: "2027-06-01", portal__installments_remaining: 2,
         child_name: "Sofia", childs_age: "7", docs_sent: "Yes", esign_status: "Sent", docs_signed: "No",
@@ -50,7 +50,7 @@ function seed() {
     },
     {
       id: "demo-staff-1", firstName: "Aisha", lastName: "Grant", email: "staff@demo.test",
-      fields: { portal__role: "Camp Staff", portal__location: "Little Elm", portal__jordan_approved: "Yes", portal__onboarding_status: "Training" },
+      fields: { portal__role: "Camp Staff", portal__location: "Plano", portal__jordan_approved: "Yes", portal__onboarding_status: "Training" },
     },
     {
       id: "demo-tutor-1", firstName: "Dev", lastName: "Patel", email: "tutor@demo.test",
@@ -63,7 +63,7 @@ function seed() {
     },
     {
       id: "demo-parent-4", firstName: "Omar", lastName: "Hassan", email: "omar@demo.test", phone: "+14695550104",
-      fields: { portal__location: "Little Elm", portal__program: "Winter Camp", portal__amount_paid: 900 },
+      fields: { portal__location: "Plano", portal__program: "Winter Camp", portal__amount_paid: 900 },
     },
     // Not shown in the admin Parents list: paid in the OLD "Winter Camp" pipeline, and a 2026 lead that hasn't paid.
     { id: "demo-lead-1", firstName: "Olivia", lastName: "Reed", email: "olivia@demo.test", phone: "+14695550105", fields: {} },
@@ -143,6 +143,7 @@ export function createDemoStore() {
         portalLogin: "https://example.com/DUMMY-portal-login",
         payment: "https://example.com/DUMMY-payment",
         introVideoForm: "https://example.com/DUMMY-intro-video-form",
+        whatsappPlano: "https://example.com/DUMMY-whatsapp-plano",
         whatsappLittleElm: "https://example.com/DUMMY-whatsapp-little-elm",
         wiseInvite: "https://example.com/DUMMY-wise-invite",
       };
@@ -157,7 +158,7 @@ export function createDemoStore() {
       if (!c) return null;
       return {
         id: c.id, firstName: c.firstName, lastName: c.lastName, email: c.email, phone: c.phone || "", tags: c.tags || [],
-        address1: "123 Demo St", city: "Little Elm", state: "TX", postalCode: "75024", country: "US",
+        address1: "123 Demo St", city: c.fields.portal__location === "Little Elm" ? "Little Elm" : "Plano", state: "TX", postalCode: "75024", country: "US",
         source: "Demo data", type: "customer", dateAdded: "2026-10-01T15:00:00.000Z",
         customFields: Object.entries(c.fields).map(([k, v]) => ({ id: `demo-${k}`, value: v })),
       };

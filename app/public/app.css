@@ -69,11 +69,6 @@ textarea.input { min-height: 84px; resize: vertical; line-height: 1.45; }
 .si__loc .photo { aspect-ratio: 3 / 2; border-radius: 14px; margin-bottom: 12px; }
 .si__loc strong { display: block; }
 .si__loc span { display: block; margin-top: 4px; font-size: 15px; line-height: 1.45; color: var(--on-navy); }
-/* One camp: its photo and address side by side (stacked on phones). */
-.si__locs--one { grid-template-columns: 1fr; }
-.si__locs--one .si__loc { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; align-items: center; }
-.si__locs--one .si__loc .photo { margin-bottom: 0; }
-@media (max-width: 600px) { .si__locs--one .si__loc { grid-template-columns: 1fr; } .si__locs--one .si__loc .photo { margin-bottom: 4px; } }
 .si__main { padding: clamp(26px, 4.4vw, 56px); }
 .si__title { font: 900 clamp(30px, 3.4vw, 38px)/1.15 var(--head); }
 .si__sub { margin: 6px 0 0; font-size: 17px; color: var(--muted); }

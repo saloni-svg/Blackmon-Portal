@@ -698,7 +698,7 @@ async function followupsView(el, me) {
       <button class="btn btn--ghost" data-refresh>${ico("refresh")} Refresh</button></div>`)}
     <section class="card">
       <div class="filters">
-        <div><label class="label" for="f-loc">Location</label><select class="input" id="f-loc" data-loc><option value="">All locations</option><option>Little Elm</option><option value="-">No location yet</option></select></div>
+        <div><label class="label" for="f-loc">Location</label><select class="input" id="f-loc" data-loc><option value="">All locations</option><option>Plano</option><option>Little Elm</option><option value="-">No location yet</option></select></div>
         <div><label class="label" for="f-step">Show</label><select class="input" id="f-step" data-step><option value="any">Families with something missing</option>
           ${STEPS.map((s) => `<option value="${s.key}">Missing: ${s.label}</option>`).join("")}<option value="all">All families</option></select></div>
       </div>
@@ -825,7 +825,7 @@ async function announcementsView(el, me) {
                 <label class="check"><input type="radio" name="aud" value="location"> One location</label>
                 <label class="check"><input type="radio" name="aud" value="families"> Chosen families</label>
               </div>
-              <div data-audloc hidden><label class="sr" for="an-loc">Location</label><select class="input" id="an-loc" name="location" style="max-width:260px"><option>Little Elm</option></select></div>
+              <div data-audloc hidden><label class="sr" for="an-loc">Location</label><select class="input" id="an-loc" name="location" style="max-width:260px"><option>Plano</option><option>Little Elm</option></select></div>
               <div data-audfam hidden>
                 <label class="sr" for="an-fq">Search families</label><input class="input" id="an-fq" type="search" placeholder="Search families…" data-fq style="max-width:320px">
                 <div class="picker" data-picker><p class="hint">Loading families…</p></div>
@@ -1197,7 +1197,7 @@ function campInfoView(el, me) {
 function weekView(el, me) {
   let loc = null;
   contentEditor(el, me, {
-    title: "This week", sub: "The Little Elm camp's plan for the week. Parents see it once their dashboard is unlocked.",
+    title: "This week", sub: "Each location's plan for the week. Parents see their own location's week once their dashboard is unlocked.",
     form: WEEK_FORM,
     bracketNote: true,
     value: (d) => { loc = loc && d.weeks[loc] ? loc : Object.keys(d.weeks)[0]; return d.weeks[loc]; },

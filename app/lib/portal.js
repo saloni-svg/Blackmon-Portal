@@ -17,9 +17,7 @@ export const ENROLLMENT_TAG = "enrollment-submitted";
 export const ONBOARDING =["Not Started", "Training", "Training Complete", "Contract Signed", "Video Submitted", "Group/Wise Link Sent"];
 
 const ROLE = { Parent: "parent", "Camp Staff": "staff", Tutor: "tutor" };
-// Blackmon Tutoring runs one camp, Little Elm (content/camp.json -> locations.littleelm). Everyone sees
-// it, whatever their GHL Portal - Location says (older contacts may still say "Plano").
-const CAMP = { key: "littleelm", name: "Little Elm" };
+const LOC = { Plano: "plano", "Little Elm": "littleelm" };
 
 const filled = (v) => v !== null && v !== undefined && String(v).trim() !== "";
 const num = (v) => (filled(v) && !isNaN(Number(v)) ? Number(v) : null);
@@ -105,14 +103,14 @@ export function roleOf(contact) {
 export async function buildView(contact, store, content) {
   const f = contact.fields;
   const role = roleOf(contact);
-  const location = CAMP.key;
+  const location = LOC[f.portal__location] || null;
   const links = await store.links();
   const base = {
     role,
     live: store.live,
     person: { firstName: contact.firstName, lastName: contact.lastName, email: contact.email },
     location,
-    locationName: CAMP.name,
+    locationName: f.portal__location || null,
     camp: location ? content.locations[location] : null,
   };
 
@@ -173,7 +171,7 @@ export async function buildView(contact, store, content) {
     const at = (name) => stage >= ONBOARDING.indexOf(name);
     const groupLink = role === "tutor"
       ? links.wiseInvite
-      : links.whatsappLittleElm;
+      : location === "littleelm" ? links.whatsappLittleElm : location === "plano" ? links.whatsappPlano : "";
     return {
       ...base,
       approved,
@@ -187,7 +185,7 @@ export async function buildView(contact, store, content) {
         {
           id: "group",
           title: role === "tutor" ? "Accept your Wise invite" : "Join your camp WhatsApp group",
-          desc: role === "tutor" ? "Wise is where you'll teach and see your students." : `Your ${CAMP.name} team chat.`,
+          desc: role === "tutor" ? "Wise is where you'll teach and see your students." : `Your ${f.portal__location || "camp"} team chat.`,
           done: at("Group/Wise Link Sent"),
           link: at("Video Submitted") ? groupLink : "",
           linkText: role === "tutor" ? "Open Wise invite" : "Open WhatsApp group",
