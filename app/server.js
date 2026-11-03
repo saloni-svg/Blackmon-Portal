@@ -5,6 +5,7 @@ import http from "node:http";
 import fs from "node:fs";
 import path from "node:path";
 import crypto from "node:crypto";
+import { execFileSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 import { createGhlStore } from "./lib/ghl.js";
 import { createDemoStore } from "./lib/demo.js";
@@ -71,6 +72,18 @@ const loadContent = () => JSON.parse(fs.readFileSync(CAMP_FILE, "utf8"));
 // uses data/demo/ so sample data never mixes with live data. On a host, DATA_DIR must be a persistent disk.
 const DATA_DIR = path.resolve(ROOT, process.env.DATA_DIR || "data");
 const DATA_BASE = store.live ? DATA_DIR : path.join(DATA_DIR, "demo");
+// Moving to a new host: data uploaded through the one-time import (PUT /_import, see below) waits in
+// DATA_BASE/import-staging and is put in place here, on the next start, before the database opens.
+const STAGING = path.join(DATA_BASE, "import-staging");
+if (fs.existsSync(path.join(STAGING, "portal.db"))) {
+  for (const f of ["portal.db", "portal.db-wal", "portal.db-shm"]) fs.rmSync(path.join(DATA_BASE, f), { force: true });
+  for (const name of fs.readdirSync(STAGING)) {
+    fs.rmSync(path.join(DATA_BASE, name), { recursive: true, force: true });
+    fs.renameSync(path.join(STAGING, name), path.join(DATA_BASE, name));
+  }
+  fs.rmSync(STAGING, { recursive: true, force: true });
+  console.log(`  Import: moved the uploaded data into ${DATA_BASE} (database, waivers, uploads, camp content).`);
+}
 const db = openDb(path.join(DATA_BASE, "portal.db"), path.join(ROOT, "migrations"));
 // camp.json is edited from the admin dashboard (Camp info, This week), so the live copy is kept with
 // the data (on the host's persistent disk), not in the app folder that's replaced on every deploy.
@@ -924,6 +937,30 @@ async function api(req, res, url) {
   return send(res, 404, { error: "Not found" });
 }
 
+async function importPart(req, res, url) {
+  const token = process.env.IMPORT_TOKEN || "", given = /^Bearer (.+)$/.exec(req.headers.authorization || "")?.[1] || "";
+  const same = token.length >= 24 && given.length === token.length && crypto.timingSafeEqual(Buffer.from(given), Buffer.from(token));
+  if (!same) return send(res, 404, { error: "Not found" });
+  const part = Number(url.searchParams.get("part")), of = Number(url.searchParams.get("of"));
+  if (!Number.isInteger(part) || !Number.isInteger(of) || part < 1 || part > of || of > 200) return send(res, 400, { error: "part / of" });
+  const dir = path.join(DATA_BASE, "import-parts");
+  fs.mkdirSync(dir, { recursive: true });
+  const chunks = [];
+  for await (const c of req) chunks.push(c);
+  fs.writeFileSync(path.join(dir, String(part).padStart(3, "0")), Buffer.concat(chunks));
+  const have = fs.readdirSync(dir).length;
+  console.log(`  Import: received part ${part} of ${of} (${(Buffer.concat(chunks).length / 1e6).toFixed(1)} MB).`);
+  if (have < of) return send(res, 200, { ok: true, received: have, of });
+  const archive = path.join(DATA_BASE, "import.tgz");
+  fs.writeFileSync(archive, Buffer.concat(fs.readdirSync(dir).sort().map((f) => fs.readFileSync(path.join(dir, f)))));
+  fs.rmSync(STAGING, { recursive: true, force: true });
+  fs.mkdirSync(STAGING, { recursive: true });
+  execFileSync("tar", ["-xzf", archive, "-C", STAGING]);
+  fs.rmSync(dir, { recursive: true, force: true }); fs.rmSync(archive, { force: true });
+  console.log(`  Import: all ${of} parts in and unpacked; restart the service to use the imported data.`);
+  return send(res, 200, { ok: true, unpacked: fs.readdirSync(STAGING) });
+}
+
 // ---------- server ----------
 const server = http.createServer(async (req, res) => {
   const url = new URL(req.url, "http://localhost");
@@ -932,6 +969,11 @@ const server = http.createServer(async (req, res) => {
     try { db.prepare("SELECT 1").get(); return send(res, 200, { ok: true }); }
     catch (err) { return send(res, 503, { ok: false, error: err.message }); }
   }
+  // One-time data import for moving hosts: only while IMPORT_TOKEN is set (remove it afterwards).
+  // PUT /_import?part=N&of=M with the token as a Bearer; body = part N (1..M) of the archive from
+  // scripts/export-data.mjs. When every part is in, it's unpacked into import-staging; restart the
+  // service and it's put in place (above).
+  if (url.pathname === "/_import" && req.method === "PUT") return importPart(req, res, url);
   // Production: HTTPS only. The host's proxy terminates TLS and says how the visitor came in.
   if (PRODUCTION && req.headers["x-forwarded-proto"] === "http") {
     res.writeHead(301, { Location: `https://${req.headers.host}${req.url}` });
