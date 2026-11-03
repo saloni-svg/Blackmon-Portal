@@ -370,6 +370,26 @@ textarea.input { min-height: 84px; resize: vertical; line-height: 1.45; }
 @media (max-width: 380px) {
   .si__locs { grid-template-columns: 1fr; }
 }
+/* Sign-in page. The short intro and the one-line location only show on phones. */
+.si__intro-short, .si__where { display: none; }
+.si__where { align-items: center; gap: 8px; margin: 0; font-size: 15px; line-height: 1.4; color: var(--on-navy); }
+.si__where .ico { flex: none; width: 18px; height: 18px; color: var(--sun); }
+/* Phones: the blue panel first and kept short (heading, one line, the camp's location, one photo),
+   then the sign-in form; the footer centered with the card's gutter. */
+@media (max-width: 767px) {
+  .si { padding-left: 16px; padding-right: 16px; }
+  .si__card { display: flex; flex-direction: column; }
+  .si__panel { order: -1; gap: 14px; padding: 24px 20px; border-radius: 20px 20px 0 0; }
+  .si__main { order: 0; padding: 26px 20px; border-radius: 0 0 20px 20px; }
+  .si__hero { margin-top: -4px; font-size: 28px; }
+  .si__intro { font-size: 16px; }
+  .si__intro-long, .si__locs { display: none; }
+  .si__intro-short { display: inline; }
+  .si__where { display: flex; }
+  .si__photo { flex: none; height: 180px; aspect-ratio: auto; min-height: 0; }
+  .si__foot { flex-direction: column; align-items: center; text-align: center; gap: 6px; padding: 0; }
+  .si__main .btn { width: 100%; }
+}
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { transition: none !important; }
 }
