@@ -571,11 +571,11 @@ async function parentDetailView(el, me, id) {
         ${data.opportunities.map((o) => `<section class="card"><div class="card__h"><div><h2>Winter Camp 2026 opportunity</h2><p class="card__sub">Every value here is read from the opportunity in GHL</p></div>
             <span class="pill pill--ok">Paid (won)</span></div>${dl(oppRows(o))}</section>`).join("")}
         <section class="card">
-          <div class="card__h"><div><h2>Enrollment form</h2><p class="card__sub">${data.enrollment ? `${esc(data.enrollment.camp)} · submitted in the portal · last updated ${esc(when(data.enrollment.updatedAt))}` : "Not submitted yet"}</p></div>
-            ${data.enrollment ? `<a class="btn btn--ghost btn--sm" href="#/roster">Open roster</a>` : ""}</div>
-          ${data.enrollment ? data.enrollment.children.map((c, i) => `${data.enrollment.children.length > 1 ? `<h3 style="margin:${i ? "24px" : "0"} 0 8px">${esc(c.child)}</h3>` : ""}
+          <div class="card__h"><div><h2>Enrollment form</h2><p class="card__sub">${data.enrollment ? `${esc(data.enrollment.camp)} · ${data.enrollment.submittedAt ? `submitted ${esc(when(data.enrollment.submittedAt))}` : "submitted"}${data.enrollment.source === "submission" ? " · answers from the GHL form submission (not on this contact)" : ""}` : "Not submitted yet"}</p></div>
+            ${data.enrollment?.children.length ? `<a class="btn btn--ghost btn--sm" href="#/roster">Open roster</a>` : ""}</div>
+          ${data.enrollment?.children.length ? data.enrollment.children.map((c, i) => `${data.enrollment.children.length > 1 ? `<h3 style="margin:${i ? "24px" : "0"} 0 8px">${esc(c.child)}</h3>` : ""}
             ${dl(data.enrollment.columns.filter(([k]) => !["camp", "submitted"].includes(k)).map(([k, label]) => ({ name: label, value: c[k] })))}`).join("")
-            : '<p class="hint" style="margin:0">The parent hasn\'t submitted the enrollment form in the portal yet.</p>'}
+            : `<p class="hint" style="margin:0">${data.enrollment ? "GHL has the submission, but no answers could be read from it." : "The parent hasn\'t submitted the enrollment form in the portal yet."}</p>`}
         </section>
         <section class="card">
           <div class="card__h"><div><h2>Meal plan</h2><p class="card__sub">${data.mealsSavedAt ? `Saved by the parent in the portal ${esc(when(data.mealsSavedAt))}` : data.mealsSource === "ghl" ? "Saved by the parent before meal plans were kept in the portal" : "Not saved yet"}${p.lunch === "Yes" ? "" : ` · Lunch: ${esc(p.lunch || "—")}`}</p></div>

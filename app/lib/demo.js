@@ -180,6 +180,7 @@ export function createDemoStore() {
     },
     async addNote(contactId, body) { console.log(`  [demo GHL note] ${byId(contactId)?.email}: ${body}`); },
     async ensureAlertContact(email) { return { id: "demo-admin-alerts", email, firstName: "Blackmon", lastName: "Admin Alerts" }; },
+    async formSubmissions() { return []; },
     async sendSms(contact, message) { console.log(`\n  [demo SMS] To: ${contact.email}\n  ${message}\n`); },
     // Demo never emails; the subject and any links print in the terminal instead.
     async sendEmail(contact, subject, html) {
