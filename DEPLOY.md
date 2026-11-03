@@ -64,5 +64,6 @@ Then **Manual Deploy → Restart service**. Delete `app/blackmon-data.tgz` from 
 ## Later
 - Every `git push` to main redeploys (a few seconds of downtime: one instance because of the disk).
 - Back up: Render keeps daily disk snapshots; `node scripts/export-data.mjs` on the server also works.
-- Your Mac's `app/.env` keeps `PORTAL_URL=http://localhost:3000` for local testing; don't run the
-  local server against live GHL with AUTO_INVITE=1 once the hosted one is live, or both send invites.
+- `PORTAL_URL` is `https://portal.blackmontutoring.com` everywhere (Render and `app/.env`), so every
+  emailed / texted link uses the custom domain. Requests on the `*.onrender.com` address redirect there.
+- Run the Mac's local server with `AUTO_INVITE=0` (as in `app/.env`) so only Render sends invites.
