@@ -1,46 +1,6 @@
 {
   "_note": "DUMMY weekly content for testing. Names and phone numbers are made up (555-01xx numbers are reserved for fiction). Replace before launch.",
   "week": {
-    "plano": {
-      "label": "Week of June 8",
-      "days": [
-        {
-          "day": "Mon",
-          "date": "June 8",
-          "title": "Science splash day",
-          "description": "Kitchen-table experiments: volcano fizz, slime and paper rockets.",
-          "tag": ""
-        },
-        {
-          "day": "Tue",
-          "date": "June 9",
-          "title": "Sports clinic: soccer",
-          "description": "Passing, dribbling and a friendly scrimmage. Wear sneakers.",
-          "tag": "Sports clinic"
-        },
-        {
-          "day": "Wed",
-          "date": "June 10",
-          "title": "Art & build day",
-          "description": "Cardboard city building and painting in small teams.",
-          "tag": ""
-        },
-        {
-          "day": "Thu",
-          "date": "June 11",
-          "title": "Field trip: Perot Museum (dummy)",
-          "description": "Bus leaves at 9:15 AM. Wear your camp T-shirt and closed-toe shoes.",
-          "tag": "Field trip"
-        },
-        {
-          "day": "Fri",
-          "date": "June 12",
-          "title": "Talent show Friday",
-          "description": "Campers show off songs, jokes and tricks. Families welcome at 3:30 PM.",
-          "tag": "Bring lunch"
-        }
-      ]
-    },
     "littleelm": {
       "label": "Week of June 8",
       "days": [
@@ -84,26 +44,6 @@
   },
   "team": {
     "photoBase": "",
-    "plano": [
-      {
-        "name": "Taylor Test",
-        "role": "Supervisor",
-        "phone": "469-555-0101",
-        "photo": ""
-      },
-      {
-        "name": "Jamie Sample",
-        "role": "Counselor",
-        "phone": "469-555-0102",
-        "photo": ""
-      },
-      {
-        "name": "Riley Demo",
-        "role": "Counselor",
-        "phone": "469-555-0103",
-        "photo": ""
-      }
-    ],
     "littleelm": [
       {
         "name": "Morgan Example",

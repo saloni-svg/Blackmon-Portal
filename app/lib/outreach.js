@@ -76,7 +76,7 @@ export function createOutreach({ db, store, apiKey, portalUrl, testEmail, testPh
       model: MODEL,
       reasoning_effort: "low",
       messages: [
-        { role: "system", content: `You translate messages from Blackmon Tutoring (a kids' Winter Camp in Plano and Little Elm, Texas) to parents. Translate each value from English into ${LANG_EN[lang]}${lang === "en" ? " (it's already English: return it unchanged)" : ""}. Warm, clear, simple words a busy parent understands. Keep {placeholders} exactly as they are. Keep names as they are (Blackmon Tutoring, Blackmon Portal, Ask Blackmon, Plano, Little Elm, Short Game!), and keep links, phone numbers, prices and times. A "waiver" is the liability release form a parent signs: use the everyday word parents would recognize for a signed permission/release form, not a word meaning "exemption". ${extra}\nThis is: ${purpose}.` },
+        { role: "system", content: `You translate messages from Blackmon Tutoring (a kids' Winter Camp in Little Elm, Texas) to parents. Translate each value from English into ${LANG_EN[lang]}${lang === "en" ? " (it's already English: return it unchanged)" : ""}. Warm, clear, simple words a busy parent understands. Keep {placeholders} exactly as they are. Keep names as they are (Blackmon Tutoring, Blackmon Portal, Ask Blackmon, Little Elm, Short Game!), and keep links, phone numbers, prices and times. A "waiver" is the liability release form a parent signs: use the everyday word parents would recognize for a signed permission/release form, not a word meaning "exemption". ${extra}\nThis is: ${purpose}.` },
         { role: "user", content: JSON.stringify(strings) },
       ],
       response_format: { type: "json_schema", json_schema: { name: "translation", strict: true, schema: {

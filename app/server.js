@@ -94,6 +94,17 @@ if (!fs.existsSync(CAMP_FILE)) {
   fs.copyFileSync(path.join(ROOT, "content", "camp.json"), CAMP_FILE);
   console.log(`  Camp content: copied content/camp.json to ${CAMP_FILE} (admin edits are saved there).`);
 }
+// Camp is only in Little Elm now: the Plano camp, its week schedule and its team are removed from the
+// live camp.json (once; admins' other edits stay as they are).
+{
+  const camp = JSON.parse(fs.readFileSync(CAMP_FILE, "utf8"));
+  const had = ["locations", "weeks", "teams"].filter((k) => camp[k]?.plano);
+  if (had.length) {
+    for (const k of had) delete camp[k].plano;
+    fs.writeFileSync(CAMP_FILE, JSON.stringify(camp, null, 2) + "\n");
+    console.log(`  Camp content: removed Plano (${had.join(", ")}) from ${CAMP_FILE}.`);
+  }
+}
 const docs = createDocuments({ db, store, root: ROOT, base: DATA_BASE });
 // Before launch (PARENT_MESSAGES isn't "live"), the portal changes and emails real GHL contacts only
 // when they're tagged portal-test; everyone else is left alone until launch.
@@ -383,7 +394,7 @@ function serveFile(res, base, rel) {
 async function setUpTestContact(email, contact, picked) {
   const role = TEST_ROLES[picked] || TEST_ROLES.parent;
   const values = { portal__role: role, portal__access_granted: "Yes" };
-  if (role === "Parent" || role === "Camp Staff") values.portal__location = "Plano";
+  if (role === "Parent" || role === "Camp Staff") values.portal__location = "Little Elm";
   if (role === "Camp Staff" || role === "Tutor") Object.assign(values, { portal__jordan_approved: "Yes", portal__onboarding_status: "Training" });
 
   if (contact) {

@@ -3,7 +3,7 @@
   ============================================================================
   WEBSITE FIX: "Our camp locations" — Summer Camp page
   ----------------------------------------------------------------------------
-  REPLACES the old block that wrongly listed Dallas / Plano / Frisco.
+  REPLACES the old block that wrongly listed several cities: camp is only in Little Elm.
 
   WHERE IT GOES
     Website > Summer Camp page > delete the old locations section > add a
@@ -11,7 +11,7 @@
     BEGIN WIDGET and END WIDGET below.
 
   WHAT TO EDIT
-    • Photos: add plano-camp.jpg and littleelm-camp.jpg to assets/images/.
+    • Photos: add littleelm-camp.jpg to assets/images/.
       On GHL, relative paths won't resolve — upload the photos to GHL Media
       and replace the two src="../assets/images/..." values with the full
       Media URLs. Until a photo loads, a styled placeholder shows the file
@@ -157,35 +157,6 @@
 
   <div class="bt-locs__grid">
 
-    <!-- PLANO -->
-    <article class="bt-locs__card">
-      <div class="bt-locs__photo-wrap">
-        <div class="bt-locs__photo">
-          <div class="bt-locs__ph" aria-hidden="true">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="3"/><circle cx="9" cy="10" r="1.8"/><path d="m21 16-5-5-8 8"/></svg>
-            Photo goes here
-            <code>assets/images/plano-camp.jpg</code>
-          </div>
-          <img src="../assets/images/plano-camp.jpg" alt="Blackmon Tutoring Plano camp" loading="lazy" onerror="this.remove()">
-        </div>
-        <span class="bt-locs__tag">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-7-6.2-7-11.5a7 7 0 0 1 14 0C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg>
-          Plano
-        </span>
-      </div>
-      <div class="bt-locs__body">
-        <h3 class="bt-locs__addr">6300 Independence Pkwy, Unit A<br>Plano, TX</h3>
-        <ul class="bt-locs__list">
-          <li><span class="bt-locs__ico is-sun" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></span>Camp hours 9:00 AM&ndash;4:00 PM</li>
-          <li><span class="bt-locs__ico is-grass" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3 2.7 5.6 6.1.8-4.5 4.2 1.1 6.1L12 16.8l-5.4 2.9 1.1-6.1-4.5-4.2 6.1-.8z"/></svg></span>Ages 3&ndash;16</li>
-        </ul>
-        <a class="bt-locs__btn" href="https://www.google.com/maps/search/?api=1&amp;query=6300%20Independence%20Pkwy%2C%20Unit%20A%2C%20Plano%2C%20TX" target="_blank" rel="noopener">
-          Get directions
-          <span class="bt-locs__sr">to the Plano camp (opens Google Maps)</span>
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
-        </a>
-      </div>
-    </article>
 
     <!-- LITTLE ELM -->
     <article class="bt-locs__card">

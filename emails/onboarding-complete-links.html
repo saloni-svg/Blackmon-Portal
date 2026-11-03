@@ -8,7 +8,7 @@
     > "Send Email" action > Design editor: "Code / HTML" (or Marketing >
     Emails > Templates > New > Code editor) > paste this whole file.
   WHAT TO EDIT
-    • Camp staff: {{custom_values.portal_whatsapp_plano_link}}, {{custom_values.portal_whatsapp_little_elm_link}}
+    • Camp staff: {{custom_values.portal_whatsapp_little_elm_link}}
     • Tutors: {{custom_values.portal_wise_invite_link}}
   NOTES
     Table layout + inline styles only, 600px max — safe for Gmail, Outlook,
@@ -71,22 +71,14 @@
             </tr></table>
             <h1 style="margin:14px 0 0; font-family:Georgia, 'Times New Roman', Times, serif; font-size:28px; line-height:36px; font-weight:bold; color:#0B1F3F;">You&rsquo;re all set &mdash; join your camp team</h1>
             <p style="margin:18px 0 0; font-family:Arial, Helvetica, sans-serif; font-size:16px; line-height:25px; color:#0B1F3F;">Hi {{contact.first_name}},</p>
-            <p style="margin:14px 0 0; font-family:Arial, Helvetica, sans-serif; font-size:16px; line-height:25px; color:#0B1F3F;">Thank you for completing onboarding! The last step is to join the WhatsApp group for your camp location. Your location: <strong>{{contact.portal__location}}</strong>.</p>
+            <p style="margin:14px 0 0; font-family:Arial, Helvetica, sans-serif; font-size:16px; line-height:25px; color:#0B1F3F;">Thank you for completing onboarding! The last step is to join the WhatsApp group for the <strong>Little Elm camp</strong> (520 Lobo Lane).</p>
             <table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin-top:26px;">
-              <tr>
-                <td align="center" bgcolor="#0B1F3F" style="background-color:#0B1F3F; border-radius:14px; border-bottom:4px solid #FFC845;">
-                  <a href="{{custom_values.portal_whatsapp_plano_link}}" target="_blank" style="display:inline-block; padding:17px 34px; font-family:Arial, Helvetica, sans-serif; font-size:17px; line-height:20px; font-weight:bold; color:#FFFFFF; text-decoration:none; border-radius:14px;">Join the Plano team&nbsp;&rarr;</a>
-                </td>
-              </tr>
-            </table>
-            <table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin-top:12px;">
               <tr>
                 <td align="center" bgcolor="#0B1F3F" style="background-color:#0B1F3F; border-radius:14px; border-bottom:4px solid #FFC845;">
                   <a href="{{custom_values.portal_whatsapp_little_elm_link}}" target="_blank" style="display:inline-block; padding:17px 34px; font-family:Arial, Helvetica, sans-serif; font-size:17px; line-height:20px; font-weight:bold; color:#FFFFFF; text-decoration:none; border-radius:14px;">Join the Little Elm team&nbsp;&rarr;</a>
                 </td>
               </tr>
             </table>
-            <p style="margin:20px 0 0; font-family:Arial, Helvetica, sans-serif; font-size:14px; line-height:22px; color:#5A6679;">Please only join the group for the camp where you&rsquo;re working.</p>
           </td>
         </tr>
         <!-- ===================== END VERSION A ============================ -->
@@ -132,13 +124,9 @@
                 <td style="padding-top:16px;">
                   <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
                     <tr>
-                      <td valign="top" width="50%" style="padding-right:8px; font-family:Arial, Helvetica, sans-serif; font-size:13px; line-height:20px; color:#5A6679;">
-                        <strong style="color:#0B1F3F;">Plano camp</strong><br />
-                        6300 Independence Pkwy, Unit A<br />Plano, TX
-                      </td>
-                      <td valign="top" width="50%" style="padding-left:8px; font-family:Arial, Helvetica, sans-serif; font-size:13px; line-height:20px; color:#5A6679;">
+                      <td valign="top" width="100%" style="font-family:Arial, Helvetica, sans-serif; font-size:13px; line-height:20px; color:#5A6679;">
                         <strong style="color:#0B1F3F;">Little Elm camp</strong><br />
-                        528 Lake Ln<br />Little Elm, TX
+                        520 Lobo Lane<br />Little Elm, TX
                       </td>
                     </tr>
                   </table>
