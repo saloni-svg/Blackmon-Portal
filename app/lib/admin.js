@@ -739,7 +739,7 @@ export function createAdmin({ store, db, meals, campFile, clientIp = (req) => re
     if (db.prepare("SELECT 1 FROM staff").get()) return;
     const pdf = Buffer.from("%PDF-1.4\n% demo identity proof\n");
     const people = [
-      { first: "Priya", last: "Shah", gender: "Female", email: "view@demo.test", phone: "+14695550201", role: "Camp Staff", location: "Plano", level: "view" },
+      { first: "Priya", last: "Shah", gender: "Female", email: "view@demo.test", phone: "+14695550201", role: "Camp Staff", location: "Little Elm", level: "view" },
       { first: "Marcus", last: "Lee", gender: "Male", email: "admin@demo.test", phone: "+14695550202", role: "Tutor", location: "Little Elm", level: "admin" },
       { first: "Ella", last: "Moreno", gender: "Female", email: "ella@demo.test", phone: "+14695550203", role: "Camp Staff", location: "Little Elm", level: null },
     ];

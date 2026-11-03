@@ -15,7 +15,7 @@ const httpError = (status, message, fields) => Object.assign(new Error(message),
 export const ANNOUNCEMENT_LIMITS = { title: 120, body: 2000, families: 500, files: 5 };
 export const ATTACHMENT = { maxBytes: 10 * 1024 * 1024, types: { "application/pdf": "pdf", "image/jpeg": "jpg", "image/png": "png" }, label: "PDF, JPG or PNG", accept: ".pdf,.jpg,.jpeg,.png" };
 const FILE_ID = /^[0-9a-f-]{36}$/;
-export const LOCATIONS = ["Plano", "Little Elm"];
+export const LOCATIONS = ["Little Elm"]; // one camp
 const CHANNELS = ["email", "sms"]; // the portal is always included
 
 export function validateAnnouncement(input, { scheduleOnly = false } = {}) {
