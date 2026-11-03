@@ -1,0 +1,467 @@
+{
+  "enrollmentForm": {
+    "formId": "FG3Bw2DX2cBbnGYN1i56",
+    "embedBase": "https://link.msgsndr.com/widget/form/"
+  },
+  "locations": {
+    "plano": {
+      "name": "Plano camp",
+      "address": "6300 Independence Pkwy, Unit A, Plano, TX",
+      "photo": "/img/plano-camp.jpg"
+    },
+    "littleelm": {
+      "name": "Little Elm camp",
+      "address": "520 Lobo Lane, Little Elm, TX",
+      "photo": "/img/littleelm-camp.jpg"
+    }
+  },
+  "schedule": {
+    "earlyDropoffPrice": "$50 flat extended-care fee",
+    "latePickupPrice": "$50 flat extended-care fee",
+    "items": [
+      {
+        "time": "7:00–9:00 AM",
+        "title": "Early care",
+        "note": "Optional, for an additional charge.",
+        "start": "07:00",
+        "end": "09:00",
+        "extra": "early"
+      },
+      {
+        "time": "9:00 AM",
+        "title": "Camp starts",
+        "note": "Arrival and check-in (roll call)",
+        "milestone": true
+      },
+      {
+        "time": "9:00–10:00 AM",
+        "title": "Free play",
+        "note": "Board games, electronics, etc.",
+        "start": "09:00",
+        "end": "10:00"
+      },
+      {
+        "time": "10:00–11:00 AM",
+        "title": "Academic enrichment",
+        "start": "10:00",
+        "end": "11:00"
+      },
+      {
+        "time": "11:00 AM–12:00 PM",
+        "title": "Prepare for activity or sports clinic",
+        "start": "11:00",
+        "end": "12:00"
+      },
+      {
+        "time": "12:00–1:00 PM",
+        "title": "Lunch",
+        "note": "On field trip days, please pack your child's lunch. If it's forgotten, we'll have PB&J available.",
+        "start": "12:00",
+        "end": "13:00"
+      },
+      {
+        "time": "1:00–3:00 PM",
+        "title": "Activity of the day",
+        "start": "13:00",
+        "end": "15:00"
+      },
+      {
+        "time": "3:00–3:30 PM",
+        "title": "Afternoon snack",
+        "start": "15:00",
+        "end": "15:30"
+      },
+      {
+        "time": "3:30–4:00 PM",
+        "title": "Free play",
+        "note": "Board games, electronics, etc.",
+        "start": "15:30",
+        "end": "16:00"
+      },
+      {
+        "time": "4:00 PM",
+        "title": "Camp day ends",
+        "milestone": true
+      },
+      {
+        "time": "4:00–6:00 PM",
+        "title": "Late care",
+        "note": "Optional, for an additional charge.",
+        "start": "16:00",
+        "end": "18:00",
+        "extra": "late"
+      }
+    ]
+  },
+  "weeks": {
+    "plano": {
+      "label": "Week of June 8",
+      "days": [
+        {
+          "day": "Monday",
+          "date": "June 8",
+          "title": "[MONDAY_TITLE]",
+          "description": "[Short description of Monday's activity of the day.]",
+          "tag": ""
+        },
+        {
+          "day": "Tuesday",
+          "date": "June 9",
+          "title": "Sports clinic",
+          "description": "[Which sport / what campers will practice.]",
+          "tag": "Sports clinic"
+        },
+        {
+          "day": "Wednesday",
+          "date": "June 10",
+          "title": "[WEDNESDAY_TITLE]",
+          "description": "[Short description of Wednesday's activity.]",
+          "tag": ""
+        },
+        {
+          "day": "Thursday",
+          "date": "June 11",
+          "title": "Field trip: [FIELD_TRIP_DESTINATION]",
+          "description": "[Where we're going and what to wear.]",
+          "tag": "Field trip"
+        },
+        {
+          "day": "Friday",
+          "date": "June 12",
+          "title": "[FRIDAY_TITLE]",
+          "description": "[Short description of Friday's activity.]",
+          "tag": ""
+        }
+      ]
+    },
+    "littleelm": {
+      "label": "Week of December 21",
+      "days": [
+        {
+          "day": "Monday",
+          "date": "December 21",
+          "title": "[MONDAY_TITLE]",
+          "description": "[Short description of Monday's activity of the day.]",
+          "tag": ""
+        },
+        {
+          "day": "Tuesday",
+          "date": "December 22",
+          "title": "[TUESDAY_TITLE]",
+          "description": "[Short description of Tuesday's activity.]",
+          "tag": ""
+        },
+        {
+          "day": "Wednesday",
+          "date": "December 23",
+          "title": "[WEDNESDAY_TITLE]",
+          "description": "[Short description of Wednesday's activity.]",
+          "tag": ""
+        },
+        {
+          "day": "Thursday",
+          "date": "December 24",
+          "title": "[THURSDAY_TITLE]",
+          "description": "[Short description of Thursday's activity.]",
+          "tag": ""
+        },
+        {
+          "day": "Friday",
+          "date": "December 25",
+          "title": "Camp closed: Christmas Day",
+          "description": "No camp today. Merry Christmas!",
+          "tag": "Closed"
+        }
+      ]
+    }
+  },
+  "winterCamp": {
+    "title": "Blackmon Tutoring Winter Camp 2026–2027",
+    "tagline": "Where Winter Break Becomes an Adventure.",
+    "intro": "Give your child a winter break filled with exciting activities, hands-on learning, creative exploration, and new friendships. From STEM experiments and arts and crafts to sports, games, and field trips, Blackmon Tutoring Winter Camp gives children opportunities to explore new interests, stay engaged, and enjoy meaningful experiences beyond the screen.",
+    "dates": "December 21, 2026 – January 1, 2027",
+    "operatingDays": "8 operating days: December 21–24 and December 28–31",
+    "closed": "Closed December 25 and January 1",
+    "ages": "Ages 3–16",
+    "hours": "9:00 AM–4:00 PM",
+    "location": "520 Lobo Lane, Little Elm, Texas",
+    "gallery": [
+      {
+        "src": "/img/gallery/camp-1.jpg",
+        "alt": "Campers and coaches in team jerseys on the sports field"
+      },
+      {
+        "src": "/img/gallery/camp-2.jpg",
+        "alt": "Coaches and campers smiling together by the field"
+      },
+      {
+        "src": "/img/gallery/camp-3.jpg",
+        "alt": "Campers working on a group activity in the classroom"
+      },
+      {
+        "src": "/img/gallery/camp-4.jpg",
+        "alt": "Campers laughing together at lunch"
+      },
+      {
+        "src": "/img/gallery/camp-5.jpg",
+        "alt": "Campers practicing soccer drills with a coach"
+      },
+      {
+        "src": "/img/gallery/camp-6.jpg",
+        "alt": "Campers taking a shaded break under the tent"
+      },
+      {
+        "src": "/img/gallery/camp-7.jpg",
+        "alt": "Campers holding up the paper rockets they built"
+      },
+      {
+        "src": "/img/gallery/camp-8.jpg",
+        "alt": "Campers outside with their rockets before launch"
+      },
+      {
+        "src": "/img/gallery/camp-9.jpg",
+        "alt": "Campers lining up in the hallway with a counselor"
+      }
+    ],
+    "extendedCare": {
+      "early": "7:00–9:00 AM",
+      "late": "4:00–6:00 PM",
+      "price": "$50",
+      "note": "Flat extended-care fee, not an hourly charge.",
+      "coverage": "[Coverage period for the $50 fee, to be confirmed]"
+    },
+    "activities": [
+      {
+        "title": "STEAM Days",
+        "tagline": "Discover. Experiment. Create.",
+        "text": "Explore science, technology, engineering, arts, and mathematics through engaging, hands-on activities.",
+        "items": [
+          "Science experiments and robotics",
+          "Coding basics and building challenges",
+          "Creative STEM projects and problem-solving"
+        ],
+        "note": ""
+      },
+      {
+        "title": "Arts & Crafts",
+        "tagline": "Let Their Imagination Come to Life.",
+        "text": "Give children opportunities to express their ideas and create something of their own.",
+        "items": [
+          "Painting and drawing",
+          "DIY crafts and sculpting",
+          "Creative expression and fine motor skill practice"
+        ],
+        "note": ""
+      },
+      {
+        "title": "Field Days",
+        "tagline": "Move More. Play Together.",
+        "text": "Encourage participation, teamwork, and physical activity through outdoor games and group challenges.",
+        "items": [
+          "Sports and fitness challenges",
+          "Relay races and scavenger hunts",
+          "Outdoor team-building activities"
+        ],
+        "note": ""
+      },
+      {
+        "title": "Field Trips",
+        "tagline": "Learning Beyond the Camp.",
+        "text": "Make room for discovery through educational outings and recreational adventures.",
+        "items": [
+          "Museums, zoos, and cultural sites",
+          "RoughRiders baseball games",
+          "Arcades, bowling, and other active adventures"
+        ],
+        "note": "Field-trip destinations are subject to the confirmed schedule, availability, and applicable arrangements."
+      },
+      {
+        "title": "Game Days",
+        "tagline": "Friendly Competition. Shared Fun.",
+        "text": "Turn playtime into an opportunity to collaborate, think strategically, and enjoy challenges together.",
+        "items": [
+          "Board games and group challenges",
+          "Team competitions",
+          "Cooperation and sportsmanship"
+        ],
+        "note": ""
+      },
+      {
+        "title": "Public Speaking",
+        "tagline": "Helping Young Voices Be Heard.",
+        "text": "Give children opportunities to practice expressing ideas, sharing opinions, and speaking with others.",
+        "items": [
+          "Show-and-tell presentations",
+          "Group discussions and age-appropriate debates",
+          "Motivational speakers and communication activities"
+        ],
+        "note": ""
+      }
+    ],
+    "sports": {
+      "intro": "Sports offer children another way to stay active, practice coordination, work with others, and discover activities they enjoy.",
+      "list": [
+        {
+          "name": "Martial Arts",
+          "text": "Practice movement, coordination, and discipline."
+        },
+        {
+          "name": "Golf",
+          "text": "Explore putting, focus, and hand-eye coordination."
+        },
+        {
+          "name": "Basketball",
+          "text": "Enjoy team play, passing, and shooting challenges."
+        },
+        {
+          "name": "Baseball",
+          "text": "Explore throwing, catching, and teamwork."
+        },
+        {
+          "name": "Agility Training",
+          "text": "Practice balance, coordination, and movement."
+        },
+        {
+          "name": "Football",
+          "text": "Participate in age-appropriate football activities."
+        },
+        {
+          "name": "Soccer",
+          "text": "Enjoy ball skills, movement, and team challenges."
+        }
+      ],
+      "included": "All seven sports are included in Premium. Standard includes sports only when you choose the sports option instead of lunch. Basic does not include organized sports.",
+      "note": "Specific sports, activities, and field-trip participation depend on the final camp schedule and age-appropriate arrangements."
+    },
+    "packages": [
+      {
+        "name": "Premium",
+        "recommended": true,
+        "price": "$500",
+        "weekly": "$300",
+        "summary": "The complete camp experience, with fewer things to prepare each morning.",
+        "items": [
+          "Daily lunch included",
+          "All seven sports and athletics activities",
+          "STEAM, arts and crafts, game days, field days, and public speaking",
+          "Scheduled enrichment activities and field trips"
+        ],
+        "lunch": "Daily lunch included"
+      },
+      {
+        "name": "Standard",
+        "recommended": false,
+        "price": "$400",
+        "weekly": "$250",
+        "summary": "Choose lunch or sports.",
+        "items": [
+          "Full camp experience",
+          "Choose daily lunch OR organized sports activities",
+          "General camp enrichment and creative activities",
+          "Scheduled camp activities, subject to the program"
+        ],
+        "lunch": "Lunch option: daily lunch included. Sports option: bring lunch from home. You can't choose both."
+      },
+      {
+        "name": "Basic",
+        "recommended": false,
+        "price": "$350",
+        "weekly": "$225",
+        "summary": "The core camp experience.",
+        "items": [
+          "General camp experience and enrichment",
+          "Creative projects, games, and scheduled activities",
+          "Opportunities to learn and connect with other children",
+          "Lunch and organized sports are not included"
+        ],
+        "lunch": "Bring lunch from home"
+      }
+    ],
+    "packageNotes": [
+      "Full camp covers all 8 operating days. The weekly option covers any 5 selected operating days, subject to availability.",
+      "Holiday closures are December 25 and January 1.",
+      "Optional transportation and extended care are separate from the package price."
+    ],
+    "lunchNote": "With lunch, you can review the menu and choose your child's meal preferences in advance. If your child has food allergies or dietary restrictions, tell our team so suitable arrangements can be discussed before camp.",
+    "offers": [
+      {
+        "title": "Early Bird Special",
+        "amount": "50% off",
+        "text": "Register by November 25, 2026, to qualify for our early bird offer."
+      },
+      {
+        "title": "Sibling Discount",
+        "amount": "10% off",
+        "text": "Enrolling multiple children? Receive 10% off eligible registrations when you enroll siblings in Winter Camp."
+      },
+      {
+        "title": "Refer a Friend",
+        "amount": "10% off",
+        "text": "When a friend you refer registers, you both receive 10% off, subject to the offer terms."
+      }
+    ],
+    "offersNote": "Discounts aren't combined automatically on the same registration. Ask our team which offers apply to you.",
+    "transportation": {
+      "text": "Optional round-trip transportation is available for designated service areas, subject to route availability.",
+      "prices": [
+        {
+          "label": "Daily",
+          "price": "$60",
+          "note": "Round trip"
+        },
+        {
+          "label": "Weekly",
+          "price": "$300",
+          "note": "5 days"
+        },
+        {
+          "label": "Full camp",
+          "price": "$450",
+          "note": "8 days"
+        }
+      ],
+      "items": [
+        "Round-trip pick-up and drop-off",
+        "Service within designated areas",
+        "Scheduled arrangements confirmed by the camp team"
+      ]
+    },
+    "sections": []
+  },
+  "teams": {
+    "plano": [
+      {
+        "name": "[STAFF_NAME]",
+        "role": "Supervisor",
+        "phone": "[STAFF_PHONE]"
+      },
+      {
+        "name": "[STAFF_NAME]",
+        "role": "Counselor",
+        "phone": "[STAFF_PHONE]"
+      },
+      {
+        "name": "[STAFF_NAME]",
+        "role": "Counselor",
+        "phone": "[STAFF_PHONE]"
+      }
+    ],
+    "littleelm": [
+      {
+        "name": "[STAFF_NAME]",
+        "role": "Supervisor",
+        "phone": "[STAFF_PHONE]"
+      },
+      {
+        "name": "[STAFF_NAME]",
+        "role": "Counselor",
+        "phone": "[STAFF_PHONE]"
+      },
+      {
+        "name": "[STAFF_NAME]",
+        "role": "Counselor",
+        "phone": "[STAFF_PHONE]"
+      }
+    ]
+  }
+}

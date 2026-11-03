@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<!--
+  ============================================================================
+  PAGE: Portal sign-in (approved design)
+  ----------------------------------------------------------------------------
+  WHERE IT GOES IN GHL
+    Sites > Funnels/Websites > new page (e.g. /portal) > add a full-width
+    "Custom HTML/Code" element > paste EVERYTHING between BEGIN WIDGET and
+    END WIDGET below. Set the page background to #F4F7FB.
+
+  HOW SIGN-IN WORKS
+    GHL does not let a custom page log people in directly — the actual login
+    happens on GHL's own membership / client-portal login page. So when the
+    button is pressed, this page sends the person to the login URL for the
+    role they picked (Parent / Camp staff / Tutor), with their email
+    pre-filled where GHL supports it. The password is NEVER sent anywhere
+    from this page.
+
+  WHAT TO EDIT
+    The EDIT block at the top of the widget: login URL per role, the
+    forgot-password link, the camp plans link and the apply link.
+    Photo: assets/images/camp-signin.jpg (upload to GHL Media and paste the
+    full URL into the <img src> on GHL).
+    Logo: assets/logo/blackmon-tutoring-logo.png (same: upload to GHL Media
+    and paste the full URL into the logo <img src>).
+
+  Tip: open with ?role=staff or ?role=tutor to pre-select a tab
+  (e.g. link to /portal?role=staff from staff emails).
+  ============================================================================
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sign in — Blackmon Tutoring Portal</title>
+<link rel="icon" href="data:,">
+<style>
+  /* Preview page only — NOT part of the widget */
+  body { margin: 0; background: #F4F7FB; }
+</style>
+</head>
+<body>
+
+<!-- ===== BEGIN WIDGET ===== -->
+<div class="bt-signin">
+<script>
+  /* =====================================================================
+     EDIT HERE — where each button and link goes.
+     ===================================================================== */
+  (document.currentScript.closest(".bt-signin") || {}).btSignin = {
+    loginUrl: {
+      parent: "{{custom_values.portal_login_link}}",
+      staff:  "{{custom_values.portal_login_link}}",
+      tutor:  "{{custom_values.portal_login_link}}"
+    },
+    emailParam:       "email",                 /* query param used to pre-fill the email on GHL's login page; "" to turn off */
+    forgotPassword:   "[FORGOT_PASSWORD_LINK]",
+    campPlans:        "[CAMP_PLANS_LINK]",
+    applyTutor:       "[APPLY_FORM_LINK]",
+    applyStaff:       "[APPLY_FORM_LINK]"
+  };
+</script>
+<style>
+  @import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Merriweather:wght@700;900&display=swap");
+
+  .bt-signin {
+    --bt-navy:#0B1F3F; --bt-navy-2:#16335F; --bt-navy-3:#132E57; --bt-sky:#5BABE0;
+    --bt-bg:#F4F7FB; --bt-muted:#5A6679; --bt-line:#E4E8EF; --bt-field:#D6DDE7; --bt-link:#1F6FAE;
+    --bt-soft:#F5F8FB; --bt-seg:#EDF1F6; --bt-on-navy:#C9D6EA;
+    --bt-head:"Merriweather", Georgia, "Times New Roman", serif;
+    --bt-body:"Inter", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 28px clamp(16px, 3vw, 40px) 24px;
+    background: var(--bt-bg);
+    color: var(--bt-navy);
+    font: 400 16px/1.5 var(--bt-body);
+    -webkit-font-smoothing: antialiased;
+  }
+  .bt-signin *, .bt-signin *::before, .bt-signin *::after { box-sizing: border-box; }
+  .bt-signin a { color: var(--bt-link); }
+  .bt-signin a:focus-visible, .bt-signin button:focus-visible { outline: 3px solid var(--bt-link); outline-offset: 3px; border-radius: 8px; }
+
+  /* ---------- Top bar ---------- */
+  .bt-signin .bt-si__top { display: flex; align-items: center; justify-content: space-between; gap: 12px 24px; flex-wrap: wrap; margin-bottom: 22px; }
+  .bt-signin .bt-si__brand { display: inline-flex; align-items: center; gap: 12px; color: var(--bt-navy); text-decoration: none; }
+  .bt-signin .bt-si__logo { display: block; height: 48px; width: auto; }
+  .bt-signin .bt-si__help { margin: 0; display: inline-flex; align-items: center; gap: 14px; font-size: 15px; color: var(--bt-muted); }
+  .bt-signin .bt-si__help a { display: inline-flex; align-items: center; gap: 8px; font-weight: 700; text-decoration: none; white-space: nowrap; }
+  .bt-signin .bt-si__help svg { width: 18px; height: 18px; }
+
+  /* ---------- Card ---------- */
+  .bt-signin .bt-si__card {
+    display: grid; grid-template-columns: minmax(300px, 34%) 1fr;
+    background: #fff; border: 1px solid var(--bt-line); border-radius: 28px; overflow: hidden;
+    box-shadow: 0 30px 60px -36px rgba(11,31,63,.35);
+  }
+
+  /* Left navy panel */
+  .bt-signin .bt-si__panel { display: flex; flex-direction: column; gap: 22px; padding: clamp(28px, 4vw, 48px); background: var(--bt-navy); color: #fff; }
+  .bt-signin .bt-si__eyebrow { margin: 0; font: 700 13px/1.3 var(--bt-body); letter-spacing: .12em; text-transform: uppercase; color: var(--bt-sky); }
+  .bt-signin .bt-si__hero { margin: -8px 0 0; font: 900 clamp(30px, 3.4vw, 42px)/1.12 var(--bt-head); color: #fff; letter-spacing: -.01em; }
+  .bt-signin .bt-si__intro { margin: 0; font-size: 17px; line-height: 1.6; color: #DCE5F2; }
+
+  /* Photo slots: placeholder sits behind the <img>; if the image fails it is removed */
+  .bt-signin .bt-si__photo { position: relative; aspect-ratio: 4 / 3; border-radius: 20px; overflow: hidden; background: var(--bt-navy-3); }
+  .bt-signin .bt-si__ph { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; padding: 20px; text-align: center; color: var(--bt-on-navy); font-size: 14px; border: 1.5px dashed rgba(201,214,234,.35); border-radius: inherit; }
+  .bt-signin .bt-si__ph svg { width: 34px; height: 34px; opacity: .9; }
+  .bt-signin .bt-si__ph code { font: 500 12px/1.4 ui-monospace, Menlo, Consolas, monospace; opacity: .8; }
+  .bt-signin .bt-si__photo img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+  .bt-signin .bt-si__panel > .bt-si__photo { flex: 1 0 auto; aspect-ratio: auto; min-height: 260px; }  /* main photo fills the panel's spare height */
+  .bt-signin .bt-si__photo--loc { aspect-ratio: 3 / 2; border-radius: 14px; }
+  .bt-signin .bt-si__photo--loc .bt-si__ph { gap: 6px; padding: 10px; font-size: 12px; }
+  .bt-signin .bt-si__photo--loc .bt-si__ph svg { width: 24px; height: 24px; }
+
+  .bt-signin .bt-si__locs { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-top: auto; padding-top: 22px; border-top: 1px solid rgba(201,214,234,.2); }
+  .bt-signin .bt-si__loc-wrap { display: flex; flex-direction: column; gap: 14px; }
+  .bt-signin .bt-si__loc { display: flex; gap: 10px; }
+  .bt-signin .bt-si__loc svg { flex: none; width: 20px; height: 20px; margin-top: 2px; color: var(--bt-sky); }
+  .bt-signin .bt-si__loc strong { display: block; font-weight: 700; color: #fff; }
+  .bt-signin .bt-si__loc span { display: block; margin-top: 4px; font-size: 15px; line-height: 1.45; color: #DCE5F2; }
+
+  /* Right form side */
+  .bt-signin .bt-si__main { padding: clamp(28px, 4.4vw, 56px) clamp(22px, 4.4vw, 56px) clamp(28px, 4vw, 48px); }
+  .bt-signin .bt-si__title { margin: 0; font: 900 clamp(30px, 3.4vw, 38px)/1.15 var(--bt-head); color: var(--bt-navy); }
+  .bt-signin .bt-si__sub { margin: 6px 0 0; font-size: 17px; color: var(--bt-muted); }
+
+  /* Role switch (radio group styled as segmented control) */
+  .bt-signin .bt-si__roles { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; margin: 28px 0 0; padding: 6px; border: 0; border-radius: 16px; background: var(--bt-seg); }
+  .bt-signin .bt-si__roles legend { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+  .bt-signin .bt-si__role { position: relative; }
+  .bt-signin .bt-si__role input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+  .bt-signin .bt-si__role span {
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    min-height: 48px; padding: 0 10px; border-radius: 12px;
+    font: 500 16px/1.2 var(--bt-body); color: var(--bt-muted); text-align: center;
+    cursor: pointer; transition: background-color .15s ease, color .15s ease, box-shadow .15s ease;
+  }
+  .bt-signin .bt-si__role span:hover { color: var(--bt-navy); }
+  .bt-signin .bt-si__role input:checked + span { background: #fff; color: var(--bt-navy); font-weight: 600; box-shadow: 0 2px 6px rgba(11,31,63,.12); }
+  .bt-signin .bt-si__role input:checked + span::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--bt-sky); }
+  .bt-signin .bt-si__role input:focus-visible + span { outline: 3px solid var(--bt-link); outline-offset: 2px; }
+
+  .bt-signin .bt-si__who { margin: 30px 0 0; font: 700 clamp(21px, 2.2vw, 24px)/1.3 var(--bt-head); color: var(--bt-navy); }
+  .bt-signin .bt-si__who-sub { margin: 4px 0 0; font-size: 16px; color: var(--bt-muted); }
+
+  /* Fields */
+  .bt-signin .bt-si__form { margin: 0; }
+  .bt-signin .bt-si__field { margin-top: 22px; }
+  .bt-signin .bt-si__label-row { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-bottom: 8px; }
+  .bt-signin .bt-si__label { display: block; font: 600 15px/1.4 var(--bt-body); color: var(--bt-navy); }
+  .bt-signin .bt-si__field > .bt-si__label { margin-bottom: 8px; }
+  .bt-signin .bt-si__label-row .bt-si__label { margin: 0; }
+  .bt-signin .bt-si__label-row a { font-size: 15px; font-weight: 500; text-underline-offset: 3px; }
+  .bt-signin .bt-si__input {
+    display: block; width: 100%; height: 54px; padding: 0 18px;
+    font: 400 16px/1 var(--bt-body); color: var(--bt-navy);
+    background: #fff; border: 1.5px solid var(--bt-field); border-radius: 14px;
+    transition: border-color .15s ease, box-shadow .15s ease;
+    -webkit-appearance: none; appearance: none;
+  }
+  .bt-signin .bt-si__input::placeholder { color: #8A94A6; }
+  .bt-signin .bt-si__input:hover { border-color: #BCC7D6; }
+  .bt-signin .bt-si__input:focus { outline: none; border-color: var(--bt-sky); box-shadow: 0 0 0 4px rgba(91,171,224,.3); }
+  .bt-signin .bt-si__input[aria-invalid="true"] { border-color: #FF7A59; }
+  .bt-signin .bt-si__error { display: none; margin: 8px 0 0; font: 600 13px/1.4 var(--bt-body); color: #A8401F; }
+  .bt-signin .bt-si__error.is-on { display: block; }
+
+  .bt-signin .bt-si__check { display: inline-flex; align-items: center; gap: 12px; margin-top: 20px; font-size: 16px; color: var(--bt-muted); cursor: pointer; }
+  .bt-signin .bt-si__check input { width: 22px; height: 22px; margin: 0; accent-color: var(--bt-navy); cursor: pointer; }
+
+  .bt-signin .bt-si__btn {
+    display: flex; align-items: center; justify-content: center; gap: 12px;
+    width: 100%; min-height: 58px; margin-top: 22px; padding: 0 24px;
+    background: var(--bt-navy); color: #fff; border: 0; border-radius: 14px;
+    font: 600 18px/1.2 var(--bt-body); cursor: pointer;
+    box-shadow: 0 12px 24px -14px rgba(11,31,63,.6);
+    transition: background-color .15s ease, transform .15s ease;
+  }
+  .bt-signin .bt-si__btn:hover { background: var(--bt-navy-2); transform: translateY(-1px); }
+  .bt-signin .bt-si__btn:active { transform: translateY(1px); }
+  .bt-signin .bt-si__btn svg { width: 20px; height: 20px; flex: none; }
+
+  /* Inside your portal */
+  .bt-signin .bt-si__inside { margin-top: 30px; padding: 20px 24px 22px; background: var(--bt-soft); border: 1px solid var(--bt-line); border-radius: 18px; }
+  .bt-signin .bt-si__inside-title { margin: 0 0 12px; font: 700 13px/1.3 var(--bt-body); letter-spacing: .1em; text-transform: uppercase; color: var(--bt-muted); }
+  .bt-signin .bt-si__perks { display: grid; grid-template-columns: 1fr 1fr; gap: 10px 24px; margin: 0; padding: 0; list-style: none; }
+  .bt-signin .bt-si__perks li { display: flex; align-items: flex-start; gap: 12px; font-size: 16px; color: var(--bt-navy); }
+  .bt-signin .bt-si__perks svg { flex: none; width: 20px; height: 20px; margin-top: 2px; color: var(--bt-link); }
+
+  /* New / work with us */
+  .bt-signin .bt-si__more { display: grid; grid-template-columns: 1fr 1fr; gap: 24px 36px; margin-top: 34px; }
+  .bt-signin .bt-si__more h3 { margin: 0; font: 700 17px/1.35 var(--bt-body); color: var(--bt-navy); }
+  .bt-signin .bt-si__more p { margin: 6px 0 0; font-size: 16px; color: var(--bt-muted); }
+  .bt-signin .bt-si__more .bt-si__links { margin-top: 10px; color: var(--bt-muted); }
+  .bt-signin .bt-si__more a { font-weight: 600; text-underline-offset: 3px; }
+
+  /* Footer */
+  .bt-signin .bt-si__foot { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px 24px; margin-top: 20px; padding: 0 4px; font-size: 14px; color: var(--bt-muted); }
+  .bt-signin .bt-si__foot a { text-underline-offset: 3px; }
+
+  .bt-signin [hidden] { display: none !important; }
+
+  /* ---------- Responsive ---------- */
+  @media (max-width: 960px) {
+    .bt-signin .bt-si__card { grid-template-columns: 1fr; }
+    .bt-signin .bt-si__main { order: -1; }
+    .bt-signin .bt-si__panel > .bt-si__photo { flex: none; aspect-ratio: 16 / 9; min-height: 0; }
+  }
+  @media (max-width: 600px) {
+    .bt-signin { padding-top: 18px; }
+    .bt-signin .bt-si__help > span { display: none; }
+    .bt-signin .bt-si__perks, .bt-signin .bt-si__more { grid-template-columns: 1fr; }
+    .bt-signin .bt-si__role span { font-size: 15px; min-height: 46px; padding: 0 6px; }
+    .bt-signin .bt-si__role input:checked + span::before { display: none; }
+    .bt-signin .bt-si__card { border-radius: 22px; }
+    .bt-signin .bt-si__inside { padding: 18px; }
+  }
+  @media (max-width: 380px) {
+    .bt-signin .bt-si__locs { grid-template-columns: 1fr; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .bt-signin .bt-si__btn, .bt-signin .bt-si__input, .bt-signin .bt-si__role span { transition: none; }
+  }
+</style>
+
+  <header class="bt-si__top">
+    <a class="bt-si__brand" href="https://www.blackmontutoring.com" aria-label="Blackmon Tutoring home">
+      <img class="bt-si__logo" src="../assets/logo/blackmon-tutoring-logo.png" alt="Blackmon Tutoring">
+    </a>
+    <p class="bt-si__help">
+      <span>Trouble signing in?</span>
+      <a href="tel:+14692611625">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2"/></svg>
+        469-261-1625
+      </a>
+    </p>
+  </header>
+
+  <div class="bt-si__card">
+
+    <!-- Left: navy panel -->
+    <aside class="bt-si__panel">
+      <p class="bt-si__eyebrow">Blackmon Portal</p>
+      <h1 class="bt-si__hero">Everything for camp, in one sign&#8209;in.</h1>
+      <p class="bt-si__intro">Enrollment, payments, weekly camp updates and team onboarding &mdash; each account sees only what belongs to it.</p>
+
+      <div class="bt-si__photo">
+        <div class="bt-si__ph" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="9" cy="9" r="2"/><path d="m21 15-5-5L5 21"/></svg>
+          <span>[CAMP PHOTO &mdash; kids &amp; counselors, 4:3]<br><code>assets/images/camp-signin.jpg</code></span>
+        </div>
+        <img src="../assets/images/camp-signin.jpg" alt="Campers and counselors at Blackmon Tutoring summer camp" loading="lazy" onerror="this.remove()">
+      </div>
+
+      <div class="bt-si__locs">
+        <div class="bt-si__loc-wrap">
+          <div class="bt-si__photo bt-si__photo--loc">
+            <div class="bt-si__ph" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="9" cy="9" r="2"/><path d="m21 15-5-5L5 21"/></svg>
+              <span>[PLANO PHOTO]</span>
+            </div>
+            <img src="../assets/images/plano-camp.jpg" alt="Campers at Blackmon Tutoring's Plano camp" loading="lazy" onerror="this.remove()">
+          </div>
+          <div class="bt-si__loc">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-7-6.2-7-11.5a7 7 0 0 1 14 0C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg>
+            <div><strong>Plano camp</strong><span>6300 Independence Pkwy, Unit A<br>Plano, TX</span></div>
+          </div>
+        </div>
+        <div class="bt-si__loc-wrap">
+          <div class="bt-si__photo bt-si__photo--loc">
+            <div class="bt-si__ph" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="9" cy="9" r="2"/><path d="m21 15-5-5L5 21"/></svg>
+              <span>[LITTLE ELM PHOTO]</span>
+            </div>
+            <img src="../assets/images/littleelm-camp.jpg" alt="Campers at Blackmon Tutoring's Little Elm camp" loading="lazy" onerror="this.remove()">
+          </div>
+          <div class="bt-si__loc">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-7-6.2-7-11.5a7 7 0 0 1 14 0C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg>
+            <div><strong>Little Elm camp</strong><span>528 Lake Ln<br>Little Elm, TX</span></div>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Right: sign-in form -->
+    <main class="bt-si__main">
+      <h2 class="bt-si__title">Sign in</h2>
+      <p class="bt-si__sub">First, tell us who you are.</p>
+
+      <form class="bt-si__form" novalidate>
+        <fieldset class="bt-si__roles">
+          <legend>I am a</legend>
+          <label class="bt-si__role"><input type="radio" name="bt-si-role" value="parent" checked><span>Parent</span></label>
+          <label class="bt-si__role"><input type="radio" name="bt-si-role" value="staff"><span>Camp staff</span></label>
+          <label class="bt-si__role"><input type="radio" name="bt-si-role" value="tutor"><span>Tutor</span></label>
+        </fieldset>
+
+        <h3 class="bt-si__who" data-bt-out="who">Parent or guardian</h3>
+        <p class="bt-si__who-sub" data-bt-out="who-sub">Use the email you enrolled with.</p>
+
+        <div class="bt-si__field">
+          <label class="bt-si__label" for="bt-si-email">Email address</label>
+          <input class="bt-si__input" id="bt-si-email" name="email" type="email" autocomplete="email" inputmode="email" placeholder="you@example.com" required aria-describedby="bt-si-email-err">
+          <p class="bt-si__error" id="bt-si-email-err" role="alert">Please enter the email address you use with Blackmon Tutoring.</p>
+        </div>
+
+        <div class="bt-si__field">
+          <div class="bt-si__label-row">
+            <label class="bt-si__label" for="bt-si-pass">Password</label>
+            <a data-bt-link="forgot" href="[FORGOT_PASSWORD_LINK]">Forgot password?</a>
+          </div>
+          <input class="bt-si__input" id="bt-si-pass" name="password" type="password" autocomplete="current-password">
+        </div>
+
+        <label class="bt-si__check"><input type="checkbox" name="remember"> Keep me signed in on this device</label>
+
+        <button class="bt-si__btn" type="submit">
+          <span data-bt-out="btn">Sign in to the parent portal</span>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+        </button>
+      </form>
+
+      <section class="bt-si__inside" aria-labelledby="bt-si-inside-title">
+        <p class="bt-si__inside-title" id="bt-si-inside-title" data-bt-out="inside">Inside your parent portal</p>
+        <ul class="bt-si__perks" data-bt-out="perks"></ul>
+      </section>
+
+      <div class="bt-si__more">
+        <div>
+          <h3>New to camp?</h3>
+          <p>Your parent account opens after your first payment.</p>
+          <p class="bt-si__links"><a data-bt-link="plans" href="[CAMP_PLANS_LINK]">Choose a camp plan &rarr;</a></p>
+        </div>
+        <div>
+          <h3>Want to work with us?</h3>
+          <p>Apply first &mdash; we&rsquo;ll send your login once you&rsquo;re approved.</p>
+          <p class="bt-si__links"><a data-bt-link="tutor" href="[APPLY_FORM_LINK]">Apply as a tutor</a> &middot; <a data-bt-link="staff" href="[APPLY_FORM_LINK]">Apply as camp staff</a></p>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <footer class="bt-si__foot">
+    <span>&copy; Blackmon Tutoring &middot; Plano &amp; Little Elm, TX</span>
+    <span>Need help? <a href="mailto:Blackmontutoring@gmail.com">Blackmontutoring@gmail.com</a></span>
+  </footer>
+
+<script>
+(function () {
+  var SEL = ".bt-signin";
+  var CHECK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg>';
+
+  /* Copy for each role. Parent copy is from the approved design. */
+  var ROLES = {
+    parent: {
+      who: "Parent or guardian", sub: "Use the email you enrolled with.",
+      btn: "Sign in to the parent portal", inside: "Inside your parent portal",
+      perks: ["Sign enrollment documents", "Check your payment plan", "See this week’s camp events", "Call your camp team"]
+    },
+    staff: {
+      who: "Camp staff", sub: "Use the email you applied with.",
+      btn: "Sign in to the staff portal", inside: "Inside your staff portal",
+      perks: ["Watch your training videos", "Sign your contract", "Submit your intro video", "Join your camp team"]
+    },
+    tutor: {
+      who: "Tutor", sub: "Use the email you applied with.",
+      btn: "Sign in to the tutor portal", inside: "Inside your tutor portal",
+      perks: ["Watch your training videos", "Sign your contract", "Submit your intro video", "Get your Wise invite"]
+    }
+  };
+
+  function clean(v) { return v && v.indexOf("[") !== 0 ? v : null; }
+
+  function init(root) {
+    if (root.getAttribute("data-bt-ready")) return;
+    root.setAttribute("data-bt-ready", "1");
+    var cfg = root.btSignin || {};
+    var $ = function (s) { return root.querySelector(s); };
+
+    /* Links from the EDIT block */
+    var map = { forgot: cfg.forgotPassword, plans: cfg.campPlans, tutor: cfg.applyTutor, staff: cfg.applyStaff };
+    Object.keys(map).forEach(function (k) {
+      var a = $('[data-bt-link="' + k + '"]');
+      if (a && map[k]) a.setAttribute("href", map[k]);
+    });
+
+    function render(role) {
+      var r = ROLES[role] || ROLES.parent;
+      $('[data-bt-out="who"]').textContent = r.who;
+      $('[data-bt-out="who-sub"]').textContent = r.sub;
+      $('[data-bt-out="btn"]').textContent = r.btn;
+      $('[data-bt-out="inside"]').textContent = r.inside;
+      var ul = $('[data-bt-out="perks"]');
+      ul.innerHTML = "";
+      r.perks.forEach(function (t) {
+        var li = document.createElement("li");
+        li.innerHTML = CHECK;
+        li.appendChild(document.createTextNode(t));
+        ul.appendChild(li);
+      });
+    }
+
+    var radios = root.querySelectorAll('input[name="bt-si-role"]');
+    Array.prototype.forEach.call(radios, function (r) {
+      r.addEventListener("change", function () { if (r.checked) render(r.value); });
+    });
+
+    /* ?role=staff / ?role=tutor pre-selects a tab */
+    var m = /[?&]role=(parent|staff|tutor)\b/i.exec(location.search);
+    var start = m ? m[1].toLowerCase() : "parent";
+    Array.prototype.forEach.call(radios, function (r) { r.checked = r.value === start; });
+    render(start);
+
+    /* Submit: validate email, then go to the real GHL login for that role */
+    var form = $(".bt-si__form"), email = $("#bt-si-email"), err = $("#bt-si-email-err");
+    email.addEventListener("input", function () { email.removeAttribute("aria-invalid"); err.classList.remove("is-on"); });
+    form.addEventListener("submit", function (e) {
+      e.preventDefault();
+      var val = email.value.trim();
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val)) {
+        email.setAttribute("aria-invalid", "true");
+        err.classList.add("is-on");
+        email.focus();
+        return;
+      }
+      var role = (form.querySelector('input[name="bt-si-role"]:checked') || {}).value || "parent";
+      var url = clean((cfg.loginUrl || {})[role]);
+      if (!url) {
+        alert("Preview: the login link for this role isn't set yet. Add it in the EDIT block (loginUrl." + role + ").");
+        return;
+      }
+      if (cfg.emailParam) url += (url.indexOf("?") === -1 ? "?" : "&") + encodeURIComponent(cfg.emailParam) + "=" + encodeURIComponent(val);
+      /* The password is never put in the URL or sent from this page. */
+      window.location.href = url;
+    });
+  }
+
+  var s = document.currentScript, r = s && s.closest(SEL);
+  if (r) init(r);
+  function boot() { Array.prototype.forEach.call(document.querySelectorAll(SEL), init); }
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", boot); else boot();
+})();
+</script>
+</div>
+<!-- ===== END WIDGET ===== -->
+
+</body>
+</html>

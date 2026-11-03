@@ -1,0 +1,118 @@
+{
+  "title": "Camp Counselor Knowledge Assessment",
+  "audience": "Camp Staff",
+  "passPercent": 80,
+  "note": "This is an internal Blackmon Tutoring assessment. It is not an official Texas licensing examination or certification.",
+  "questions": [
+    {
+      "n": 1, "type": "single",
+      "prompt": "A counselor counts 14 children before leaving the classroom but only 13 arrive at the sports area. What should happen?",
+      "options": [
+        { "key": "A", "text": "Continue the activity while another counselor looks around." },
+        { "key": "B", "text": "Alert the lead immediately, keep the remaining children supervised, and activate the missing-child procedure." },
+        { "key": "C", "text": "Ask the children to find their missing classmate." },
+        { "key": "D", "text": "Wait until the next headcount." }
+      ],
+      "answer": ["B"], "review": "Scene 3",
+      "why": "A count that does not match the roster means a child is unaccounted for. Stop the transition, alert the designated lead right away, and keep the remaining children supervised while the missing-child procedure is followed. Never wait for the next count or send children to search."
+    },
+    {
+      "n": 2, "type": "single",
+      "prompt": "An unfamiliar adult arrives and says they are picking up a camper. What is the correct response?",
+      "options": [
+        { "key": "A", "text": "Release the child if the adult knows the child’s name." },
+        { "key": "B", "text": "Ask the child whether they recognize the adult and release them if they say yes." },
+        { "key": "C", "text": "Keep the child supervised and verify pickup authorization using the approved procedure." },
+        { "key": "D", "text": "Allow the adult to take the child while you contact the parent." }
+      ],
+      "answer": ["C"], "review": "Scene 4",
+      "why": "A child is released only to an authorized person under the program’s release procedures. Knowing the child’s name, a verbal claim, or the child recognizing the adult is not verification; keep the child supervised and confirm authorization. If it cannot be confirmed, do not release the child."
+    },
+    {
+      "n": 3, "type": "single",
+      "prompt": "A child tells a counselor something that raises suspicion of abuse. What should the counselor do?",
+      "options": [
+        { "key": "A", "text": "Listen calmly, protect the child’s immediate safety, and make required reports without waiting for internal approval." },
+        { "key": "B", "text": "Promise to keep the disclosure secret." },
+        { "key": "C", "text": "Question the child repeatedly until the full story is established." },
+        { "key": "D", "text": "Confront the person accused." }
+      ],
+      "answer": ["A"], "review": "Scene 5",
+      "why": "Stay calm, listen without judgment, and protect the child’s immediate safety. Never promise secrecy, question the child repeatedly, investigate, or confront the person accused, and never delay a legally required report while waiting for internal approval."
+    },
+    {
+      "n": 4, "type": "single",
+      "prompt": "A child has a potentially life-threatening emergency. What is the priority?",
+      "options": [
+        { "key": "A", "text": "Finish taking attendance before asking for help." },
+        { "key": "B", "text": "Call the parent and wait for instructions." },
+        { "key": "C", "text": "Move the child without considering immediate danger or circumstances." },
+        { "key": "D", "text": "Call 911 or direct someone to call, and provide appropriate assistance within your training." }
+      ],
+      "answer": ["D"], "review": "Scene 8",
+      "why": "In a potentially life-threatening emergency, call 911 immediately or direct a designated person to call, then help only within your training and follow dispatcher instructions. Do not delay emergency care to finish attendance or to reach a parent or supervisor."
+    },
+    {
+      "n": 5, "type": "single",
+      "prompt": "Which is an example of appropriate behavior management?",
+      "options": [
+        { "key": "A", "text": "Publicly embarrassing a child who breaks a rule." },
+        { "key": "B", "text": "Giving clear, respectful directions and offering an appropriate choice." },
+        { "key": "C", "text": "Withholding drinking water to discourage disruptive behavior." },
+        { "key": "D", "text": "Threatening to remove a child’s privileges indefinitely." }
+      ],
+      "answer": ["B"], "review": "Scene 6",
+      "why": "Clear, respectful directions and age-appropriate choices guide behavior while protecting the child’s dignity. Shaming, threats, and using food, water, bathroom access, or supervision as punishment are never permitted."
+    },
+    {
+      "n": 6, "type": "multi",
+      "prompt": "Select all appropriate active-supervision practices.",
+      "options": [
+        { "key": "A", "text": "Position yourself to see and hear children during activities." },
+        { "key": "B", "text": "Confirm responsibility explicitly when handing a group to another staff member." },
+        { "key": "C", "text": "Assume another adult is supervising whenever they are in the same room." },
+        { "key": "D", "text": "Reconcile headcounts with the roster during transitions." }
+      ],
+      "answer": ["A", "B", "D"], "review": "Scene 3",
+      "why": "Active supervision means positioning yourself to see and hear the children, confirming every handoff explicitly, and reconciling headcounts with the roster at each transition. Another adult in the same room is not necessarily supervising your group, so C is incorrect; the point requires A, B, and D with C left unmarked."
+    },
+    {
+      "n": 7, "type": "single",
+      "prompt": "Before a sports or STEM activity, what should staff do?",
+      "options": [
+        { "key": "A", "text": "Begin immediately if the children are excited." },
+        { "key": "B", "text": "Let children decide which equipment is safe." },
+        { "key": "C", "text": "Check the environment and equipment, explain rules, and confirm appropriate supervision." },
+        { "key": "D", "text": "Skip safety instructions if the activity has been done before." }
+      ],
+      "answer": ["C"], "review": "Scene 7",
+      "why": "Before any activity, inspect the space and equipment, remove hazards, explain the rules, and confirm supervision is adequate. Excitement or having done the activity before never replaces the safety check, and children do not decide whether equipment is safe."
+    },
+    {
+      "n": 8, "type": "single",
+      "prompt": "A staff member suspects child abuse but has informed the camp director. Which statement is correct?",
+      "options": [
+        { "key": "A", "text": "The staff member never needs to make another report." },
+        { "key": "B", "text": "Only the camp director may report suspected abuse." },
+        { "key": "C", "text": "The staff member should wait until an internal investigation is complete." },
+        { "key": "D", "text": "Informing the director does not automatically fulfill the staff member’s individual legal reporting duty." }
+      ],
+      "answer": ["D"], "review": "Scenes 5 and 10",
+      "why": "In Texas, people who suspect child abuse or neglect must follow applicable reporting laws. Telling the camp director does not automatically fulfill an individual’s legal reporting duty, and a required report is never delayed for an internal investigation or permission."
+    },
+    {
+      "n": 9, "type": "truefalse",
+      "prompt": "A counselor may leave a group briefly without arranging a handoff if another adult is somewhere in the building.",
+      "options": [{ "key": "True", "text": "True" }, { "key": "False", "text": "False" }],
+      "answer": ["False"], "review": "Scenes 2 and 3",
+      "why": "Never leave your assigned group without arranging and confirming an approved handoff. An adult somewhere in the building has not accepted responsibility for your group, so leaving without a handoff leaves the children unsupervised."
+    },
+    {
+      "n": 10, "type": "truefalse",
+      "prompt": "A training-video completion record by itself proves that a camp meets every applicable Texas licensing and certification requirement.",
+      "options": [{ "key": "True", "text": "True" }, { "key": "False", "text": "False" }],
+      "answer": ["False"], "review": "Scene 11 and the Texas resources slide",
+      "why": "Training completion is only one part of onboarding. The applicable Texas requirements depend on each program’s legal classification, operating arrangements, and location, and also include screening, licenses, certifications, and site-specific instruction that management must verify for each site."
+    }
+  ]
+}

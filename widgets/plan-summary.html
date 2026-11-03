@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<!--
+  ============================================================================
+  WIDGET: "My payment plan" — parent dashboard card
+  ----------------------------------------------------------------------------
+  WHERE IT GOES IN GHL
+    Memberships > Parent portal > Dashboard / "My plan" lesson > add a
+    "Custom HTML/Code" element and paste EVERYTHING between
+    BEGIN WIDGET and END WIDGET below.
+
+  HOW IT WORKS
+    GHL fills the {{contact.portal__...}} merge fields in the data-* attributes
+    on the root <div>. JavaScript reads them, parses the money values and
+    renders the card. If a value arrives empty or unrendered (still shows
+    "{{"), the card shows "We're updating your plan details" instead of
+    broken text.
+
+    • Pay-in-full plans (plan type contains "full", or balance is $0) show a
+      "Paid in full" badge and hide the due-date / installment rows.
+    • "Update payment method" goes to the GHL custom value
+      {{custom_values.portal_payment_link}} (Settings > Custom Values >
+      "Portal Payment Link"), so there's nothing to paste here.
+
+  >>> IMPORTANT — MERGE FIELDS IN MEMBERSHIP CUSTOM CODE <<<
+    Some GHL membership areas do NOT render contact merge fields inside
+    Custom HTML/Code elements. Test with a real parent login first. If the
+    card always shows the "updating" message, merge fields aren't rendering
+    there — use this widget on a GHL funnel/website page instead (merge
+    fields render there for known contacts), or send the same info by email
+    (see emails/installment-reminder.html).
+
+  WHAT TO EDIT
+    • Nothing. Values come from GHL contact fields and the
+      "Portal Payment Link" custom value.
+  ============================================================================
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Preview — My payment plan</title>
+<style>
+  /* Preview page only — NOT part of the widget */
+  body { margin: 0; padding: 32px 16px; background: #f3efe6; font-family: system-ui, sans-serif; }
+  .preview-label { max-width: 560px; margin: 40px auto 12px; font: 600 13px/1.4 system-ui, sans-serif; color: #5A6679; text-transform: uppercase; letter-spacing: .06em; }
+</style>
+</head>
+<body>
+
+<!-- ===== BEGIN WIDGET ===== -->
+<div class="bt-plan"
+     data-program="{{contact.portal__program}}"
+     data-location="{{contact.portal__location}}"
+     data-plan="{{contact.portal__payment_plan}}"
+     data-total="{{contact.portal__plan_total}}"
+     data-paid="{{contact.portal__amount_paid}}"
+     data-balance="{{contact.portal__balance}}"
+     data-next-due="{{contact.portal__next_due_date}}"
+     data-remaining="{{contact.portal__installments_remaining}}"
+     data-payment-link="{{custom_values.portal_payment_link}}">
+<style>
+  @import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Merriweather:wght@700;900&display=swap");
+
+  .bt-plan {
+    --bt-navy:#0B1F3F; --bt-navy-2:#16335F; --bt-sky:#5BABE0; --bt-sun:#FFC845;
+    --bt-grass:#43B37A; --bt-coral:#FF7A59; --bt-cream:#FFF8EC; --bt-muted:#5A6679;
+    --bt-line:#E4E8EF; --bt-link:#1F6FAE;
+    --bt-sky-ink:#1F6FAE; --bt-grass-ink:#1D7148; --bt-sun-ink:#7A5300; --bt-coral-ink:#A8401F;
+    --bt-sky-tint:#E3F1FB; --bt-grass-tint:#E2F5EA; --bt-sun-tint:#FFF1C9; --bt-coral-tint:#FFE6DE; --bt-navy-tint:#E7ECF4;
+    --bt-head:"Merriweather", Georgia, "Times New Roman", serif;
+    --bt-body:"Inter", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+
+    position: relative;
+    max-width: 560px;
+    margin: 0 auto;
+    background: #fff;
+    border: 1px solid var(--bt-line);
+    border-radius: 28px;
+    box-shadow: 0 22px 48px -24px rgba(11,31,63,.30);
+    color: var(--bt-navy);
+    font: 400 16px/1.5 var(--bt-body);
+    overflow: hidden;
+    -webkit-font-smoothing: antialiased;
+  }
+  .bt-plan *, .bt-plan *::before, .bt-plan *::after { box-sizing: border-box; }
+
+  /* ---------- Navy header ---------- */
+  .bt-plan .bt-plan__top {
+    position: relative;
+    padding: 24px clamp(20px, 5vw, 32px) 26px;
+    background: var(--bt-navy);
+    color: #fff;
+    overflow: hidden;
+  }
+  .bt-plan .bt-plan__top::after { /* sun arc */
+    content: ""; position: absolute; right: -54px; bottom: -84px; width: 140px; height: 140px; border-radius: 50%;
+    border: 16px solid var(--bt-sun); opacity: .9; pointer-events: none;
+  }
+  .bt-plan .bt-plan__row-top { position: relative; z-index: 1; display: flex; align-items: center; gap: 14px; }
+  .bt-plan .bt-plan__tile { flex: none; display: grid; place-items: center; width: 48px; height: 48px; border-radius: 14px; background: var(--bt-sun); color: var(--bt-navy); transform: rotate(-4deg); }
+  .bt-plan .bt-plan__tile svg { width: 24px; height: 24px; }
+  .bt-plan .bt-plan__eyebrow { margin: 0; font: 700 12px/1.3 var(--bt-body); letter-spacing: .08em; text-transform: uppercase; color: #C9D6EA; }
+  .bt-plan .bt-plan__title { margin: 2px 0 0; font: 900 clamp(20px, 3.6vw, 24px)/1.25 var(--bt-head); color: #fff; }
+  .bt-plan .bt-plan__program { position: relative; z-index: 1; margin: 16px 0 0; padding-right: 72px; font-size: 15px; color: #DCE5F2; }
+  .bt-plan .bt-plan__program strong { color: #fff; font-weight: 600; }
+
+  /* Sticker badge */
+  .bt-plan .bt-plan__badge {
+    position: absolute; z-index: 2; top: 20px; right: 20px;
+    display: none; align-items: center; gap: 6px;
+    padding: 6px 12px;
+    background: var(--bt-grass); color: var(--bt-navy);
+    border: 3px solid #fff; border-radius: 999px;
+    font: 700 12px/1.2 var(--bt-body); letter-spacing: .04em; text-transform: uppercase;
+    box-shadow: 0 8px 16px -8px rgba(0,0,0,.5);
+    transform: rotate(4deg);
+  }
+  .bt-plan .bt-plan__badge svg { width: 14px; height: 14px; }
+  .bt-plan.is-full .bt-plan__badge { display: inline-flex; }
+  
+  /* ---------- Body ---------- */
+  .bt-plan .bt-plan__body { padding: 24px clamp(20px, 5vw, 32px) 28px; }
+
+  .bt-plan .bt-plan__figures { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+  .bt-plan .bt-plan__fig { padding: 14px 14px 12px; border-radius: 16px; background: var(--bt-cream); }
+  .bt-plan .bt-plan__fig--paid { background: var(--bt-grass-tint); }
+  .bt-plan .bt-plan__fig--bal { background: var(--bt-sun-tint); }
+  .bt-plan .bt-plan__fig-label { display: block; font: 600 12px/1.3 var(--bt-body); color: var(--bt-muted); letter-spacing: .02em; }
+  .bt-plan .bt-plan__fig--paid .bt-plan__fig-label { color: var(--bt-grass-ink); }
+  .bt-plan .bt-plan__fig--bal .bt-plan__fig-label { color: var(--bt-sun-ink); }
+  .bt-plan .bt-plan__fig-value { display: block; margin-top: 4px; font: 900 clamp(17px, 3.4vw, 22px)/1.2 var(--bt-head); color: var(--bt-navy); font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+
+  /* Progress */
+  .bt-plan .bt-plan__progress { margin: 20px 0 6px; }
+  .bt-plan .bt-plan__progress-head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; margin-bottom: 8px; font-size: 14px; color: var(--bt-muted); }
+  .bt-plan .bt-plan__progress-head strong { color: var(--bt-navy); font-weight: 700; font-variant-numeric: tabular-nums; }
+  .bt-plan .bt-plan__track { position: relative; height: 14px; border-radius: 999px; background: var(--bt-navy-tint); overflow: hidden; }
+  .bt-plan .bt-plan__fill {
+    height: 100%; width: 0; border-radius: inherit;
+    background: repeating-linear-gradient(-45deg, var(--bt-grass) 0 10px, #4FC287 10px 20px);
+    transition: width .8s cubic-bezier(.2,.8,.2,1);
+  }
+
+  /* Detail rows */
+  .bt-plan .bt-plan__rows { margin: 18px 0 0; padding: 0; list-style: none; border-top: 1px solid var(--bt-line); }
+  .bt-plan .bt-plan__rows li { display: flex; align-items: center; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--bt-line); }
+  .bt-plan .bt-plan__rows li[hidden] { display: none; }
+  .bt-plan .bt-plan__ricon { flex: none; display: grid; place-items: center; width: 34px; height: 34px; border-radius: 10px; background: var(--bt-sky-tint); color: var(--bt-sky-ink); }
+  .bt-plan .bt-plan__ricon svg { width: 18px; height: 18px; }
+  .bt-plan .bt-plan__rlabel { flex: 1; min-width: 0; font-size: 15px; color: var(--bt-muted); }
+  .bt-plan .bt-plan__rvalue { text-align: right; font: 700 15px/1.35 var(--bt-body); color: var(--bt-navy); }
+  .bt-plan .bt-plan__rvalue.is-missing { font-weight: 500; font-style: italic; color: var(--bt-muted); }
+
+  /* Actions */
+  .bt-plan .bt-plan__actions { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 18px; margin-top: 22px; }
+  .bt-plan .bt-plan__btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: 10px;
+    min-height: 52px; padding: 0 22px;
+    background: var(--bt-navy); color: #fff;
+    border: 0; border-radius: 14px;
+    box-shadow: inset 0 -4px 0 var(--bt-sun), 0 10px 20px -10px rgba(11,31,63,.55);
+    font: 600 16px/1 var(--bt-body); text-decoration: none; cursor: pointer;
+    transition: transform .15s ease, background-color .15s ease, box-shadow .15s ease;
+  }
+  .bt-plan .bt-plan__btn:hover { background: var(--bt-navy-2); transform: translateY(-1px); }
+  .bt-plan .bt-plan__btn:active { transform: translateY(1px); box-shadow: inset 0 -2px 0 var(--bt-sun); }
+  .bt-plan .bt-plan__btn svg { width: 18px; height: 18px; }
+  .bt-plan .bt-plan__help { font-size: 14px; color: var(--bt-muted); }
+  .bt-plan .bt-plan__help a { color: var(--bt-link); font-weight: 600; text-underline-offset: 3px; }
+  .bt-plan a:focus-visible { outline: 3px solid var(--bt-link); outline-offset: 3px; border-radius: 6px; }
+  .bt-plan .bt-plan__btn:focus-visible { border-radius: 14px; }
+
+  /* ---------- Fallback state ---------- */
+  .bt-plan .bt-plan__fallback { display: none; align-items: flex-start; gap: 14px; padding: 18px; border-radius: 18px; background: var(--bt-sky-tint); }
+  .bt-plan .bt-plan__fallback-icon { flex: none; display: grid; place-items: center; width: 44px; height: 44px; border-radius: 14px; background: #fff; color: var(--bt-sky-ink); }
+  .bt-plan .bt-plan__fallback-icon svg { width: 22px; height: 22px; }
+  .bt-plan .bt-plan__fallback-title { margin: 0; font: 700 16px/1.35 var(--bt-body); color: var(--bt-navy); }
+  .bt-plan .bt-plan__fallback-text { margin: 4px 0 0; font-size: 14px; color: var(--bt-navy); }
+  .bt-plan .bt-plan__fallback-text a { color: var(--bt-link); font-weight: 600; white-space: nowrap; text-underline-offset: 3px; }
+  .bt-plan.is-pending .bt-plan__fallback { display: flex; }
+  .bt-plan.is-pending .bt-plan__figures,
+  .bt-plan.is-pending .bt-plan__progress,
+  .bt-plan.is-pending .bt-plan__rows { display: none; }
+
+  @media (max-width: 460px) {
+    .bt-plan .bt-plan__figures { grid-template-columns: 1fr 1fr; }
+    .bt-plan .bt-plan__fig--total { grid-column: 1 / -1; display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
+    .bt-plan .bt-plan__fig--total .bt-plan__fig-value { margin-top: 0; }
+    .bt-plan .bt-plan__program { margin-top: 14px; }
+    .bt-plan .bt-plan__badge { position: relative; top: auto; right: auto; margin-top: 14px; transform: rotate(-2deg); }
+    .bt-plan .bt-plan__btn { width: 100%; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .bt-plan .bt-plan__fill, .bt-plan .bt-plan__btn { transition: none; }
+  }
+</style>
+
+  <div class="bt-plan__top">
+    <div class="bt-plan__row-top">
+      <span class="bt-plan__tile" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="3"/><path d="M3 10h18M7 15h4"/></svg>
+      </span>
+      <div>
+        <p class="bt-plan__eyebrow">Summer Camp 2026</p>
+        <h2 class="bt-plan__title">My payment plan</h2>
+      </div>
+    </div>
+    <p class="bt-plan__program" data-bt-out="program-line">&nbsp;</p>
+    <span class="bt-plan__badge">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg>
+      Paid in full
+    </span>
+  </div>
+
+  <div class="bt-plan__body">
+    <div class="bt-plan__fallback" role="status">
+      <span class="bt-plan__fallback-icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12a8 8 0 1 1-2.3-5.6M20 4v5h-5"/></svg>
+      </span>
+      <div>
+        <p class="bt-plan__fallback-title">We&rsquo;re updating your plan details</p>
+        <p class="bt-plan__fallback-text">Your payment information will show here shortly. Questions in the meantime? Call us at <a href="tel:+14692611625">469-261-1625</a>.</p>
+      </div>
+    </div>
+
+    <div class="bt-plan__figures">
+      <div class="bt-plan__fig bt-plan__fig--total">
+        <span class="bt-plan__fig-label">Plan total</span>
+        <span class="bt-plan__fig-value" data-bt-out="total">&mdash;</span>
+      </div>
+      <div class="bt-plan__fig bt-plan__fig--paid">
+        <span class="bt-plan__fig-label">Paid so far</span>
+        <span class="bt-plan__fig-value" data-bt-out="paid">&mdash;</span>
+      </div>
+      <div class="bt-plan__fig bt-plan__fig--bal">
+        <span class="bt-plan__fig-label">Balance</span>
+        <span class="bt-plan__fig-value" data-bt-out="balance">&mdash;</span>
+      </div>
+    </div>
+
+    <div class="bt-plan__progress">
+      <div class="bt-plan__progress-head">
+        <span>Payment progress</span>
+        <strong data-bt-out="pct">0% paid</strong>
+      </div>
+      <div class="bt-plan__track" role="progressbar" aria-label="Payment progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+        <div class="bt-plan__fill"></div>
+      </div>
+    </div>
+
+    <ul class="bt-plan__rows">
+      <li>
+        <span class="bt-plan__ricon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M9 13h6M9 17h4"/></svg></span>
+        <span class="bt-plan__rlabel">Plan type</span>
+        <span class="bt-plan__rvalue" data-bt-out="plan">&mdash;</span>
+      </li>
+      <li data-bt-due>
+        <span class="bt-plan__ricon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M3 10h18M8 3v4M16 3v4"/></svg></span>
+        <span class="bt-plan__rlabel">Next payment due</span>
+        <span class="bt-plan__rvalue" data-bt-out="next">&mdash;</span>
+      </li>
+      <li data-bt-due>
+        <span class="bt-plan__ricon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M4 12h16M4 17h10"/></svg></span>
+        <span class="bt-plan__rlabel">Installments remaining</span>
+        <span class="bt-plan__rvalue" data-bt-out="remaining">&mdash;</span>
+      </li>
+    </ul>
+
+    <div class="bt-plan__actions">
+      <a class="bt-plan__btn" data-bt-out="paylink" href="{{custom_values.portal_payment_link}}">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="3"/><path d="M3 10h18M7 15h4"/></svg>
+        Update payment method
+      </a>
+      <span class="bt-plan__help">Payments are charged automatically on the due date.</span>
+    </div>
+  </div>
+
+<script>
+(function () {
+  var SEL = ".bt-plan";
+  var UPDATING = "Updating…";
+
+  /* Empty, or a merge field GHL didn't fill in ("{{contact...}}") */
+  function clean(v) {
+    v = (v == null ? "" : String(v)).trim();
+    if (!v || v.indexOf("{{") !== -1 || v.indexOf("}}") !== -1) return null;
+    return v;
+  }
+  function money(v) {
+    v = clean(v);
+    if (v === null) return null;
+    var n = parseFloat(v.replace(/[^0-9.\-]/g, ""));
+    return isFinite(n) ? n : null;
+  }
+  function fmt(n) {
+    try { return n.toLocaleString("en-US", { style: "currency", currency: "USD", minimumFractionDigits: n % 1 ? 2 : 0, maximumFractionDigits: 2 }); }
+    catch (e) { return "$" + n.toFixed(2); }
+  }
+  function niceDate(v) {
+    /* Pretty-print ISO (2026-06-15) or US (06/15/2026) dates; else show as-is */
+    var m = /^(\d{4})-(\d{2})-(\d{2})/.exec(v) || null, d = null;
+    if (m) d = new Date(+m[1], +m[2] - 1, +m[3]);
+    else if ((m = /^(\d{1,2})\/(\d{1,2})\/(\d{4})$/.exec(v))) d = new Date(+m[3], +m[1] - 1, +m[2]);
+    if (!d || isNaN(d)) return v;
+    return d.toLocaleDateString("en-US", { weekday: "short", month: "long", day: "numeric", year: "numeric" });
+  }
+
+  function init(root) {
+    if (root.getAttribute("data-bt-ready")) return;
+    root.setAttribute("data-bt-ready", "1");
+    var $ = function (k) { return root.querySelector('[data-bt-out="' + k + '"]'); };
+    function put(k, val) {
+      var el = $(k); if (!el) return;
+      el.textContent = val === null ? UPDATING : val;
+      el.classList.toggle("is-missing", val === null);
+    }
+
+    var program  = clean(root.getAttribute("data-program"));
+    var location = clean(root.getAttribute("data-location"));
+    var plan     = clean(root.getAttribute("data-plan"));
+    var total    = money(root.getAttribute("data-total"));
+    var paid     = money(root.getAttribute("data-paid"));
+    var balance  = money(root.getAttribute("data-balance"));
+    var next     = clean(root.getAttribute("data-next-due"));
+    var remain   = clean(root.getAttribute("data-remaining"));
+    var link     = clean(root.getAttribute("data-payment-link"));
+
+    if (balance === null && total !== null && paid !== null) balance = Math.max(total - paid, 0);
+
+    /* Program line */
+    var line = $("program-line");
+    if (program || location) {
+      line.innerHTML = "";
+      var b = document.createElement("strong");
+      b.textContent = program || "Summer Camp";
+      line.appendChild(b);
+      if (location) line.appendChild(document.createTextNode(" · " + location + " camp"));
+    } else {
+      line.textContent = "Blackmon Tutoring";
+    }
+
+    /* Core numbers missing -> friendly fallback */
+    var pending = total === null || paid === null;
+    root.classList.toggle("is-pending", pending);
+
+    var isFull = (plan && /full/i.test(plan)) || (!pending && balance !== null && balance <= 0 && total > 0);
+    root.classList.toggle("is-full", !!isFull);
+
+    if (!pending) {
+      put("total", fmt(total));
+      put("paid", fmt(paid));
+      put("balance", fmt(Math.max(balance || 0, 0)));
+      var pct = total > 0 ? Math.round(Math.min(Math.max(paid / total, 0), 1) * 100) : 0;
+      if (isFull) pct = 100;
+      $("pct").textContent = pct + "% paid";
+      var track = root.querySelector(".bt-plan__track");
+      track.setAttribute("aria-valuenow", String(pct));
+      track.setAttribute("aria-valuetext", fmt(paid) + " of " + fmt(total) + " paid");
+      var fill = root.querySelector(".bt-plan__fill");
+      requestAnimationFrame(function () { requestAnimationFrame(function () { fill.style.width = pct + "%"; }); });
+    }
+
+    put("plan", plan);
+    put("next", next ? niceDate(next) : null);
+    put("remaining", remain);
+
+    Array.prototype.forEach.call(root.querySelectorAll("[data-bt-due]"), function (li) { li.hidden = !!isFull; });
+    var help = root.querySelector(".bt-plan__help");
+    if (help && isFull) help.textContent = "Thank you — your camp spot is fully paid.";
+
+    if (link) $("paylink").setAttribute("href", link);
+  }
+
+  var s = document.currentScript, r = s && s.closest(SEL);
+  if (r) init(r);
+  function boot() { Array.prototype.forEach.call(document.querySelectorAll(SEL), init); }
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", boot); else boot();
+})();
+</script>
+</div>
+<!-- ===== END WIDGET ===== -->
+
+<!-- ======================================================================
+     PREVIEW ONLY — do NOT paste. Sample numbers below are fake, for layout
+     testing. The widget's own script styles these copies automatically.
+     ====================================================================== -->
+<p class="preview-label">Preview: installment plan (sample numbers, not real prices)</p>
+<div class="bt-plan" data-program="Summer Camp 2026" data-location="Plano" data-plan="Installments"
+     data-total="1000" data-paid="400" data-balance="600" data-next-due="2026-06-15" data-remaining="3" data-payment-link="#">
+  <div class="bt-plan__top"><div class="bt-plan__row-top"><span class="bt-plan__tile" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="3"/><path d="M3 10h18M7 15h4"/></svg></span><div><p class="bt-plan__eyebrow">Summer Camp 2026</p><h2 class="bt-plan__title">My payment plan</h2></div></div><p class="bt-plan__program" data-bt-out="program-line">&nbsp;</p><span class="bt-plan__badge">Paid in full</span></div>
+  <div class="bt-plan__body"><div class="bt-plan__fallback"><div><p class="bt-plan__fallback-title">We&rsquo;re updating your plan details</p></div></div>
+    <div class="bt-plan__figures"><div class="bt-plan__fig bt-plan__fig--total"><span class="bt-plan__fig-label">Plan total</span><span class="bt-plan__fig-value" data-bt-out="total"></span></div><div class="bt-plan__fig bt-plan__fig--paid"><span class="bt-plan__fig-label">Paid so far</span><span class="bt-plan__fig-value" data-bt-out="paid"></span></div><div class="bt-plan__fig bt-plan__fig--bal"><span class="bt-plan__fig-label">Balance</span><span class="bt-plan__fig-value" data-bt-out="balance"></span></div></div>
+    <div class="bt-plan__progress"><div class="bt-plan__progress-head"><span>Payment progress</span><strong data-bt-out="pct"></strong></div><div class="bt-plan__track" role="progressbar" aria-label="Payment progress" aria-valuemin="0" aria-valuemax="100"><div class="bt-plan__fill"></div></div></div>
+    <ul class="bt-plan__rows"><li><span class="bt-plan__rlabel">Plan type</span><span class="bt-plan__rvalue" data-bt-out="plan"></span></li><li data-bt-due><span class="bt-plan__rlabel">Next payment due</span><span class="bt-plan__rvalue" data-bt-out="next"></span></li><li data-bt-due><span class="bt-plan__rlabel">Installments remaining</span><span class="bt-plan__rvalue" data-bt-out="remaining"></span></li></ul>
+    <div class="bt-plan__actions"><a class="bt-plan__btn" data-bt-out="paylink" href="#">Update payment method</a><span class="bt-plan__help">Payments are charged automatically on the due date.</span></div></div>
+</div>
+
+<p class="preview-label">Preview: pay in full (sample numbers)</p>
+<div class="bt-plan" data-program="Summer Camp 2026" data-location="Little Elm" data-plan="Pay in full"
+     data-total="1000" data-paid="1000" data-balance="0" data-next-due="" data-remaining="0" data-payment-link="#">
+  <div class="bt-plan__top"><div class="bt-plan__row-top"><span class="bt-plan__tile" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="3"/><path d="M3 10h18M7 15h4"/></svg></span><div><p class="bt-plan__eyebrow">Summer Camp 2026</p><h2 class="bt-plan__title">My payment plan</h2></div></div><p class="bt-plan__program" data-bt-out="program-line">&nbsp;</p><span class="bt-plan__badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg>Paid in full</span></div>
+  <div class="bt-plan__body"><div class="bt-plan__fallback"><div><p class="bt-plan__fallback-title">We&rsquo;re updating your plan details</p></div></div>
+    <div class="bt-plan__figures"><div class="bt-plan__fig bt-plan__fig--total"><span class="bt-plan__fig-label">Plan total</span><span class="bt-plan__fig-value" data-bt-out="total"></span></div><div class="bt-plan__fig bt-plan__fig--paid"><span class="bt-plan__fig-label">Paid so far</span><span class="bt-plan__fig-value" data-bt-out="paid"></span></div><div class="bt-plan__fig bt-plan__fig--bal"><span class="bt-plan__fig-label">Balance</span><span class="bt-plan__fig-value" data-bt-out="balance"></span></div></div>
+    <div class="bt-plan__progress"><div class="bt-plan__progress-head"><span>Payment progress</span><strong data-bt-out="pct"></strong></div><div class="bt-plan__track" role="progressbar" aria-label="Payment progress" aria-valuemin="0" aria-valuemax="100"><div class="bt-plan__fill"></div></div></div>
+    <ul class="bt-plan__rows"><li><span class="bt-plan__rlabel">Plan type</span><span class="bt-plan__rvalue" data-bt-out="plan"></span></li><li data-bt-due><span class="bt-plan__rlabel">Next payment due</span><span class="bt-plan__rvalue" data-bt-out="next"></span></li><li data-bt-due><span class="bt-plan__rlabel">Installments remaining</span><span class="bt-plan__rvalue" data-bt-out="remaining"></span></li></ul>
+    <div class="bt-plan__actions"><a class="bt-plan__btn" data-bt-out="paylink" href="#">Update payment method</a><span class="bt-plan__help">Payments are charged automatically on the due date.</span></div></div>
+</div>
+
+</body>
+</html>

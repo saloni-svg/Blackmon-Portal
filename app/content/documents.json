@@ -1,0 +1,9 @@
+{
+  "_help": "Documents every paid Winter Camp 2026 parent gets. Put the PDF in app/documents/ and add a line here. type: \"read\" (view/download) or \"sign\" (waiver the parent signs). lunchOnly: true = only parents whose opportunity has Lunch Included = yes. Keep each id the same once parents have it. Waivers are signed here in the portal (not by GHL email). When every waiver is signed, the GHL contact gets E-Sign Status = Completed and Docs Signed = Yes.",
+  "documents": [
+    { "id": "itinerary", "title": "Camp Itinerary", "file": "Blackmon_Summer_Camp_Itinerary.pdf", "type": "read", "lunchOnly": false },
+    { "id": "meal-plan", "title": "Camp Meal Plan", "file": "Blackmon_Summer_Camp_Meal_Plan.pdf", "type": "read", "lunchOnly": true },
+    { "id": "liability-release", "title": "Day Camp Liability Release", "file": "Blackmon_Summer_Camp_Liability_Release.pdf", "type": "sign", "lunchOnly": false },
+    { "id": "short-game-waiver", "title": "Short Game Waiver & Code of Conduct", "file": "Blackmon_Summer_Camp_Short_Game_Waiver.pdf", "type": "sign", "lunchOnly": false }
+  ]
+}

@@ -1,0 +1,212 @@
+{
+  "_note": "DUMMY weekly content for testing. Names and phone numbers are made up (555-01xx numbers are reserved for fiction). Replace before launch.",
+  "week": {
+    "plano": {
+      "label": "Week of June 8",
+      "days": [
+        {
+          "day": "Mon",
+          "date": "June 8",
+          "title": "Science splash day",
+          "description": "Kitchen-table experiments: volcano fizz, slime and paper rockets.",
+          "tag": ""
+        },
+        {
+          "day": "Tue",
+          "date": "June 9",
+          "title": "Sports clinic: soccer",
+          "description": "Passing, dribbling and a friendly scrimmage. Wear sneakers.",
+          "tag": "Sports clinic"
+        },
+        {
+          "day": "Wed",
+          "date": "June 10",
+          "title": "Art & build day",
+          "description": "Cardboard city building and painting in small teams.",
+          "tag": ""
+        },
+        {
+          "day": "Thu",
+          "date": "June 11",
+          "title": "Field trip: Perot Museum (dummy)",
+          "description": "Bus leaves at 9:15 AM. Wear your camp T-shirt and closed-toe shoes.",
+          "tag": "Field trip"
+        },
+        {
+          "day": "Fri",
+          "date": "June 12",
+          "title": "Talent show Friday",
+          "description": "Campers show off songs, jokes and tricks. Families welcome at 3:30 PM.",
+          "tag": "Bring lunch"
+        }
+      ]
+    },
+    "littleelm": {
+      "label": "Week of June 8",
+      "days": [
+        {
+          "day": "Mon",
+          "date": "June 8",
+          "title": "Science splash day",
+          "description": "Kitchen-table experiments: volcano fizz, slime and paper rockets.",
+          "tag": ""
+        },
+        {
+          "day": "Tue",
+          "date": "June 9",
+          "title": "Sports clinic: soccer",
+          "description": "Passing, dribbling and a friendly scrimmage. Wear sneakers.",
+          "tag": "Sports clinic"
+        },
+        {
+          "day": "Wed",
+          "date": "June 10",
+          "title": "Field trip: Perot Museum (dummy)",
+          "description": "Bus leaves at 9:15 AM. Wear your camp T-shirt and closed-toe shoes.",
+          "tag": "Field trip"
+        },
+        {
+          "day": "Thu",
+          "date": "June 11",
+          "title": "Short Game! golf",
+          "description": "Putting and chipping with the PATTS coaches. Hats and sunscreen recommended.",
+          "tag": "Sports clinic"
+        },
+        {
+          "day": "Fri",
+          "date": "June 12",
+          "title": "Talent show Friday",
+          "description": "Campers show off songs, jokes and tricks. Families welcome at 3:30 PM.",
+          "tag": "Bring lunch"
+        }
+      ]
+    }
+  },
+  "team": {
+    "photoBase": "",
+    "plano": [
+      {
+        "name": "Taylor Test",
+        "role": "Supervisor",
+        "phone": "469-555-0101",
+        "photo": ""
+      },
+      {
+        "name": "Jamie Sample",
+        "role": "Counselor",
+        "phone": "469-555-0102",
+        "photo": ""
+      },
+      {
+        "name": "Riley Demo",
+        "role": "Counselor",
+        "phone": "469-555-0103",
+        "photo": ""
+      }
+    ],
+    "littleelm": [
+      {
+        "name": "Morgan Example",
+        "role": "Supervisor",
+        "phone": "469-555-0111",
+        "photo": ""
+      },
+      {
+        "name": "Casey Placeholder",
+        "role": "Counselor",
+        "phone": "469-555-0112",
+        "photo": ""
+      },
+      {
+        "name": "Avery Mock",
+        "role": "Counselor",
+        "phone": "469-555-0113",
+        "photo": ""
+      }
+    ]
+  },
+  "schedule": {
+    "campHours": "9:00 AM – 4:00 PM",
+    "earlyDropoffPrice": "+$15/day",
+    "latePickupPrice": "+$15/day",
+    "earlyDropoffLink": "[EARLY_DROPOFF_LINK]",
+    "items": [
+      {
+        "time": "7:00–9:00 AM",
+        "start": "07:00",
+        "end": "09:00",
+        "name": "Early drop-off",
+        "note": "Available for an additional charge.",
+        "kind": "optional"
+      },
+      {
+        "time": "9:00 AM",
+        "name": "Camp starts",
+        "note": "Arrival and check-in (roll call)",
+        "kind": "milestone"
+      },
+      {
+        "time": "9:00–10:00 AM",
+        "start": "09:00",
+        "end": "10:00",
+        "name": "Free play",
+        "note": "Board games, electronics, etc."
+      },
+      {
+        "time": "10:00–11:00 AM",
+        "start": "10:00",
+        "end": "11:00",
+        "name": "Academic enrichment"
+      },
+      {
+        "time": "11:00 AM–12:00 PM",
+        "start": "11:00",
+        "end": "12:00",
+        "name": "Prepare for activity or sports clinic"
+      },
+      {
+        "time": "12:00–1:00 PM",
+        "start": "12:00",
+        "end": "13:00",
+        "name": "Lunch"
+      },
+      {
+        "time": "1:00–3:00 PM",
+        "start": "13:00",
+        "end": "15:00",
+        "name": "Activity of the day"
+      },
+      {
+        "time": "3:00–3:30 PM",
+        "start": "15:00",
+        "end": "15:30",
+        "name": "Afternoon snack"
+      },
+      {
+        "time": "3:30–4:00 PM",
+        "start": "15:30",
+        "end": "16:00",
+        "name": "Free play",
+        "note": "Board games, electronics, etc."
+      },
+      {
+        "time": "4:00 PM",
+        "name": "Camp day ends",
+        "kind": "milestone"
+      },
+      {
+        "time": "4:00–5:00 PM",
+        "start": "16:00",
+        "end": "17:00",
+        "name": "Parent pick-up grace period",
+        "note": "Kids may keep playing until you arrive."
+      },
+      {
+        "time": "After 5:00 PM",
+        "name": "Late pick-up",
+        "note": "Available for an additional charge.",
+        "kind": "optional"
+      }
+    ]
+  }
+}

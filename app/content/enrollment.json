@@ -1,0 +1,52 @@
+{
+  "_about": "Enrollment form settings per camp (Camp Enrollment Forms Build Spec, Oct 2026, section 3). 'current' is the camp parents enroll for in the portal. Options marked 'provided by Blackmon Tutoring' in the spec are filled in here once Jordan sends them.",
+  "current": "winter",
+  "policiesUrl": "https://blackmontutoring.com",
+  "grades": ["Pre-K", "Kindergarten", "1st", "2nd", "3rd", "4th", "5th", "6th", "7th", "8th", "9th", "10th", "11th", "12th"],
+  "shirtSizes": ["Youth XS", "Youth S", "Youth M", "Youth L", "Youth XL", "Adult S", "Adult M", "Adult L", "Adult XL"],
+  "packages": ["Basic", "Standard", "Premium"],
+  "camps": {
+    "winter": {
+      "tag": "Winter 2026",
+      "title": "Blackmon Tutoring Winter Camp Enrollment Form",
+      "hours": "9 AM–4 PM",
+      "ages": [3, 16],
+      "sessions": [
+        { "id": "week1", "label": "Week 1: Dec 21–24" },
+        { "id": "week2", "label": "Week 2: Dec 28–31" }
+      ],
+      "sessionsNote": "Full camp = both weeks. Closed Dec 25 and Jan 1.",
+      "locations": [
+        { "value": "Little Elm", "label": "Little Elm – 520 Lobo Lane" },
+        { "value": "Plano", "label": "Plano – 6300 Independence Pkwy, Unit A" }
+      ],
+      "earlyDropoff": ["None", "1 hour before camp (8 AM)", "2 hours before camp (7 AM)"],
+      "latePickup": ["None", "1 hour after camp (5 PM)", "2 hours after camp (6 PM)"],
+      "transportStops": []
+    },
+    "summer": {
+      "tag": "Summer 2027",
+      "title": "Blackmon Tutoring Summer Day Camp Enrollment Form",
+      "hours": "9 AM–5 PM",
+      "ages": [3, 16],
+      "sessions": [],
+      "sessionsNote": "June–August 2027, 10 weeks. Week dates provided by Blackmon Tutoring.",
+      "locations": [{ "value": "Little Elm", "label": "Little Elm – 520 Lobo Lane" }],
+      "earlyDropoff": ["None", "1 hour before camp (8 AM)", "2 hours before camp (7 AM)"],
+      "latePickup": ["None", "1 hour after camp (6 PM)", "2 hours after camp (7 PM)"],
+      "transportStops": []
+    },
+    "fall": {
+      "tag": "Fall 2027",
+      "title": "Blackmon Tutoring Fall Camp Enrollment Form",
+      "hours": "",
+      "ages": [3, 16],
+      "sessions": [],
+      "sessionsNote": "Dates and sessions provided by Blackmon Tutoring.",
+      "locations": [{ "value": "Little Elm", "label": "Little Elm – 520 Lobo Lane" }],
+      "earlyDropoff": ["None", "1 hour before camp", "2 hours before camp"],
+      "latePickup": ["None", "1 hour after camp", "2 hours after camp"],
+      "transportStops": []
+    }
+  }
+}

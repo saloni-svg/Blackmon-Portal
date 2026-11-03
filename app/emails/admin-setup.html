@@ -1,0 +1,22 @@
+<!-- Subject: Set up your Blackmon admin dashboard password -->
+<!--
+  Sent when a staff member is given dashboard access (or "Resend setup link" is used).
+  These are filled in when it's sent:
+    {{first_name}}  the staff member's first name
+    {{access}}      "View only" or "Admin"
+    {{setup_url}}   their one-time link to set a password (expires in 24 hours)
+    {{admin_url}}   the dashboard sign-in page, for later visits
+-->
+<div style="font-family:Arial,Helvetica,sans-serif;font-size:16px;line-height:1.55;color:#0B1F3F;max-width:560px">
+  <p>Hi {{first_name}},</p>
+  <p>You've been given <strong>{{access}}</strong> access to the Blackmon admin dashboard.</p>
+  <p>Please set your password using the button below. The link works once and expires in 24 hours.</p>
+
+  <p style="margin:24px 0">
+    <a href="{{setup_url}}" style="display:inline-block;padding:14px 24px;background:#0B1F3F;color:#ffffff;text-decoration:none;border-radius:10px;font-weight:bold">Set my password</a>
+  </p>
+
+  <p>After that, sign in any time at <a href="{{admin_url}}" style="color:#1F6FAE">{{admin_url}}</a> with this email address and your new password. You might want to bookmark it.</p>
+  <p>If the link has expired, ask an admin to send you a new one. If you weren't expecting this email, you can ignore it.</p>
+  <p>Blackmon Tutoring</p>
+</div>

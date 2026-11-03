@@ -1,0 +1,58 @@
+# Render Blueprint for the Blackmon Portal (app/). Render → New → Blueprint → this repository.
+#
+# One web service with a persistent disk mounted at /var/data: the SQLite database (portal.db), signed
+# waivers, uploads (ID proofs, photos, announcement files, training / intro videos), the editable camp
+# content and Ask Blackmon's search model all live there (DATA_DIR). A disk means exactly one instance,
+# and the background jobs (automatic invites every 5 minutes, scheduled announcements) run in it.
+services:
+  - type: web
+    name: blackmon-portal
+    runtime: node
+    rootDir: app                 # the repo also holds ../assets (images, logos) the app serves
+    plan: standard               # 2 GB RAM: Ask Blackmon loads a local search model; starter (512 MB) may run out
+    region: ohio
+    numInstances: 1
+    buildCommand: npm ci
+    startCommand: node server.js
+    healthCheckPath: /health
+    disk:
+      name: blackmon-data
+      mountPath: /var/data
+      sizeGB: 5
+    domains:
+      - portal.blackmontutoring.com
+    envVars:
+      - key: NODE_VERSION
+        value: "24"
+      - key: NODE_ENV
+        value: production        # HTTPS only, Secure cookies, real client IPs, testing switches off
+      - key: DATA_DIR
+        value: /var/data
+      - key: PORTAL_URL
+        value: https://portal.blackmontutoring.com
+      - key: GHL_LOCATION_ID
+        value: dbijRKgKjGLpLDU9lJxv
+      - key: GHL_TOKEN           # GHL Private Integration token (GHL_API_KEY works too)
+        sync: false
+      - key: GHL_USER_ID
+        value: Gdffn4IPj4BLO56gXSdb
+      - key: GHL_PAYMENT_MODE
+        value: test
+      - key: PARENT_MESSAGES
+        value: live
+      - key: AUTO_INVITE
+        value: "1"
+      - key: ADMIN_ALERT_EMAIL
+        value: Jordan@blackmontutoring.com
+      - key: ADMIN_ALERT_PHONE
+        value: "+14692611625"
+      - key: ADMIN_ALERT_CONTACT_ID
+        value: gLTEQ2vq7iB3wLyFpHQH
+      - key: ADMIN_EMAIL         # the dashboard Owner, created on first start if the database has none
+        value: saloni@digitalryze.com
+      - key: ADMIN_PASSWORD
+        sync: false
+      - key: ANTHROPIC_API_KEY
+        sync: false
+      - key: OPENAI_API_KEY
+        sync: false

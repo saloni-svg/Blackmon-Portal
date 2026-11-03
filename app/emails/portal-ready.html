@@ -1,0 +1,43 @@
+<!-- Subject: Your Blackmon Portal login – Winter Camp 2026 -->
+<!--
+  Sent from the admin Parents page ("Send notification").
+  Edit the wording freely. These are filled in when it's sent:
+    {{first_name}}  the parent's first name (or "there")
+    {{email}}       the email this was sent to (the one they paid with)
+    {{portal_url}}  the portal sign-in link (PORTAL_URL in .env)
+-->
+<div style="font-family:Arial,Helvetica,sans-serif;font-size:16px;line-height:1.55;color:#0B1F3F;max-width:560px">
+  <p>Hi {{first_name}},</p>
+  <p>Thank you for your payment! Your <strong>Blackmon Portal</strong> is ready. It's where you'll handle everything for camp in one place.</p>
+
+  <p style="margin:24px 0">
+    <a href="{{portal_url}}" style="display:inline-block;padding:14px 24px;background:#0B1F3F;color:#ffffff;text-decoration:none;border-radius:10px;font-weight:bold">Open the Blackmon Portal</a>
+  </p>
+
+  <p><strong>How to sign in</strong></p>
+  <ol style="padding-left:20px">
+    <li>Open the portal: <a href="{{portal_url}}" style="color:#1F6FAE">{{portal_url}}</a></li>
+    <li>Choose <strong>Parent</strong>.</li>
+    <li>Enter <strong>{{email}}</strong>. This is the same email address you used to make your payment, so please use exactly this one.</li>
+    <li>We'll email you a <strong>6-digit code</strong>. Enter it to sign in.</li>
+    <li>After signing in, complete the <strong>Enrollment form</strong>, then open <strong>Documents</strong> to sign your waivers.</li>
+  </ol>
+  <p>If the code doesn't arrive within a couple of minutes, please check your spam or junk folder.</p>
+
+  <p><strong>In the portal you can</strong></p>
+  <ul style="padding-left:20px">
+    <li><strong>Sign your child's waivers in the Documents section. Camp participation requires signed waivers.</strong></li>
+    <li>Complete your child's enrollment form and meal plan</li>
+    <li>See your payment plan and pay installments</li>
+    <li>Get weekly camp updates, the daily schedule and your camp team's contacts</li>
+  </ul>
+
+  <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="margin:20px 0;border-collapse:collapse">
+    <tr><td style="background:#FFF4D6;border:1px solid #F2D27A;border-left:4px solid #E0A800;border-radius:8px;padding:14px 16px;color:#3B2F00;font-weight:bold;font-family:Arial,Helvetica,sans-serif;font-size:16px;line-height:1.5">
+      Important: After you submit the enrollment form, go to the Documents section in the portal to read and sign your child's waivers (Day Camp Liability Release and Short Game Waiver &amp; Code of Conduct). Your child can't attend camp until they're signed.
+    </td></tr>
+  </table>
+
+  <p>Need help? Call us at <a href="tel:+14692611625" style="color:#1F6FAE">469-261-1625</a>.</p>
+  <p>See you at camp!<br>Blackmon Tutoring</p>
+</div>

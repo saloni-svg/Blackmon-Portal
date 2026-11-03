@@ -1,0 +1,527 @@
+/* ==========================================================================
+   Blackmon Tutoring — GHL Form / Survey theme
+   --------------------------------------------------------------------------
+   WHERE IT GOES
+     GHL > Sites > Forms (or Surveys) > open the Enrollment form / Meal plan
+     form > Styles / Options > "Custom CSS" > paste this whole file.
+
+   WHY THESE SELECTORS
+     GHL renders each form inside its own iframe, so this CSS only affects
+     the form — it can't leak onto the portal page. Selectors are still kept
+     inside the form wrappers GHL uses (#_builder-form, .form-builder,
+     .ghl-form-wrap, .ghl-survey, form). GHL changes class names from time to
+     time: if something doesn't pick up a style, right-click it > Inspect in
+     the preview and add its class to the matching section below.
+
+   Brand: navy #0B1F3F · navy-2 #16335F · sky #5BABE0 · sun #FFC845
+          grass #43B37A · cream #FFF8EC · muted #5A6679 · lines #E4E8EF
+          link #1F6FAE · fonts Merriweather (headings) + Inter (everything)
+   ========================================================================== */
+
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Merriweather:wght@700;900&display=swap");
+
+
+/* --------------------------------------------------------------------------
+   1. Page + form card
+   -------------------------------------------------------------------------- */
+body {
+  background: #FFF8EC !important;
+}
+
+#_builder-form,
+.form-builder,
+.ghl-form-wrap,
+.ghl-survey {
+  max-width: 720px;
+  margin: 0 auto !important;
+  padding: clamp(20px, 4vw, 40px) !important;
+  background: #FFFFFF !important;
+  border: 1px solid #E4E8EF !important;
+  border-radius: 28px !important;
+  box-shadow: 0 22px 48px -24px rgba(11, 31, 63, 0.28) !important;
+  font-family: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif !important;
+  color: #0B1F3F !important;
+  -webkit-font-smoothing: antialiased;
+}
+
+#_builder-form *,
+.form-builder *,
+.ghl-form-wrap *,
+.ghl-survey * {
+  font-family: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  box-sizing: border-box;
+}
+
+
+/* --------------------------------------------------------------------------
+   2. Headings + text elements (form title, "Text" / "HTML" blocks)
+   -------------------------------------------------------------------------- */
+form h1, form h2, form h3,
+.form-builder h1, .form-builder h2, .form-builder h3,
+.ghl-survey h1, .ghl-survey h2, .ghl-survey h3 {
+  font-family: "Merriweather", Georgia, "Times New Roman", serif !important;
+  font-weight: 900 !important;
+  color: #0B1F3F !important;
+  letter-spacing: -0.01em;
+  line-height: 1.2 !important;
+}
+form h1, .form-builder h1, .ghl-survey h1 { font-size: clamp(26px, 4vw, 32px) !important; }
+form h2, .form-builder h2, .ghl-survey h2 { font-size: clamp(22px, 3.4vw, 26px) !important; }
+form h3, .form-builder h3, .ghl-survey h3 { font-size: 19px !important; font-weight: 700 !important; }
+
+form p, .form-builder p, .ghl-survey p {
+  color: #5A6679;
+  font-size: 15px;
+  line-height: 1.55;
+}
+
+form a, .form-builder a, .ghl-survey a {
+  color: #1F6FAE !important;
+  font-weight: 600;
+  text-underline-offset: 3px;
+}
+
+
+/* --------------------------------------------------------------------------
+   3. Field spacing + labels
+   -------------------------------------------------------------------------- */
+form .form-field-container,
+form .form-builder--item,
+form .field-container,
+form .form-group {
+  margin-bottom: 22px !important;
+}
+
+form label,
+form .label-alignment,
+form .field-label,
+.form-builder label {
+  display: block;
+  margin-bottom: 8px !important;
+  font-size: 15px !important;
+  font-weight: 600 !important;
+  line-height: 1.4 !important;
+  color: #0B1F3F !important;
+}
+
+/* Required asterisk */
+form label .required,
+form label span[style*="color: red"],
+form .text-danger {
+  color: #A8401F !important;
+}
+
+/* Small help text under fields */
+form .short-label,
+form .help-text,
+form small {
+  font-size: 13px !important;
+  color: #5A6679 !important;
+}
+
+
+/* --------------------------------------------------------------------------
+   4. Inputs — 52px tall, 2px border, 14px radius, sky focus ring
+   -------------------------------------------------------------------------- */
+form input[type="text"],
+form input[type="email"],
+form input[type="tel"],
+form input[type="number"],
+form input[type="date"],
+form input[type="url"],
+form input.form-control,
+form select,
+form .form-control,
+form .multiselect__tags,
+form .vs__dropdown-toggle {
+  width: 100%;
+  min-height: 52px !important;
+  height: auto;
+  padding: 12px 16px !important;
+  font-size: 16px !important;               /* 16px stops iOS zooming in */
+  color: #0B1F3F !important;
+  background: #FFFFFF !important;
+  border: 2px solid #E4E8EF !important;
+  border-radius: 14px !important;
+  box-shadow: none !important;
+  outline: none;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+form textarea,
+form textarea.form-control {
+  width: 100%;
+  min-height: 120px !important;
+  padding: 14px 16px !important;
+  font-size: 16px !important;
+  line-height: 1.5 !important;
+  color: #0B1F3F !important;
+  background: #FFFFFF !important;
+  border: 2px solid #E4E8EF !important;
+  border-radius: 14px !important;
+  resize: vertical;
+}
+
+form input::placeholder,
+form textarea::placeholder {
+  color: #8A94A6 !important;
+  opacity: 1;
+}
+
+form input:hover,
+form select:hover,
+form textarea:hover,
+form .form-control:hover {
+  border-color: #C9D3E1 !important;
+}
+
+form input:focus,
+form select:focus,
+form textarea:focus,
+form .form-control:focus,
+form .multiselect--active .multiselect__tags {
+  border-color: #5BABE0 !important;
+  box-shadow: 0 0 0 4px rgba(91, 171, 224, 0.35) !important;
+  outline: none !important;
+}
+
+/* Error state */
+form .has-error input,
+form .has-error textarea,
+form .has-error select,
+form input[aria-invalid="true"],
+form .is-invalid {
+  border-color: #FF7A59 !important;
+}
+form .error,
+form .invalid-feedback,
+form .field-error {
+  margin-top: 6px;
+  font-size: 13px !important;
+  font-weight: 600;
+  color: #A8401F !important;
+}
+
+
+/* --------------------------------------------------------------------------
+   5. Radio + checkbox "choice cards" (meal options, accept/decline)
+      Each option becomes a tappable card; the selected one turns sky.
+   -------------------------------------------------------------------------- */
+form .option,
+form .radio,
+form .checkbox,
+form .form-check,
+form label:has(> input[type="radio"]),
+form label:has(> input[type="checkbox"]) {
+  position: relative;
+  display: flex !important;
+  align-items: center;
+  gap: 12px;
+  min-height: 52px;
+  margin: 0 0 10px !important;
+  padding: 12px 16px !important;
+  background: #FFFFFF;
+  border: 2px solid #E4E8EF;
+  border-radius: 14px;
+  font-weight: 500 !important;
+  cursor: pointer;
+  transition: border-color 0.15s ease, background-color 0.15s ease;
+}
+
+form .option:hover,
+form .radio:hover,
+form .checkbox:hover,
+form .form-check:hover,
+form label:has(> input[type="radio"]):hover,
+form label:has(> input[type="checkbox"]):hover {
+  border-color: #C9D3E1;
+}
+
+/* Selected card */
+form .option:has(input:checked),
+form .radio:has(input:checked),
+form .checkbox:has(input:checked),
+form .form-check:has(input:checked),
+form label:has(> input:checked) {
+  background: #E3F1FB !important;
+  border-color: #5BABE0 !important;
+}
+
+/* Keyboard focus on a card */
+form .option:has(input:focus-visible),
+form .radio:has(input:focus-visible),
+form .checkbox:has(input:focus-visible),
+form .form-check:has(input:focus-visible),
+form label:has(> input:focus-visible) {
+  box-shadow: 0 0 0 4px rgba(91, 171, 224, 0.35);
+}
+
+/* The control itself */
+form input[type="radio"],
+form input[type="checkbox"] {
+  flex: none;
+  width: 22px !important;
+  height: 22px !important;
+  margin: 0 !important;
+  accent-color: #0B1F3F;
+  cursor: pointer;
+}
+
+/* Labels inside cards shouldn't add their own spacing */
+form .option label,
+form .radio label,
+form .checkbox label,
+form .form-check label {
+  margin: 0 !important;
+  padding: 0 !important;
+  min-height: 0 !important;
+  background: none !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  font-weight: 500 !important;
+  cursor: pointer;
+}
+
+
+/* --------------------------------------------------------------------------
+   6. Multi-step progress bar (Surveys / multi-step forms)
+   -------------------------------------------------------------------------- */
+.progress,
+.ghl-progress,
+.progress-bar-container,
+.survey-progress {
+  height: 10px !important;
+  margin: 0 0 28px !important;
+  background: #E7ECF4 !important;
+  border-radius: 999px !important;
+  overflow: hidden;
+  box-shadow: none !important;
+}
+
+.progress .progress-bar,
+.ghl-progress .progress-bar,
+.progress-bar-container .progress-bar,
+.survey-progress .progress-bar,
+.progress-bar-fill {
+  height: 100% !important;
+  background: repeating-linear-gradient(-45deg, #43B37A 0 10px, #4FC287 10px 20px) !important;
+  border-radius: 999px !important;
+  transition: width 0.5s ease;
+}
+
+/* Step counter text ("Step 2 of 4") */
+.progress-text,
+.step-count,
+.ghl-step-count {
+  font-size: 13px !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #1F6FAE !important;
+}
+
+
+/* --------------------------------------------------------------------------
+   7. Buttons — navy with a sun bottom edge (matches the portal sign-in)
+   -------------------------------------------------------------------------- */
+form button[type="submit"],
+form .btn-dark,
+form .btn-primary,
+form .ghl-btn,
+form .ghl-submit-btn,
+.ghl-survey .next-btn,
+.ghl-survey button.btn {
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  min-height: 56px !important;
+  padding: 0 24px !important;
+  font-family: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif !important;
+  font-size: 17px !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.01em;
+  color: #FFFFFF !important;
+  background: #0B1F3F !important;
+  border: 0 !important;
+  border-radius: 14px !important;
+  box-shadow: inset 0 -4px 0 #FFC845, 0 10px 20px -10px rgba(11, 31, 63, 0.55) !important;
+  cursor: pointer;
+  transition: transform 0.15s ease, background-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+form button[type="submit"]:hover,
+form .btn-dark:hover,
+form .btn-primary:hover,
+form .ghl-btn:hover,
+form .ghl-submit-btn:hover,
+.ghl-survey .next-btn:hover,
+.ghl-survey button.btn:hover {
+  background: #16335F !important;
+  transform: translateY(-1px);
+}
+
+form button[type="submit"]:active,
+form .btn-dark:active,
+form .btn-primary:active,
+form .ghl-btn:active,
+.ghl-survey button.btn:active {
+  transform: translateY(1px);
+  box-shadow: inset 0 -2px 0 #FFC845 !important;
+}
+
+form button:focus-visible,
+.ghl-survey button:focus-visible {
+  outline: 3px solid #1F6FAE !important;
+  outline-offset: 3px;
+}
+
+/* "Back" button in multi-step surveys — quiet outline style */
+.ghl-survey .prev-btn,
+.ghl-survey .back-btn,
+form .btn-back {
+  min-height: 56px !important;
+  padding: 0 20px !important;
+  color: #0B1F3F !important;
+  background: transparent !important;
+  border: 2px solid #E4E8EF !important;
+  border-radius: 14px !important;
+  box-shadow: none !important;
+  font-weight: 600 !important;
+}
+
+
+/* --------------------------------------------------------------------------
+   8. Section dividers / notice boxes
+      Add a GHL "HTML" element with <div class="bt-notice">...</div> for the
+      yellow field-trip notice inside the Meal plan form.
+   -------------------------------------------------------------------------- */
+form hr,
+.form-builder hr {
+  border: 0;
+  border-top: 2px dashed #E4E8EF;
+  margin: 28px 0;
+}
+
+form .bt-notice,
+.form-builder .bt-notice {
+  margin: 8px 0 24px;
+  padding: 16px 18px;
+  background: #FFF1C9;
+  border: 2px solid #FFC845;
+  border-radius: 18px;
+  color: #0B1F3F;
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.5;
+}
+
+
+/* --------------------------------------------------------------------------
+   9. Small screens + reduced motion
+   -------------------------------------------------------------------------- */
+@media (max-width: 480px) {
+  #_builder-form,
+  .form-builder,
+  .ghl-form-wrap,
+  .ghl-survey {
+    border-radius: 20px !important;
+    padding: 20px !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  form *,
+  .ghl-survey * {
+    transition: none !important;
+  }
+}
+
+
+/* ==========================================================================
+   MEAL PLAN FORM — cleaned-up options to enter in the GHL form builder
+   --------------------------------------------------------------------------
+   Copy these labels into the GHL fields exactly as written. Typos from the
+   original Word doc are fixed ("hummus", missing commas).
+
+   ALREADY IN YOUR GHL ACCOUNT (checked Oct 22, 2026) — reuse these fields:
+     contact.sub_sandwich_chips_included   (5 options, matches below)
+     contact.sub_sandwich_special_request
+     contact.soft_tacos_chips_included     (3 options, matches below)
+     contact.soft_tacos_special_request_note_here
+     contact.chicken_nuggets_chips_included
+     contact.pizza                         (3 options, matches below)
+     contact.special_request_note_here
+   DIFFERENCES TO FIX IN GHL (confirm with Jordan):
+     • Chicken nuggets field has "Regular chicken nuggets" and
+       "Grilled chicken nuggets" — the Word doc only lists Regular.
+     • There is no dipping-sauce field yet — add one (Radio) with the five
+       sauces below.
+     • No allergies or pizza special-request field found — add them.
+
+   Suggested field types in brackets.
+
+   -------------------------------------------------------------------------
+   INTRO TEXT (Text / HTML element at the top)
+     Please choose your child's preferred option for each meal.
+     Please submit your meal plan at least 7 days before your child's first
+     camp day.
+
+   -------------------------------------------------------------------------
+   Parent/Guardian name          [Full name]
+   Child's name                  [Single line]
+   Contact email                 [Email]
+   Contact phone number          [Phone]
+
+   -------------------------------------------------------------------------
+   SUB SANDWICHES (chips included)          [Radio — choose one]
+     ( ) Turkey with lettuce, tomato, and mustard
+     ( ) Ham with lettuce, tomato, and mustard
+     ( ) Turkey with lettuce, tomato, and mayo
+     ( ) Ham with lettuce, tomato, and mayo
+     ( ) Veggie with lettuce, tomato, and hummus
+   Sub sandwich special request             [Multi-line, optional]
+
+   -------------------------------------------------------------------------
+   SOFT TACOS (chips included)              [Radio — choose one]
+     ( ) Beef with lettuce, tomatoes, cheese, and salsa
+     ( ) Chicken with lettuce, tomatoes, cheese, and salsa
+     ( ) Vegetarian with black beans, corn, and salsa
+   Help text: Other condiments will be on the side.
+   Soft taco special request                [Multi-line, optional]
+
+   -------------------------------------------------------------------------
+   CHICKEN NUGGETS (chips included)
+     Regular chicken nuggets — shown as a heading/text, not a choice
+   Dipping sauce                            [Radio — choose one]
+     ( ) Sweet and sour
+     ( ) Honey mustard
+     ( ) Barbecue
+     ( ) Ketchup
+     ( ) Ranch
+   Chicken nugget special request           [Multi-line, optional]
+
+   -------------------------------------------------------------------------
+   PIZZA                                    [Radio — choose one]
+     ( ) Cheese with marinara sauce
+     ( ) Pepperoni with marinara sauce
+     ( ) Veggie with mushrooms, bell peppers, onions, and olives
+   Pizza special request                    [Multi-line, optional]
+
+   -------------------------------------------------------------------------
+   FIELD TRIP NOTICE (HTML element, use the yellow box):
+     <div class="bt-notice">On field trip days, please pack your child's
+     lunch. If it's forgotten, we'll have PB&amp;J available.</div>
+
+   -------------------------------------------------------------------------
+   Allergies/dietary restrictions           [Multi-line]
+     Label: Please indicate any allergies or dietary restrictions your child has.
+   Additional comments/requests             [Multi-line, optional]
+
+   -------------------------------------------------------------------------
+   SUBMISSION DEADLINE (Text element above the submit button)
+     Please submit your meal plan at least 7 days before your child's first
+     camp day.
+     Thank you for providing this information!
+   ========================================================================== */

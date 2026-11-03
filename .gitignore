@@ -1,0 +1,7 @@
+# Secrets and local data never go to GitHub (app/.gitignore covers app/.env, app/data/ and the export).
+.env
+**/.env
+node_modules/
+*.tgz
+.DS_Store
+.vscode/

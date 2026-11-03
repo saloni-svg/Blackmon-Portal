@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<!--
+  ============================================================================
+  WIDGET: "This week at camp" — weekly plan, edited by Jordan
+  ----------------------------------------------------------------------------
+  WHERE IT GOES IN GHL
+    Memberships > Parent portal > "This week" lesson (or dashboard) > add a
+    "Custom HTML/Code" element and paste EVERYTHING between
+    BEGIN WIDGET and END WIDGET below.
+    Use one element per location: set data-location="plano" or
+    data-location="littleelm" on the <div class="bt-week"> line.
+
+  WHAT TO EDIT (no developer needed)
+    Only the "EDIT THIS WEEK" block at the very top of the widget.
+    • label  : e.g. "Week of June 8"
+    • days   : one line per day, Monday to Friday
+        day         : "Mon", "Tue", "Wed", "Thu", "Fri"
+        date        : optional, e.g. "June 8"
+        title       : short name of the day
+        description : one or two short sentences
+        tag         : optional — "Field trip", "Sports clinic", "Bring lunch",
+                      or any short word. Leave as "" for no tag.
+    • Field trip days automatically show
+      "Bring your own lunch, arrive by 9:00 AM".
+    • Keep the quotes "" and the commas at the end of lines.
+
+  The sample weeks below are PLACEHOLDERS — replace them before publishing.
+  ============================================================================
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Preview — This week at camp</title>
+<style>
+  /* Preview page only — NOT part of the widget */
+  body { margin: 0; padding: 32px 16px; background: #f3efe6; }
+</style>
+</head>
+<body>
+
+<!-- ===== BEGIN WIDGET ===== -->
+<div class="bt-week" data-location="plano">
+<script>
+  /* =====================================================================
+     EDIT THIS WEEK  —  Jordan: change the text between the quotes only.
+     ===================================================================== */
+  (document.currentScript.closest(".bt-week") || {}).btWeek = {
+
+    plano: {
+      label: "Week of June 8",
+      days: [
+        { day: "Mon", date: "June 8",  title: "[MONDAY_TITLE]",    description: "[Short description of Monday's activity of the day.]",  tag: "" },
+        { day: "Tue", date: "June 9",  title: "Sports clinic",     description: "[Which sport / what campers will practice.]",           tag: "Sports clinic" },
+        { day: "Wed", date: "June 10", title: "[WEDNESDAY_TITLE]", description: "[Short description of Wednesday's activity.]",          tag: "" },
+        { day: "Thu", date: "June 11", title: "Field trip: [FIELD_TRIP_DESTINATION]", description: "[Where we're going and what to wear.]", tag: "Field trip" },
+        { day: "Fri", date: "June 12", title: "[FRIDAY_TITLE]",    description: "[Short description of Friday's activity.]",             tag: "" }
+      ]
+    },
+
+    littleelm: {
+      label: "Week of June 8",
+      days: [
+        { day: "Mon", date: "June 8",  title: "[MONDAY_TITLE]",    description: "[Short description of Monday's activity of the day.]",  tag: "" },
+        { day: "Tue", date: "June 9",  title: "[TUESDAY_TITLE]",   description: "[Short description of Tuesday's activity.]",            tag: "" },
+        { day: "Wed", date: "June 10", title: "Field trip: [FIELD_TRIP_DESTINATION]", description: "[Where we're going and what to wear.]", tag: "Field trip" },
+        { day: "Thu", date: "June 11", title: "Sports clinic",     description: "[Which sport / what campers will practice.]",           tag: "Sports clinic" },
+        { day: "Fri", date: "June 12", title: "[FRIDAY_TITLE]",    description: "[Short description of Friday's activity.]",             tag: "Bring lunch" }
+      ]
+    }
+
+  };
+  /* ===================== END OF EDIT BLOCK ============================ */
+</script>
+<style>
+  @import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Merriweather:wght@700;900&display=swap");
+
+  .bt-week {
+    --bt-navy:#0B1F3F; --bt-navy-2:#16335F; --bt-sky:#5BABE0; --bt-sun:#FFC845;
+    --bt-grass:#43B37A; --bt-coral:#FF7A59; --bt-cream:#FFF8EC; --bt-muted:#5A6679;
+    --bt-line:#E4E8EF; --bt-link:#1F6FAE;
+    --bt-sky-ink:#1F6FAE; --bt-grass-ink:#1D7148; --bt-sun-ink:#7A5300; --bt-coral-ink:#A8401F;
+    --bt-sky-tint:#E3F1FB; --bt-grass-tint:#E2F5EA; --bt-sun-tint:#FFF1C9; --bt-coral-tint:#FFE6DE; --bt-navy-tint:#E7ECF4;
+    --bt-head:"Merriweather", Georgia, "Times New Roman", serif;
+    --bt-body:"Inter", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+
+    position: relative;
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: clamp(20px, 4vw, 36px);
+    background: var(--bt-cream);
+    border: 1px solid #F1E6CF;
+    border-radius: 28px;
+    box-shadow: 0 22px 48px -24px rgba(11,31,63,.28);
+    color: var(--bt-navy);
+    font: 400 16px/1.5 var(--bt-body);
+    -webkit-font-smoothing: antialiased;
+  }
+  .bt-week *, .bt-week *::before, .bt-week *::after { box-sizing: border-box; }
+
+  /* ---------- Header ---------- */
+  .bt-week .bt-week__head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 14px 20px; margin-bottom: 24px; }
+  .bt-week .bt-week__where { display: inline-flex; align-items: center; gap: 6px; margin: 0 0 8px; font: 700 12px/1.3 var(--bt-body); letter-spacing: .08em; text-transform: uppercase; color: var(--bt-sky-ink); }
+  .bt-week .bt-week__where svg { width: 15px; height: 15px; }
+  .bt-week .bt-week__title { margin: 0; font: 900 clamp(26px, 4.2vw, 34px)/1.15 var(--bt-head); color: var(--bt-navy); letter-spacing: -.01em; }
+  .bt-week .bt-week__label {
+    display: inline-flex; align-items: center; gap: 10px;
+    padding: 10px 16px 10px 10px;
+    background: #fff; border: 2px solid var(--bt-navy); border-radius: 16px;
+    box-shadow: 4px 4px 0 var(--bt-sun);
+    font: 700 16px/1.2 var(--bt-body); color: var(--bt-navy);
+    transform: rotate(1.5deg);
+  }
+  .bt-week .bt-week__label-icon { display: grid; place-items: center; width: 34px; height: 34px; border-radius: 10px; background: var(--bt-sun); }
+  .bt-week .bt-week__label-icon svg { width: 18px; height: 18px; }
+
+  /* ---------- Day cards ---------- */
+  .bt-week .bt-week__grid { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 14px; }
+  .bt-week .bt-week__day {
+    position: relative; display: flex; flex-direction: column;
+    min-width: 0; padding: 0 0 16px;
+    background: #fff; border: 1px solid var(--bt-line); border-radius: 20px;
+    box-shadow: 0 2px 6px rgba(11,31,63,.05);
+    overflow: hidden;
+  }
+  .bt-week .bt-week__day-top {
+    display: flex; align-items: baseline; justify-content: space-between; gap: 8px;
+    padding: 12px 16px; background: var(--bt-accent-tint, var(--bt-sky-tint));
+    border-bottom: 3px solid var(--bt-accent, var(--bt-sky));
+  }
+  .bt-week .bt-week__dname { font: 900 18px/1.2 var(--bt-head); color: var(--bt-navy); }
+  .bt-week .bt-week__ddate { font: 600 13px/1.2 var(--bt-body); color: var(--bt-accent-ink, var(--bt-sky-ink)); white-space: nowrap; }
+  .bt-week .bt-week__dbody { padding: 14px 16px 0; display: flex; flex-direction: column; gap: 8px; flex: 1; }
+  .bt-week .bt-week__dtitle { margin: 0; font: 700 16px/1.35 var(--bt-body); color: var(--bt-navy); overflow-wrap: anywhere; }
+  .bt-week .bt-week__ddesc { margin: 0; font-size: 14px; color: var(--bt-muted); overflow-wrap: anywhere; }
+  .bt-week .bt-week__tags { display: flex; flex-wrap: wrap; gap: 6px; padding-top: 4px; }
+
+  .bt-week .bt-week__tag {
+    display: inline-flex; align-items: center; gap: 5px; padding: 3px 10px;
+    border-radius: 999px; font: 700 12px/1.5 var(--bt-body); white-space: nowrap;
+    background: var(--bt-accent-tint, var(--bt-sky-tint)); color: var(--bt-accent-ink, var(--bt-sky-ink));
+  }
+  .bt-week .bt-week__tag svg { width: 13px; height: 13px; flex: none; }
+
+  /* Field trip notice sticker */
+  .bt-week .bt-week__trip {
+    display: flex; align-items: flex-start; gap: 8px;
+    margin-top: 4px; padding: 10px 12px;
+    background: var(--bt-sun); color: var(--bt-navy);
+    border-radius: 14px; font: 700 13px/1.35 var(--bt-body);
+    transform: rotate(-1deg);
+  }
+  .bt-week .bt-week__trip svg { flex: none; width: 16px; height: 16px; margin-top: 1px; }
+
+  /* Tag color themes (set on the day card) */
+  .bt-week .is-trip   { --bt-accent: var(--bt-sun);   --bt-accent-tint: var(--bt-sun-tint);   --bt-accent-ink: var(--bt-sun-ink); }
+  .bt-week .is-sports { --bt-accent: var(--bt-coral); --bt-accent-tint: var(--bt-coral-tint); --bt-accent-ink: var(--bt-coral-ink); }
+  .bt-week .is-lunch  { --bt-accent: var(--bt-grass); --bt-accent-tint: var(--bt-grass-tint); --bt-accent-ink: var(--bt-grass-ink); }
+  .bt-week .is-plain  { --bt-accent: var(--bt-sky);   --bt-accent-tint: var(--bt-sky-tint);   --bt-accent-ink: var(--bt-sky-ink); }
+
+  .bt-week .bt-week__empty { margin: 0; padding: 18px; border-radius: 18px; background: #fff; border: 2px dashed var(--bt-line); color: var(--bt-muted); }
+  .bt-week .bt-week__foot { margin: 18px 0 0; font-size: 13px; color: var(--bt-muted); }
+  .bt-week .bt-week__foot a { color: var(--bt-link); font-weight: 600; text-underline-offset: 3px; }
+  .bt-week a:focus-visible { outline: 3px solid var(--bt-link); outline-offset: 3px; border-radius: 6px; }
+
+  /* ---------- Responsive ---------- */
+  @media (max-width: 1020px) {
+    .bt-week .bt-week__grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  }
+  @media (max-width: 720px) {
+    .bt-week .bt-week__grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  }
+  @media (max-width: 520px) {
+    .bt-week .bt-week__grid { grid-template-columns: 1fr; gap: 12px; }
+    .bt-week .bt-week__day { display: grid; grid-template-columns: 108px 1fr; padding: 0; }
+    .bt-week .bt-week__dname { font-size: 15px; }
+    .bt-week .bt-week__day-top { flex-direction: column; align-items: flex-start; justify-content: flex-start; gap: 4px; padding: 14px 10px 14px 14px; border-bottom: 0; border-right: 3px solid var(--bt-accent, var(--bt-sky)); }
+    .bt-week .bt-week__ddate { white-space: normal; }
+    .bt-week .bt-week__dbody { padding: 14px 14px 14px; }
+    .bt-week .bt-week__label { transform: none; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .bt-week .bt-week__label, .bt-week .bt-week__trip { transform: none; }
+  }
+</style>
+
+  <header class="bt-week__head">
+    <div>
+      <p class="bt-week__where">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-7-6.2-7-11.5a7 7 0 0 1 14 0C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg>
+        <span data-bt-out="where">Camp</span>
+      </p>
+      <h2 class="bt-week__title">This week at camp</h2>
+    </div>
+    <p class="bt-week__label">
+      <span class="bt-week__label-icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>
+      </span>
+      <span data-bt-out="label">This week</span>
+    </p>
+  </header>
+
+  <ul class="bt-week__grid" data-bt-out="grid" aria-label="Day-by-day plan">
+    <li class="bt-week__empty">This week&rsquo;s plan is coming soon.</li>
+  </ul>
+
+  <p class="bt-week__foot">Camp hours are 9:00 AM&ndash;4:00 PM. Questions? Call <a href="tel:+14692611625">469-261-1625</a>.</p>
+
+<script>
+(function () {
+  var SEL = ".bt-week";
+  var NAMES = { Mon: "Monday", Tue: "Tuesday", Wed: "Wednesday", Thu: "Thursday", Fri: "Friday" };
+  var PLACES = { plano: "Plano camp", littleelm: "Little Elm camp" };
+  var ICON = {
+    trip:   '<path d="M4 6a3 3 0 0 1 3-3h10a3 3 0 0 1 3 3v9H4zM4 11h16M8 21v-3M16 21v-3"/><path d="M4 15v1a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-1"/>',
+    sports: '<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3v18M5.6 5.6c3.4 3.4 3.4 9.4 0 12.8M18.4 5.6c-3.4 3.4-3.4 9.4 0 12.8"/>',
+    lunch:  '<path d="M7 3v8M5 3v5a2 2 0 0 0 4 0V3M7 11v10M17 3c-2 0-3 2-3 6s1 5 3 5v7"/>',
+    plain:  '<path d="m12 3 2.7 5.6 6.1.8-4.5 4.2 1.1 6.1L12 16.8l-5.4 2.9 1.1-6.1-4.5-4.2 6.1-.8z"/>',
+    alert:  '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>'
+  };
+  function svg(name) {
+    var wrap = document.createElement("span");
+    wrap.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + ICON[name] + "</svg>";
+    return wrap.firstChild;
+  }
+  function el(tag, cls, text) {
+    var n = document.createElement(tag);
+    if (cls) n.className = cls;
+    if (text != null) n.textContent = text;
+    return n;
+  }
+  function kind(tag) {
+    var t = (tag || "").toLowerCase();
+    if (/trip/.test(t)) return "trip";
+    if (/sport|clinic|golf/.test(t)) return "sports";
+    if (/lunch/.test(t)) return "lunch";
+    return "plain";
+  }
+
+  function init(root) {
+    if (root.getAttribute("data-bt-ready")) return;
+    root.setAttribute("data-bt-ready", "1");
+
+    var loc = (root.getAttribute("data-location") || "plano").toLowerCase().replace(/[^a-z]/g, "");
+    var data = (root.btWeek || {})[loc];
+    root.querySelector('[data-bt-out="where"]').textContent = PLACES[loc] || "Camp";
+    if (!data || !data.days || !data.days.length) return;
+
+    root.querySelector('[data-bt-out="label"]').textContent = data.label || "This week";
+    var grid = root.querySelector('[data-bt-out="grid"]');
+    grid.innerHTML = "";
+
+    data.days.forEach(function (d) {
+      var k = kind(d.tag);
+      var isTrip = k === "trip" || /field\s*trip/i.test(d.title || "");
+      if (isTrip) k = "trip";
+
+      var li = el("li", "bt-week__day is-" + k);
+      var top = el("div", "bt-week__day-top");
+      top.appendChild(el("span", "bt-week__dname", NAMES[d.day] || d.day || ""));
+      if (d.date) top.appendChild(el("span", "bt-week__ddate", d.date));
+      li.appendChild(top);
+
+      var body = el("div", "bt-week__dbody");
+      if (d.title) body.appendChild(el("h3", "bt-week__dtitle", d.title));
+      if (d.description) body.appendChild(el("p", "bt-week__ddesc", d.description));
+
+      var tags = el("div", "bt-week__tags");
+      if (d.tag) {
+        var t = el("span", "bt-week__tag");
+        t.appendChild(svg(k));
+        t.appendChild(document.createTextNode(d.tag));
+        tags.appendChild(t);
+      }
+      if (isTrip) {
+        var note = el("p", "bt-week__trip");
+        note.appendChild(svg("alert"));
+        note.appendChild(document.createTextNode("Bring your own lunch, arrive by 9:00 AM"));
+        tags.appendChild(note);
+      }
+      if (tags.childNodes.length) body.appendChild(tags);
+
+      li.appendChild(body);
+      grid.appendChild(li);
+    });
+  }
+
+  var s = document.currentScript, r = s && s.closest(SEL);
+  if (r) init(r);
+  function boot() { Array.prototype.forEach.call(document.querySelectorAll(SEL), init); }
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", boot); else boot();
+})();
+</script>
+</div>
+<!-- ===== END WIDGET ===== -->
+
+</body>
+</html>

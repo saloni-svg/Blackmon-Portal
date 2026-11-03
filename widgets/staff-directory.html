@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<!--
+  ============================================================================
+  WIDGET: "Your camp team" — staff directory for ONE location
+  ----------------------------------------------------------------------------
+  WHERE IT GOES IN GHL
+    Memberships > Parent portal > "Your camp team" lesson > add a
+    "Custom HTML/Code" element and paste EVERYTHING between
+    BEGIN WIDGET and END WIDGET below.
+    Set data-location="plano" or data-location="littleelm" on the
+    <div class="bt-team"> line (use one element per location).
+
+  WHAT TO EDIT
+    Only the "EDIT THE TEAM" block at the top of the widget:
+      name  : full name
+      role  : "Supervisor", "Counselor", or any title. Supervisors are
+              always listed first and get a badge.
+      phone : 10-digit number, e.g. "XXX-XXX-XXXX" (any format; becomes a tap-to-call button)
+      photo : optional. Either a file name (e.g. "plano-jane.jpg", looked up in
+              photoBase) or a full image URL from the GHL Media library.
+              Leave "" to show the person's initials instead.
+    photoBase: folder for photo file names. On GHL, relative paths like
+              ../assets/images/ will NOT work — upload photos to GHL Media and
+              paste the full URL in "photo", or set photoBase to that folder.
+
+  The entries below are PLACEHOLDERS — replace every [STAFF_NAME] /
+  [STAFF_PHONE] with real people before publishing. Add or remove lines freely.
+  ============================================================================
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Preview — Your camp team</title>
+<style>
+  /* Preview page only — NOT part of the widget */
+  body { margin: 0; padding: 32px 16px; background: #f3efe6; }
+</style>
+</head>
+<body>
+
+<!-- ===== BEGIN WIDGET ===== -->
+<div class="bt-team" data-location="plano">
+<script>
+  /* =====================================================================
+     EDIT THE TEAM — change the text between the quotes only.
+     ===================================================================== */
+  (document.currentScript.closest(".bt-team") || {}).btTeam = {
+
+    photoBase: "../assets/images/",
+
+    plano: [
+      { name: "[STAFF_NAME]", role: "Supervisor", phone: "[STAFF_PHONE]", photo: "" },
+      { name: "[STAFF_NAME]", role: "Counselor",  phone: "[STAFF_PHONE]", photo: "" },
+      { name: "[STAFF_NAME]", role: "Counselor",  phone: "[STAFF_PHONE]", photo: "" }
+    ],
+
+    littleelm: [
+      { name: "[STAFF_NAME]", role: "Supervisor", phone: "[STAFF_PHONE]", photo: "" },
+      { name: "[STAFF_NAME]", role: "Counselor",  phone: "[STAFF_PHONE]", photo: "" },
+      { name: "[STAFF_NAME]", role: "Counselor",  phone: "[STAFF_PHONE]", photo: "" }
+    ]
+
+  };
+  /* ===================== END OF EDIT BLOCK ============================ */
+</script>
+<style>
+  @import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Merriweather:wght@700;900&display=swap");
+
+  .bt-team {
+    --bt-navy:#0B1F3F; --bt-navy-2:#16335F; --bt-sky:#5BABE0; --bt-sun:#FFC845;
+    --bt-grass:#43B37A; --bt-coral:#FF7A59; --bt-cream:#FFF8EC; --bt-muted:#5A6679;
+    --bt-line:#E4E8EF; --bt-link:#1F6FAE;
+    --bt-sky-ink:#1F6FAE; --bt-grass-ink:#1D7148; --bt-sun-ink:#7A5300; --bt-coral-ink:#A8401F;
+    --bt-sky-tint:#E3F1FB; --bt-grass-tint:#E2F5EA; --bt-sun-tint:#FFF1C9; --bt-coral-tint:#FFE6DE; --bt-navy-tint:#E7ECF4;
+    --bt-head:"Merriweather", Georgia, "Times New Roman", serif;
+    --bt-body:"Inter", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: clamp(20px, 4vw, 36px);
+    background: var(--bt-cream);
+    border: 1px solid #F1E6CF;
+    border-radius: 28px;
+    box-shadow: 0 22px 48px -24px rgba(11,31,63,.28);
+    color: var(--bt-navy);
+    font: 400 16px/1.5 var(--bt-body);
+    -webkit-font-smoothing: antialiased;
+  }
+  .bt-team *, .bt-team *::before, .bt-team *::after { box-sizing: border-box; }
+
+  .bt-team .bt-team__head { margin-bottom: 22px; }
+  .bt-team .bt-team__where { display: inline-flex; align-items: center; gap: 6px; margin: 0 0 8px; font: 700 12px/1.3 var(--bt-body); letter-spacing: .08em; text-transform: uppercase; color: var(--bt-sky-ink); }
+  .bt-team .bt-team__where svg { width: 15px; height: 15px; }
+  .bt-team .bt-team__title { margin: 0; font: 900 clamp(26px, 4.2vw, 34px)/1.15 var(--bt-head); color: var(--bt-navy); letter-spacing: -.01em; }
+  .bt-team .bt-team__sub { margin: 6px 0 0; color: var(--bt-muted); font-size: 15px; }
+
+  .bt-team .bt-team__grid { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 16px; }
+
+  /* ---------- Card ---------- */
+  .bt-team .bt-team__card {
+    position: relative; display: flex; flex-direction: column; align-items: flex-start; gap: 14px;
+    padding: 20px; background: #fff; border: 1px solid var(--bt-line); border-radius: 22px;
+    box-shadow: 0 2px 6px rgba(11,31,63,.05);
+  }
+  .bt-team .bt-team__card.is-lead { border: 2px solid var(--bt-sun); box-shadow: 0 14px 28px -18px rgba(11,31,63,.4); }
+
+  .bt-team .bt-team__badge {
+    position: absolute; top: -11px; right: 16px;
+    display: inline-flex; align-items: center; gap: 5px; padding: 4px 11px;
+    background: var(--bt-sun); color: var(--bt-navy);
+    border: 2px solid #fff; border-radius: 999px;
+    font: 700 11px/1.3 var(--bt-body); letter-spacing: .06em; text-transform: uppercase;
+    box-shadow: 0 4px 10px -4px rgba(11,31,63,.35);
+    transform: rotate(3deg);
+  }
+  .bt-team .bt-team__badge svg { width: 12px; height: 12px; }
+
+  .bt-team .bt-team__who { display: flex; align-items: center; gap: 14px; min-width: 0; width: 100%; }
+  .bt-team .bt-team__avatar {
+    position: relative; flex: none; width: 64px; height: 64px; border-radius: 20px; overflow: hidden;
+    display: grid; place-items: center;
+    background: var(--bt-av-bg, var(--bt-sky-tint)); color: var(--bt-av-ink, var(--bt-sky-ink));
+    font: 900 22px/1 var(--bt-head); letter-spacing: .02em;
+  }
+  .bt-team .bt-team__avatar svg { width: 30px; height: 30px; }
+  .bt-team .bt-team__avatar img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+  .bt-team .bt-team__card:nth-child(4n+2) { --bt-av-bg: var(--bt-grass-tint); --bt-av-ink: var(--bt-grass-ink); }
+  .bt-team .bt-team__card:nth-child(4n+3) { --bt-av-bg: var(--bt-coral-tint); --bt-av-ink: var(--bt-coral-ink); }
+  .bt-team .bt-team__card:nth-child(4n+4) { --bt-av-bg: var(--bt-navy-tint); --bt-av-ink: var(--bt-navy); }
+  .bt-team .bt-team__card.is-lead { --bt-av-bg: var(--bt-sun-tint); --bt-av-ink: var(--bt-sun-ink); }
+
+  .bt-team .bt-team__name { margin: 0; font: 700 17px/1.3 var(--bt-body); color: var(--bt-navy); overflow-wrap: anywhere; }
+  .bt-team .bt-team__role { margin: 2px 0 0; font-size: 14px; color: var(--bt-muted); }
+
+  .bt-team .bt-team__call {
+    display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+    width: 100%; min-height: 48px; padding: 0 16px; margin-top: auto;
+    background: var(--bt-navy); color: #fff; border-radius: 14px;
+    box-shadow: inset 0 -4px 0 var(--bt-sun);
+    font: 600 15px/1 var(--bt-body); text-decoration: none; font-variant-numeric: tabular-nums;
+    transition: transform .15s ease, background-color .15s ease;
+  }
+  .bt-team .bt-team__call:hover { background: var(--bt-navy-2); transform: translateY(-1px); }
+  .bt-team .bt-team__call:active { transform: translateY(1px); }
+  .bt-team .bt-team__call svg { width: 18px; height: 18px; flex: none; }
+  .bt-team .bt-team__call.is-off { background: var(--bt-navy-tint); color: var(--bt-muted); box-shadow: none; cursor: default; }
+  .bt-team .bt-team__call:focus-visible { outline: 3px solid var(--bt-link); outline-offset: 3px; }
+
+  /* Office row */
+  .bt-team .bt-team__office {
+    display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px 20px;
+    margin-top: 18px; padding: 16px 18px; border-radius: 18px;
+    background: var(--bt-sky-tint);
+  }
+  .bt-team .bt-team__office p { margin: 0; font-size: 15px; color: var(--bt-navy); }
+  .bt-team .bt-team__office strong { font-weight: 700; }
+  .bt-team .bt-team__office a { color: var(--bt-link); font-weight: 700; text-underline-offset: 3px; white-space: nowrap; }
+  .bt-team .bt-team__office a:focus-visible { outline: 3px solid var(--bt-link); outline-offset: 3px; border-radius: 6px; }
+
+  .bt-team .bt-team__sr { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+
+  @media (max-width: 520px) {
+    .bt-team .bt-team__grid { grid-template-columns: 1fr; gap: 18px; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .bt-team .bt-team__call { transition: none; }
+    .bt-team .bt-team__badge { transform: none; }
+  }
+</style>
+
+  <header class="bt-team__head">
+    <p class="bt-team__where">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-7-6.2-7-11.5a7 7 0 0 1 14 0C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg>
+      <span data-bt-out="where">Camp</span>
+    </p>
+    <h2 class="bt-team__title">Your camp team</h2>
+    <p class="bt-team__sub">The people looking after your camper every day. Tap to call.</p>
+  </header>
+
+  <ul class="bt-team__grid" data-bt-out="grid" aria-label="Camp staff"></ul>
+
+  <div class="bt-team__office">
+    <p><strong>Blackmon Tutoring office</strong> &middot; for billing, documents and general questions</p>
+    <a href="tel:+14692611625">469-261-1625</a>
+  </div>
+
+<script>
+(function () {
+  var SEL = ".bt-team";
+  var PLACES = {
+    plano: "Plano camp · 6300 Independence Pkwy, Unit A",
+    littleelm: "Little Elm camp · 528 Lake Ln"
+  };
+  var PHONE_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2"/></svg>';
+  var STAR_SVG = '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="m12 3 2.7 5.6 6.1.8-4.5 4.2 1.1 6.1L12 16.8l-5.4 2.9 1.1-6.1-4.5-4.2 6.1-.8z"/></svg>';
+  var PERSON_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/></svg>';
+
+  function el(tag, cls, text) {
+    var n = document.createElement(tag);
+    if (cls) n.className = cls;
+    if (text != null) n.textContent = text;
+    return n;
+  }
+  function isPlaceholder(v) { return !v || /^\s*\[.*\]\s*$/.test(v); }
+  function initials(name) {
+    if (isPlaceholder(name)) return "";
+    var parts = name.trim().split(/\s+/);
+    return ((parts[0] || "")[0] + (parts.length > 1 ? parts[parts.length - 1][0] : "")).toUpperCase();
+  }
+  function telHref(phone) {
+    var d = (phone || "").replace(/[^\d+]/g, "");
+    if (d.replace(/\D/g, "").length < 10) return null;
+    if (d.charAt(0) !== "+") d = (d.length === 10 ? "+1" : "+") + d;
+    return "tel:" + d;
+  }
+
+  function init(root) {
+    if (root.getAttribute("data-bt-ready")) return;
+    root.setAttribute("data-bt-ready", "1");
+    var cfg = root.btTeam || {};
+    var loc = (root.getAttribute("data-location") || "plano").toLowerCase().replace(/[^a-z]/g, "");
+    root.querySelector('[data-bt-out="where"]').textContent = PLACES[loc] || "Camp";
+
+    var people = (cfg[loc] || []).slice();
+    /* Supervisors first, otherwise keep the order Jordan typed */
+    people = people.map(function (p, i) { return { p: p, i: i }; }).sort(function (a, b) {
+      var la = /supervisor/i.test(a.p.role || "") ? 0 : 1, lb = /supervisor/i.test(b.p.role || "") ? 0 : 1;
+      return la - lb || a.i - b.i;
+    }).map(function (x) { return x.p; });
+
+    var grid = root.querySelector('[data-bt-out="grid"]');
+    grid.innerHTML = "";
+
+    people.forEach(function (p) {
+      var lead = /supervisor/i.test(p.role || "");
+      var li = el("li", "bt-team__card" + (lead ? " is-lead" : ""));
+
+      if (lead) {
+        var badge = el("span", "bt-team__badge");
+        badge.innerHTML = STAR_SVG;
+        badge.appendChild(document.createTextNode("Supervisor"));
+        badge.setAttribute("aria-hidden", "true");
+        li.appendChild(badge);
+      }
+
+      var who = el("div", "bt-team__who");
+      var av = el("span", "bt-team__avatar");
+      av.setAttribute("aria-hidden", "true");
+      var ini = initials(p.name);
+      if (ini) av.textContent = ini; else av.innerHTML = PERSON_SVG;
+      if (p.photo) {
+        var img = document.createElement("img");
+        img.alt = "";
+        img.loading = "lazy";
+        img.src = /^(https?:)?\/\//.test(p.photo) ? p.photo : (cfg.photoBase || "") + p.photo;
+        img.onerror = function () { this.remove(); };   /* falls back to initials */
+        av.appendChild(img);
+      }
+      who.appendChild(av);
+
+      var txt = el("div");
+      txt.appendChild(el("h3", "bt-team__name", p.name || ""));
+      txt.appendChild(el("p", "bt-team__role", p.role || ""));
+      who.appendChild(txt);
+      li.appendChild(who);
+
+      var href = telHref(p.phone);
+      var call;
+      if (href) {
+        call = el("a", "bt-team__call");
+        call.href = href;
+        call.innerHTML = PHONE_SVG;
+        call.appendChild(document.createTextNode("Call " + p.phone));
+        call.setAttribute("aria-label", "Call " + (isPlaceholder(p.name) ? "staff member" : p.name) + " at " + p.phone);
+      } else {
+        call = el("span", "bt-team__call is-off");
+        call.innerHTML = PHONE_SVG;
+        call.appendChild(document.createTextNode(isPlaceholder(p.phone) ? (p.phone || "Phone coming soon") : p.phone));
+      }
+      li.appendChild(call);
+      grid.appendChild(li);
+    });
+
+    if (!people.length) grid.appendChild(el("li", "bt-team__card", "Team details coming soon."));
+  }
+
+  var s = document.currentScript, r = s && s.closest(SEL);
+  if (r) init(r);
+  function boot() { Array.prototype.forEach.call(document.querySelectorAll(SEL), init); }
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", boot); else boot();
+})();
+</script>
+</div>
+<!-- ===== END WIDGET ===== -->
+
+</body>
+</html>

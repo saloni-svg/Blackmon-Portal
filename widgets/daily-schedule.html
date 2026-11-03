@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<!--
+  ============================================================================
+  WIDGET: "A day at camp" — daily schedule timeline
+  ----------------------------------------------------------------------------
+  WHERE IT GOES IN GHL
+    Memberships > Parent portal > (Welcome / Camp info lesson) > add a
+    "Custom HTML/Code" element and paste EVERYTHING between
+    BEGIN WIDGET and END WIDGET below. Can also go on any funnel page.
+
+  WHAT TO EDIT
+    • Extra-charge prices + early drop-off link: the "EDIT HERE" block right
+      at the top of the widget (BT_SCHED_CONFIG).
+    • Schedule times/text: the <li> items in the timeline. Source of truth is
+      docs/Blackmon_Summer_Camp_Itinerary.pdf — keep them in sync with it.
+    • data-start / data-end (24h, America/Chicago) on each <li> power the
+      live "Happening now" highlight. Leave them off to never highlight a row.
+
+  NOTES
+    • All CSS is scoped under .bt-sched — nothing leaks onto the GHL page.
+    • Works without JS (prices fall back to the text already in the HTML).
+  ============================================================================
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Preview — A day at camp</title>
+<style>
+  /* Preview page only — NOT part of the widget */
+  body { margin: 0; padding: 32px 16px; background: #f3efe6; }
+</style>
+</head>
+<body>
+
+<!-- ===== BEGIN WIDGET ===== -->
+<div class="bt-sched">
+<script>
+  /* =====================================================================
+     EDIT HERE — extra-charge prices and the early drop-off sign-up link.
+     Prices show on the "extra charge" pills. Text, not numbers, so you can
+     write e.g. "+$15/day" or "$15 per child".
+     ===================================================================== */
+  (document.currentScript.closest(".bt-sched") || {}).btConfig = {
+    earlyDropoffPrice: "+$15/day",        /* 7:00–9:00 AM, per child per day */
+    latePickupPrice:   "+$15/day",        /* after 5:00 PM, per child per day */
+    earlyDropoffLink:  "[EARLY_DROPOFF_LINK]"
+  };
+</script>
+<style>
+  @import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Merriweather:wght@700;900&display=swap");
+
+  .bt-sched {
+    --bt-navy:#0B1F3F; --bt-navy-2:#16335F; --bt-sky:#5BABE0; --bt-sun:#FFC845;
+    --bt-grass:#43B37A; --bt-coral:#FF7A59; --bt-cream:#FFF8EC; --bt-muted:#5A6679;
+    --bt-line:#E4E8EF; --bt-link:#1F6FAE;
+    --bt-sky-ink:#1F6FAE; --bt-grass-ink:#1D7148; --bt-sun-ink:#7A5300; --bt-coral-ink:#A8401F;
+    --bt-sky-tint:#E3F1FB; --bt-grass-tint:#E2F5EA; --bt-sun-tint:#FFF1C9; --bt-coral-tint:#FFE6DE; --bt-navy-tint:#E7ECF4;
+    --bt-head:"Merriweather", Georgia, "Times New Roman", serif;
+    --bt-body:"Inter", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+
+    position: relative;
+    max-width: 860px;
+    margin: 0 auto;
+    padding: clamp(20px, 4vw, 40px);
+    background: var(--bt-cream);
+    border: 1px solid #F1E6CF;
+    border-radius: 28px;
+    box-shadow: 0 22px 48px -24px rgba(11,31,63,.28);
+    color: var(--bt-navy);
+    font: 400 16px/1.55 var(--bt-body);
+    overflow: hidden;
+    -webkit-font-smoothing: antialiased;
+  }
+  .bt-sched *, .bt-sched *::before, .bt-sched *::after { box-sizing: border-box; }
+
+  /* Decorative sun in the corner */
+  .bt-sched .bt-sched__sun {
+    position: absolute; top: -60px; right: -60px; width: 180px; height: 180px;
+    border-radius: 50%; background: var(--bt-sun); opacity: .35; pointer-events: none;
+  }
+  .bt-sched .bt-sched__sun::after {
+    content: ""; position: absolute; inset: 28px; border-radius: 50%;
+    border: 3px dashed rgba(255,255,255,.9);
+  }
+
+  /* ---------- Header ---------- */
+  .bt-sched .bt-sched__head { position: relative; display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 16px 24px; margin-bottom: 28px; }
+  .bt-sched .bt-sched__eyebrow {
+    display: inline-block; margin: 0 0 10px; padding: 4px 12px;
+    background: var(--bt-sky-tint); color: var(--bt-sky-ink);
+    border-radius: 999px; font: 700 12px/1.4 var(--bt-body); letter-spacing: .08em; text-transform: uppercase;
+  }
+  .bt-sched .bt-sched__title { margin: 0; font: 900 clamp(26px, 4.4vw, 36px)/1.15 var(--bt-head); color: var(--bt-navy); letter-spacing: -.01em; }
+  .bt-sched .bt-sched__sub { margin: 6px 0 0; color: var(--bt-muted); font-size: 15px; }
+
+  /* Camp hours "ticket" sticker */
+  .bt-sched .bt-sched__hours {
+    display: inline-flex; align-items: center; gap: 12px;
+    padding: 12px 18px 12px 12px;
+    background: var(--bt-sun); color: var(--bt-navy);
+    border: 3px solid #fff; border-radius: 18px;
+    box-shadow: 0 10px 22px -12px rgba(11,31,63,.45);
+    transform: rotate(-2deg);
+  }
+  .bt-sched .bt-sched__hours-icon { display: grid; place-items: center; width: 40px; height: 40px; border-radius: 12px; background: var(--bt-navy); color: var(--bt-sun); flex: none; }
+  .bt-sched .bt-sched__hours-label { display: block; font: 700 11px/1.2 var(--bt-body); letter-spacing: .08em; text-transform: uppercase; }
+  .bt-sched .bt-sched__hours-time { display: block; font: 900 18px/1.25 var(--bt-head); white-space: nowrap; }
+
+  /* ---------- Timeline ---------- */
+  .bt-sched .bt-sched__list { list-style: none; margin: 0; padding: 0; position: relative; }
+  .bt-sched .bt-sched__item {
+    position: relative;
+    display: grid;
+    grid-template-columns: 150px 28px 1fr;
+    align-items: start;
+    column-gap: 14px;
+    padding-bottom: 14px;
+  }
+  /* the rail */
+  .bt-sched .bt-sched__item::before {
+    content: ""; position: absolute; left: calc(150px + 14px + 13px); top: 18px; bottom: -4px;
+    width: 2px; background: repeating-linear-gradient(to bottom, #D8DFEA 0 6px, transparent 6px 11px);
+  }
+  .bt-sched .bt-sched__item:last-child::before { display: none; }
+
+  .bt-sched .bt-sched__time {
+    padding-top: 13px; text-align: right;
+    font: 700 14px/1.3 var(--bt-body); color: var(--bt-navy); font-variant-numeric: tabular-nums;
+  }
+  .bt-sched .bt-sched__dot {
+    position: relative; z-index: 1; margin-top: 12px; width: 28px; height: 28px; border-radius: 50%;
+    background: #fff; border: 3px solid var(--bt-dot, var(--bt-sky));
+    box-shadow: 0 0 0 4px var(--bt-cream);
+  }
+  .bt-sched .bt-sched__dot::after { content: ""; position: absolute; inset: 5px; border-radius: 50%; background: var(--bt-dot, var(--bt-sky)); }
+
+  .bt-sched .bt-sched__card {
+    display: flex; align-items: flex-start; gap: 14px;
+    padding: 12px 16px 12px 12px;
+    background: #fff; border: 1px solid var(--bt-line); border-radius: 18px;
+    box-shadow: 0 2px 6px rgba(11,31,63,.05);
+    transition: box-shadow .2s ease, border-color .2s ease, transform .2s ease;
+  }
+  .bt-sched .bt-sched__icon {
+    flex: none; display: grid; place-items: center; width: 44px; height: 44px; border-radius: 14px;
+    background: var(--bt-tile, var(--bt-sky-tint)); color: var(--bt-ink, var(--bt-sky-ink));
+  }
+  .bt-sched .bt-sched__icon svg { width: 22px; height: 22px; }
+  .bt-sched .bt-sched__body { min-width: 0; flex: 1; padding-top: 2px; }
+  .bt-sched .bt-sched__name { margin: 0; font: 700 16px/1.35 var(--bt-body); color: var(--bt-navy); }
+  .bt-sched .bt-sched__note { margin: 2px 0 0; font-size: 14px; color: var(--bt-muted); }
+  .bt-sched .bt-sched__meta { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 8px; }
+
+  /* Pills */
+  .bt-sched .bt-sched__pill {
+    display: inline-flex; align-items: center; gap: 6px; padding: 3px 10px;
+    border-radius: 999px; font: 700 12px/1.5 var(--bt-body); letter-spacing: .01em; white-space: nowrap;
+  }
+  .bt-sched .bt-sched__pill--extra { background: var(--bt-coral-tint); color: var(--bt-coral-ink); }
+  .bt-sched .bt-sched__pill--now { background: var(--bt-navy); color: #fff; display: none; }
+  .bt-sched .bt-sched__pill--now::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--bt-grass); box-shadow: 0 0 0 0 rgba(67,179,122,.6); animation: bt-sched-pulse 1.8s ease-out infinite; }
+  @keyframes bt-sched-pulse { 0% { box-shadow: 0 0 0 0 rgba(67,179,122,.6); } 100% { box-shadow: 0 0 0 8px rgba(67,179,122,0); } }
+
+  .bt-sched .bt-sched__link {
+    display: inline-flex; align-items: center; gap: 4px;
+    color: var(--bt-link); font: 600 14px/1.4 var(--bt-body); text-decoration: underline; text-underline-offset: 3px;
+    border-radius: 6px;
+  }
+  .bt-sched .bt-sched__link:hover { color: var(--bt-navy); }
+  .bt-sched .bt-sched__link svg { width: 16px; height: 16px; }
+
+  /* Milestone rows (camp starts / ends) */
+  .bt-sched .bt-sched__item--mile .bt-sched__card { background: var(--bt-navy); border-color: var(--bt-navy); box-shadow: inset 0 -4px 0 var(--bt-sun), 0 10px 22px -14px rgba(11,31,63,.55); }
+  .bt-sched .bt-sched__item--mile .bt-sched__name { color: #fff; font-family: var(--bt-head); font-weight: 900; letter-spacing: .01em; }
+  .bt-sched .bt-sched__item--mile .bt-sched__note { color: #C9D6EA; }
+  .bt-sched .bt-sched__item--mile .bt-sched__icon { background: var(--bt-sun); color: var(--bt-navy); }
+
+  /* Optional rows (outside camp hours) */
+  .bt-sched .bt-sched__item--optional .bt-sched__card { background: transparent; border-style: dashed; border-color: #D3DAE5; box-shadow: none; }
+  .bt-sched .bt-sched__item--optional .bt-sched__dot { border-style: dashed; }
+
+  /* Activity color themes */
+  .bt-sched .is-sky   { --bt-dot: var(--bt-sky);   --bt-tile: var(--bt-sky-tint);   --bt-ink: var(--bt-sky-ink); }
+  .bt-sched .is-sun   { --bt-dot: var(--bt-sun);   --bt-tile: var(--bt-sun-tint);   --bt-ink: var(--bt-sun-ink); }
+  .bt-sched .is-grass { --bt-dot: var(--bt-grass); --bt-tile: var(--bt-grass-tint); --bt-ink: var(--bt-grass-ink); }
+  .bt-sched .is-coral { --bt-dot: var(--bt-coral); --bt-tile: var(--bt-coral-tint); --bt-ink: var(--bt-coral-ink); }
+  .bt-sched .is-navy  { --bt-dot: var(--bt-navy);  --bt-tile: var(--bt-navy-tint);  --bt-ink: var(--bt-navy); }
+
+  /* Happening now */
+  .bt-sched .bt-sched__item.is-now .bt-sched__card { border-color: var(--bt-sky); box-shadow: 0 0 0 4px rgba(91,171,224,.28), 0 12px 26px -14px rgba(11,31,63,.4); transform: translateX(4px); }
+  .bt-sched .bt-sched__item.is-now .bt-sched__pill--now { display: inline-flex; }
+  .bt-sched .bt-sched__item.is-now .bt-sched__dot { transform: scale(1.12); }
+
+  /* ---------- Field trip callout ---------- */
+  .bt-sched .bt-sched__trip {
+    position: relative; display: flex; gap: 16px; align-items: flex-start;
+    margin-top: 18px; padding: 20px 22px;
+    background: var(--bt-sun-tint); border: 2px solid var(--bt-sun); border-radius: 22px;
+  }
+  .bt-sched .bt-sched__trip-icon { flex: none; display: grid; place-items: center; width: 52px; height: 52px; border-radius: 16px; background: var(--bt-sun); color: var(--bt-navy); transform: rotate(-4deg); box-shadow: 0 0 0 3px #fff; }
+  .bt-sched .bt-sched__trip-icon svg { width: 26px; height: 26px; }
+  .bt-sched .bt-sched__trip-title { margin: 0 0 6px; font: 900 18px/1.3 var(--bt-head); color: var(--bt-navy); }
+  .bt-sched .bt-sched__trip-list { margin: 0; padding: 0; list-style: none; }
+  .bt-sched .bt-sched__trip-list li { position: relative; padding-left: 22px; margin-top: 6px; font-size: 15px; color: var(--bt-navy); }
+  .bt-sched .bt-sched__trip-list li::before { content: ""; position: absolute; left: 2px; top: .55em; width: 9px; height: 9px; border-radius: 3px; background: var(--bt-navy); transform: rotate(45deg); }
+
+  .bt-sched .bt-sched__foot { margin: 16px 0 0; font-size: 13px; color: var(--bt-muted); }
+  .bt-sched .bt-sched__foot a { color: var(--bt-link); font-weight: 600; }
+
+  /* Focus */
+  .bt-sched a:focus-visible { outline: 3px solid var(--bt-link); outline-offset: 3px; }
+
+  .bt-sched .bt-sched__sr { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+
+  /* ---------- Responsive ---------- */
+  @media (max-width: 640px) {
+    .bt-sched .bt-sched__head { align-items: flex-start; }
+    .bt-sched .bt-sched__item { grid-template-columns: 28px 1fr; column-gap: 12px; padding-bottom: 12px; }
+    .bt-sched .bt-sched__item::before { left: 13px; top: 18px; }
+    .bt-sched .bt-sched__time { grid-column: 2; grid-row: 1; padding: 10px 0 6px; text-align: left; font-size: 13px; color: var(--bt-muted); letter-spacing: .02em; }
+    .bt-sched .bt-sched__dot { grid-column: 1; grid-row: 1; margin-top: 8px; }
+    .bt-sched .bt-sched__card { grid-column: 2; grid-row: 2; }
+    .bt-sched .bt-sched__icon { width: 40px; height: 40px; border-radius: 12px; }
+    .bt-sched .bt-sched__trip { flex-direction: column; gap: 12px; padding: 18px; }
+    .bt-sched .bt-sched__item.is-now .bt-sched__card { transform: none; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .bt-sched .bt-sched__card, .bt-sched .bt-sched__dot { transition: none; }
+    .bt-sched .bt-sched__pill--now::before { animation: none; }
+    .bt-sched .bt-sched__item.is-now .bt-sched__card { transform: none; }
+  }
+</style>
+
+  <span class="bt-sched__sun" aria-hidden="true"></span>
+
+  <header class="bt-sched__head">
+    <div>
+      <p class="bt-sched__eyebrow">Summer Camp 2026</p>
+      <h2 class="bt-sched__title">A day at camp</h2>
+      <p class="bt-sched__sub">Plano &amp; Little Elm &middot; Ages 3&ndash;16 &middot; June 1&ndash;August 6, 2026</p>
+    </div>
+    <div class="bt-sched__hours">
+      <span class="bt-sched__hours-icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+      </span>
+      <span>
+        <span class="bt-sched__hours-label">Camp hours</span>
+        <span class="bt-sched__hours-time">9:00 AM &ndash; 4:00 PM</span>
+      </span>
+    </div>
+  </header>
+
+  <ol class="bt-sched__list" aria-label="Daily camp schedule">
+
+    <li class="bt-sched__item bt-sched__item--optional is-coral" data-start="07:00" data-end="09:00">
+      <div class="bt-sched__time">7:00&ndash;9:00 AM</div>
+      <span class="bt-sched__dot" aria-hidden="true"></span>
+      <div class="bt-sched__card">
+        <span class="bt-sched__icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v3M4.9 7.9l1.4 1.4M19.1 7.9l-1.4 1.4M3 16h18M7 16a5 5 0 0 1 10 0M6 20h12"/></svg>
+        </span>
+        <div class="bt-sched__body">
+          <p class="bt-sched__name">Early drop-off</p>
+          <p class="bt-sched__note">Available for an additional charge.</p>
+          <div class="bt-sched__meta">
+            <span class="bt-sched__pill bt-sched__pill--extra">Extra charge <span data-bt-price="early">+$15/day</span></span>
+            <a class="bt-sched__link" data-bt-link="early" href="[EARLY_DROPOFF_LINK]">Add early drop-off
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+            </a>
+            <span class="bt-sched__pill bt-sched__pill--now">Happening now</span>
+          </div>
+        </div>
+      </div>
+    </li>
+
+    <li class="bt-sched__item bt-sched__item--mile is-navy">
+      <div class="bt-sched__time">9:00 AM</div>
+      <span class="bt-sched__dot" aria-hidden="true"></span>
+      <div class="bt-sched__card">
+        <span class="bt-sched__icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 21V4M5 4h12l-2.5 4L17 12H5"/></svg>
+        </span>
+        <div class="bt-sched__body">
+          <p class="bt-sched__name">Camp starts</p>
+          <p class="bt-sched__note">Arrival and check-in (roll call)</p>
+        </div>
+      </div>
+    </li>
+
+    <li class="bt-sched__item is-sky" data-start="09:00" data-end="10:00">
+      <div class="bt-sched__time">9:00&ndash;10:00 AM</div>
+      <span class="bt-sched__dot" aria-hidden="true"></span>
+      <div class="bt-sched__card">
+        <span class="bt-sched__icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="4"/><circle cx="9" cy="9" r="1.3" fill="currentColor" stroke="none"/><circle cx="15" cy="9" r="1.3" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="1.3" fill="currentColor" stroke="none"/><circle cx="9" cy="15" r="1.3" fill="currentColor" stroke="none"/><circle cx="15" cy="15" r="1.3" fill="currentColor" stroke="none"/></svg>
+        </span>
+        <div class="bt-sched__body">
+          <p class="bt-sched__name">Free play</p>
+          <p class="bt-sched__note">Board games, electronics, etc.</p>
+          <div class="bt-sched__meta"><span class="bt-sched__pill bt-sched__pill--now">Happening now</span></div>
+        </div>
+      </div>
+    </li>
+
+    <li class="bt-sched__item is-grass" data-start="10:00" data-end="11:00">
+      <div class="bt-sched__time">10:00&ndash;11:00 AM</div>
+      <span class="bt-sched__dot" aria-hidden="true"></span>
+      <div class="bt-sched__card">
+        <span class="bt-sched__icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19V5a2 2 0 0 1 2-2h14v14H6a2 2 0 0 0 0 4h14"/><path d="M8 7h8M8 11h5"/></svg>
+        </span>
+        <div class="bt-sched__body">
+          <p class="bt-sched__name">Academic enrichment</p>
+          <div class="bt-sched__meta"><span class="bt-sched__pill bt-sched__pill--now">Happening now</span></div>
+        </div>
+      </div>
+    </li>
+
+    <li class="bt-sched__item is-coral" data-start="11:00" data-end="12:00">
+      <div class="bt-sched__time">11:00 AM&ndash;12:00 PM</div>
+      <span class="bt-sched__dot" aria-hidden="true"></span>
+      <div class="bt-sched__card">
+        <span class="bt-sched__icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3v18M5.6 5.6c3.4 3.4 3.4 9.4 0 12.8M18.4 5.6c-3.4 3.4-3.4 9.4 0 12.8"/></svg>
+        </span>
+        <div class="bt-sched__body">
+          <p class="bt-sched__name">Prepare for activity or sports clinic</p>
+          <div class="bt-sched__meta"><span class="bt-sched__pill bt-sched__pill--now">Happening now</span></div>
+        </div>
+      </div>
+    </li>
+
+    <li class="bt-sched__item is-sun" data-start="12:00" data-end="13:00">
+      <div class="bt-sched__time">12:00&ndash;1:00 PM</div>
+      <span class="bt-sched__dot" aria-hidden="true"></span>
+      <div class="bt-sched__card">
+        <span class="bt-sched__icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 8c-1.6-1.2-5.2-1.3-6.6 1.6-1.3 2.8-.3 7 2 9.5 1.4 1.5 3 1.4 4.6.6 1.6.8 3.2.9 4.6-.6 2.3-2.5 3.3-6.7 2-9.5C17.2 6.7 13.6 6.8 12 8z"/><path d="M12 8c0-2.2 1.1-3.8 3.2-4.6"/></svg>
+        </span>
+        <div class="bt-sched__body">
+          <p class="bt-sched__name">Lunch</p>
+          <div class="bt-sched__meta"><span class="bt-sched__pill bt-sched__pill--now">Happening now</span></div>
+        </div>
+      </div>
+    </li>
+
+    <li class="bt-sched__item is-sky" data-start="13:00" data-end="15:00">
+      <div class="bt-sched__time">1:00&ndash;3:00 PM</div>
+      <span class="bt-sched__dot" aria-hidden="true"></span>
+      <div class="bt-sched__card">
+        <span class="bt-sched__icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3 2.7 5.6 6.1.8-4.5 4.2 1.1 6.1L12 16.8l-5.4 2.9 1.1-6.1-4.5-4.2 6.1-.8z"/></svg>
+        </span>
+        <div class="bt-sched__body">
+          <p class="bt-sched__name">Activity of the day</p>
+          <div class="bt-sched__meta"><span class="bt-sched__pill bt-sched__pill--now">Happening now</span></div>
+        </div>
+      </div>
+    </li>
+
+    <li class="bt-sched__item is-grass" data-start="15:00" data-end="15:30">
+      <div class="bt-sched__time">3:00&ndash;3:30 PM</div>
+      <span class="bt-sched__dot" aria-hidden="true"></span>
+      <div class="bt-sched__card">
+        <span class="bt-sched__icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 13V8a4 4 0 0 1 8 0v5a1 1 0 0 1-1 1H9a1 1 0 0 1-1-1zM12 14v7M11 7.5v3"/></svg>
+        </span>
+        <div class="bt-sched__body">
+          <p class="bt-sched__name">Afternoon snack</p>
+          <div class="bt-sched__meta"><span class="bt-sched__pill bt-sched__pill--now">Happening now</span></div>
+        </div>
+      </div>
+    </li>
+
+    <li class="bt-sched__item is-sky" data-start="15:30" data-end="16:00">
+      <div class="bt-sched__time">3:30&ndash;4:00 PM</div>
+      <span class="bt-sched__dot" aria-hidden="true"></span>
+      <div class="bt-sched__card">
+        <span class="bt-sched__icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="4"/><circle cx="9" cy="9" r="1.3" fill="currentColor" stroke="none"/><circle cx="15" cy="9" r="1.3" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="1.3" fill="currentColor" stroke="none"/><circle cx="9" cy="15" r="1.3" fill="currentColor" stroke="none"/><circle cx="15" cy="15" r="1.3" fill="currentColor" stroke="none"/></svg>
+        </span>
+        <div class="bt-sched__body">
+          <p class="bt-sched__name">Free play</p>
+          <p class="bt-sched__note">Board games, electronics, etc.</p>
+          <div class="bt-sched__meta"><span class="bt-sched__pill bt-sched__pill--now">Happening now</span></div>
+        </div>
+      </div>
+    </li>
+
+    <li class="bt-sched__item bt-sched__item--mile is-navy">
+      <div class="bt-sched__time">4:00 PM</div>
+      <span class="bt-sched__dot" aria-hidden="true"></span>
+      <div class="bt-sched__card">
+        <span class="bt-sched__icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11.5 12 4l9 7.5M5.5 10v10h13V10M10 20v-5h4v5"/></svg>
+        </span>
+        <div class="bt-sched__body">
+          <p class="bt-sched__name">Camp day ends</p>
+        </div>
+      </div>
+    </li>
+
+    <li class="bt-sched__item is-grass" data-start="16:00" data-end="17:00">
+      <div class="bt-sched__time">4:00&ndash;5:00 PM</div>
+      <span class="bt-sched__dot" aria-hidden="true"></span>
+      <div class="bt-sched__card">
+        <span class="bt-sched__icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 3h10M7 21h10M8 3c0 4.5 8 4.5 8 9s-8 4.5-8 9M16 3c0 4.5-8 4.5-8 9s8 4.5 8 9"/></svg>
+        </span>
+        <div class="bt-sched__body">
+          <p class="bt-sched__name">Parent pick-up grace period</p>
+          <p class="bt-sched__note">Kids may keep playing until you arrive.</p>
+          <div class="bt-sched__meta"><span class="bt-sched__pill bt-sched__pill--now">Happening now</span></div>
+        </div>
+      </div>
+    </li>
+
+    <li class="bt-sched__item bt-sched__item--optional is-coral">
+      <div class="bt-sched__time">After 5:00 PM</div>
+      <span class="bt-sched__dot" aria-hidden="true"></span>
+      <div class="bt-sched__card">
+        <span class="bt-sched__icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"/></svg>
+        </span>
+        <div class="bt-sched__body">
+          <p class="bt-sched__name">Late pick-up</p>
+          <p class="bt-sched__note">Available for an additional charge.</p>
+          <div class="bt-sched__meta">
+            <span class="bt-sched__pill bt-sched__pill--extra">Extra charge <span data-bt-price="late">+$15/day</span></span>
+          </div>
+        </div>
+      </div>
+    </li>
+  </ol>
+
+  <aside class="bt-sched__trip" aria-label="Field trip day notes">
+    <span class="bt-sched__trip-icon" aria-hidden="true">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="16" height="15" rx="3"/><path d="M4 11h16M8 21v-3M16 21v-3"/><circle cx="8" cy="14.5" r="1" fill="currentColor" stroke="none"/><circle cx="16" cy="14.5" r="1" fill="currentColor" stroke="none"/></svg>
+    </span>
+    <div>
+      <h3 class="bt-sched__trip-title">On field trip days</h3>
+      <ul class="bt-sched__trip-list">
+        <li>Campers must arrive by <strong>9:00 AM</strong> so we're on time for the trip.</li>
+        <li>Please pack your child's lunch. If it's forgotten, we'll have PB&amp;J available.</li>
+      </ul>
+    </div>
+  </aside>
+
+  <p class="bt-sched__foot">Questions? Call us at <a href="tel:+14692611625">469-261-1625</a>.</p>
+
+<script>
+(function () {
+  var script = document.currentScript;
+  var root = script && script.closest(".bt-sched");
+  if (!root || root.getAttribute("data-bt-ready")) return;
+  root.setAttribute("data-bt-ready", "1");
+
+  /* Apply prices + link from the EDIT HERE block */
+  var cfg = root.btConfig || {};
+  var early = root.querySelector('[data-bt-price="early"]');
+  var late = root.querySelector('[data-bt-price="late"]');
+  var link = root.querySelector('[data-bt-link="early"]');
+  if (early && cfg.earlyDropoffPrice) early.textContent = cfg.earlyDropoffPrice;
+  if (late && cfg.latePickupPrice) late.textContent = cfg.latePickupPrice;
+  if (link && cfg.earlyDropoffLink) link.setAttribute("href", cfg.earlyDropoffLink);
+
+  /* "Happening now" — America/Chicago time, weekdays only */
+  var items = root.querySelectorAll(".bt-sched__item[data-start][data-end]");
+  function toMin(hhmm) { var p = hhmm.split(":"); return (+p[0]) * 60 + (+p[1]); }
+
+  function chicagoNow() {
+    try {
+      var parts = new Intl.DateTimeFormat("en-US", {
+        timeZone: "America/Chicago", weekday: "short", hour: "2-digit", minute: "2-digit", hourCycle: "h23"
+      }).formatToParts(new Date());
+      var o = {};
+      parts.forEach(function (p) { o[p.type] = p.value; });
+      return { day: o.weekday, min: (+o.hour % 24) * 60 + (+o.minute) };
+    } catch (e) { return null; }
+  }
+
+  function update() {
+    var now = chicagoNow();
+    var weekday = now && ["Mon", "Tue", "Wed", "Thu", "Fri"].indexOf(now.day) !== -1;
+    Array.prototype.forEach.call(items, function (li) {
+      var on = weekday && now.min >= toMin(li.getAttribute("data-start")) && now.min < toMin(li.getAttribute("data-end"));
+      li.classList.toggle("is-now", !!on);
+      if (on) li.setAttribute("aria-current", "time"); else li.removeAttribute("aria-current");
+    });
+  }
+  update();
+  setInterval(update, 60000);
+})();
+</script>
+</div>
+<!-- ===== END WIDGET ===== -->
+
+</body>
+</html>

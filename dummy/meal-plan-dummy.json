@@ -1,0 +1,24 @@
+{
+  "_note": "DUMMY meal plan for testing. Field keys match your GHL contact fields. Replace with a real parent's answers or delete after testing.",
+  "contact": {
+    "first_name": "Dummy",
+    "last_name": "Parent",
+    "email": "saloni@digitalryze.com",
+    "phone": "+14695550100"
+  },
+  "saved_to_ghl": {
+    "contact.childs_name": "Sam Sample",
+    "contact.sub_sandwich_chips_included": "Turkey with lettuce, tomato, and mayo",
+    "contact.sub_sandwich_special_request": "No tomato, please.",
+    "contact.soft_tacos_chips_included": "Chicken with lettuce, tomatoes, cheese, and salsa",
+    "contact.soft_tacos_special_request_note_here": "Salsa on the side.",
+    "contact.chicken_nuggets_chips_included": "Regular chicken nuggets",
+    "contact.pizza": "Cheese with marinara sauce",
+    "contact.special_request_note_here": "Sam is a slow eater, extra time at lunch would help."
+  },
+  "not_saved_yet_no_ghl_field": {
+    "dipping_sauce": "Honey mustard",
+    "allergies_dietary_restrictions": "Mild peanut allergy (dummy).",
+    "pizza_special_request": "Light cheese."
+  }
+}

@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<!--
+  ============================================================================
+  WIDGET: "Your enrollment checklist" — 3 things to complete after paying
+  ----------------------------------------------------------------------------
+  WHERE IT GOES IN GHL
+    Memberships > Parent portal > Dashboard (top) or "Get ready for camp"
+    lesson > add a "Custom HTML/Code" element and paste EVERYTHING between
+    BEGIN WIDGET and END WIDGET below.
+
+  WHAT TO EDIT
+    • Form links: replace [ENROLLMENT_FORM_LINK] and [MEAL_PLAN_FORM_LINK].
+    • Step status comes from GHL contact fields (already set up below):
+        data-status="..."  -> "Done" when the value is done, complete,
+                              completed, signed, submitted, yes or true
+        data-filled="..."  -> "Done" as soon as the field has ANY answer
+      Empty or unrendered "{{...}}" always shows "To do".
+      Current wiring (fields that exist in your GHL account):
+        Step 1 Enrollment  -> data-filled="{{contact.portal__location}}"
+                              Portal - Location is only set by the parent
+                              enrollment form, so it turns "Done" once the
+                              form is submitted.
+        Step 2 Meal plan   -> data-filled="{{contact.sub_sandwich_chips_included}}"
+        Step 3 Waiver      -> data-status="{{contact.esign_status}}"
+                              (Not Sent / Sent / Completed). Set by the
+                              Portal workflows: "Send Enrollment Documents"
+                              sets Sent, "Parent Documents Signed" sets
+                              Completed.
+    • Step 3 is ONE combined GHL Documents & Contracts template ("Parent
+      Waiver (Liability + Short Game)"). One signature covers both parts.
+      GHL emails the signing link, so it shows "Check your email to sign".
+  ============================================================================
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Preview — Your enrollment checklist</title>
+<style>
+  /* Preview page only — NOT part of the widget */
+  body { margin: 0; padding: 32px 16px; background: #f3efe6; }
+</style>
+</head>
+<body>
+
+<!-- ===== BEGIN WIDGET ===== -->
+<div class="bt-docs">
+<style>
+  @import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Merriweather:wght@700;900&display=swap");
+
+  .bt-docs {
+    --bt-navy:#0B1F3F; --bt-navy-2:#16335F; --bt-sky:#5BABE0; --bt-sun:#FFC845;
+    --bt-grass:#43B37A; --bt-coral:#FF7A59; --bt-cream:#FFF8EC; --bt-muted:#5A6679;
+    --bt-line:#E4E8EF; --bt-link:#1F6FAE;
+    --bt-sky-ink:#1F6FAE; --bt-grass-ink:#1D7148; --bt-sun-ink:#7A5300; --bt-coral-ink:#A8401F;
+    --bt-sky-tint:#E3F1FB; --bt-grass-tint:#E2F5EA; --bt-sun-tint:#FFF1C9; --bt-coral-tint:#FFE6DE; --bt-navy-tint:#E7ECF4;
+    --bt-head:"Merriweather", Georgia, "Times New Roman", serif;
+    --bt-body:"Inter", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+
+    max-width: 760px;
+    margin: 0 auto;
+    padding: clamp(20px, 4vw, 36px);
+    background: var(--bt-cream);
+    border: 1px solid #F1E6CF;
+    border-radius: 28px;
+    box-shadow: 0 22px 48px -24px rgba(11,31,63,.28);
+    color: var(--bt-navy);
+    font: 400 16px/1.5 var(--bt-body);
+    -webkit-font-smoothing: antialiased;
+  }
+  .bt-docs *, .bt-docs *::before, .bt-docs *::after { box-sizing: border-box; }
+
+  /* ---------- Header + progress ---------- */
+  .bt-docs .bt-docs__head { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 14px 20px; margin-bottom: 18px; }
+  .bt-docs .bt-docs__eyebrow { display: inline-block; margin: 0 0 10px; padding: 4px 12px; background: var(--bt-sky-tint); color: var(--bt-sky-ink); border-radius: 999px; font: 700 12px/1.4 var(--bt-body); letter-spacing: .08em; text-transform: uppercase; }
+  .bt-docs .bt-docs__title { margin: 0; font: 900 clamp(24px, 4vw, 32px)/1.15 var(--bt-head); color: var(--bt-navy); letter-spacing: -.01em; }
+  .bt-docs .bt-docs__sub { margin: 6px 0 0; color: var(--bt-muted); font-size: 15px; }
+  .bt-docs .bt-docs__count {
+    flex: none; display: inline-flex; flex-direction: column; align-items: center; justify-content: center;
+    width: 88px; height: 88px; border-radius: 50%;
+    background: var(--bt-sun); color: var(--bt-navy);
+    border: 4px solid #fff; box-shadow: 0 10px 20px -10px rgba(11,31,63,.45);
+    transform: rotate(-6deg); text-align: center;
+  }
+  .bt-docs .bt-docs__count strong { font: 900 24px/1 var(--bt-head); }
+  .bt-docs .bt-docs__count span { font: 700 11px/1.2 var(--bt-body); letter-spacing: .04em; text-transform: uppercase; margin-top: 3px; }
+  .bt-docs.is-all-done .bt-docs__count { background: var(--bt-grass); }
+
+  .bt-docs .bt-docs__bar { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin: 0 0 22px; }
+  .bt-docs .bt-docs__bar span { height: 8px; border-radius: 999px; background: var(--bt-navy-tint); transition: background-color .3s ease; }
+  .bt-docs .bt-docs__bar span.is-on { background: var(--bt-grass); }
+
+  /* ---------- Steps ---------- */
+  .bt-docs .bt-docs__list { list-style: none; margin: 0; padding: 0; counter-reset: btstep; }
+  .bt-docs .bt-docs__step {
+    position: relative; display: grid; grid-template-columns: 52px 1fr; gap: 16px;
+    padding: 18px; margin-bottom: 12px;
+    background: #fff; border: 1px solid var(--bt-line); border-radius: 22px;
+    box-shadow: 0 2px 6px rgba(11,31,63,.05);
+  }
+  .bt-docs .bt-docs__step:last-child { margin-bottom: 0; }
+  .bt-docs .bt-docs__num {
+    position: relative; display: grid; place-items: center; width: 52px; height: 52px; border-radius: 16px;
+    background: var(--bt-tile); color: var(--bt-ink);
+  }
+  .bt-docs .bt-docs__num svg { width: 24px; height: 24px; }
+  .bt-docs .bt-docs__num::after {
+    counter-increment: btstep; content: counter(btstep);
+    position: absolute; top: -7px; left: -7px; display: grid; place-items: center;
+    width: 24px; height: 24px; border-radius: 50%; border: 2px solid #fff;
+    background: var(--bt-navy); color: #fff; font: 700 12px/1 var(--bt-body);
+  }
+  .bt-docs .is-sky   { --bt-tile: var(--bt-sky-tint);   --bt-ink: var(--bt-sky-ink); }
+  .bt-docs .is-sun   { --bt-tile: var(--bt-sun-tint);   --bt-ink: var(--bt-sun-ink); }
+  .bt-docs .is-grass { --bt-tile: var(--bt-grass-tint); --bt-ink: var(--bt-grass-ink); }
+  .bt-docs .is-coral { --bt-tile: var(--bt-coral-tint); --bt-ink: var(--bt-coral-ink); }
+
+  .bt-docs .bt-docs__top { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; }
+  .bt-docs .bt-docs__name { margin: 0; font: 700 17px/1.35 var(--bt-body); color: var(--bt-navy); }
+  .bt-docs .bt-docs__desc { margin: 4px 0 0; font-size: 14px; color: var(--bt-muted); }
+  .bt-docs .bt-docs__deadline { display: flex; gap: 8px; align-items: flex-start; margin: 10px 0 0; padding: 8px 12px; border-radius: 12px; background: var(--bt-sun-tint); color: var(--bt-navy); font: 600 13px/1.45 var(--bt-body); }
+  .bt-docs .bt-docs__deadline svg { flex: none; width: 16px; height: 16px; margin-top: 1px; color: var(--bt-sun-ink); }
+
+  .bt-docs .bt-docs__pill { display: inline-flex; align-items: center; gap: 5px; padding: 3px 10px; border-radius: 999px; font: 700 12px/1.5 var(--bt-body); white-space: nowrap; }
+  .bt-docs .bt-docs__pill svg { width: 12px; height: 12px; }
+  .bt-docs .bt-docs__pill--todo { background: var(--bt-sun-tint); color: var(--bt-sun-ink); }
+  .bt-docs .bt-docs__pill--done { background: var(--bt-grass-tint); color: var(--bt-grass-ink); display: none; }
+
+  .bt-docs .bt-docs__action { margin-top: 14px; }
+  .bt-docs .bt-docs__btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+    min-height: 48px; padding: 0 20px;
+    background: var(--bt-navy); color: #fff; border-radius: 14px;
+    box-shadow: inset 0 -4px 0 var(--bt-sun), 0 8px 16px -10px rgba(11,31,63,.55);
+    font: 600 15px/1 var(--bt-body); text-decoration: none;
+    transition: transform .15s ease, background-color .15s ease;
+  }
+  .bt-docs .bt-docs__btn:hover { background: var(--bt-navy-2); transform: translateY(-1px); }
+  .bt-docs .bt-docs__btn:active { transform: translateY(1px); box-shadow: inset 0 -2px 0 var(--bt-sun); }
+  .bt-docs .bt-docs__btn svg { width: 18px; height: 18px; }
+  .bt-docs .bt-docs__btn:focus-visible { outline: 3px solid var(--bt-link); outline-offset: 3px; }
+  .bt-docs .bt-docs__email { display: inline-flex; align-items: center; gap: 10px; padding: 10px 14px; border-radius: 14px; background: var(--bt-sky-tint); color: var(--bt-navy); font: 600 14px/1.4 var(--bt-body); }
+  .bt-docs .bt-docs__email svg { flex: none; width: 20px; height: 20px; color: var(--bt-sky-ink); }
+
+  /* Done state */
+  .bt-docs .bt-docs__step.is-done { background: #FBFEFC; border-color: #CBEBD8; }
+  .bt-docs .bt-docs__step.is-done .bt-docs__num { background: var(--bt-grass); color: #fff; }
+  .bt-docs .bt-docs__step.is-done .bt-docs__num::after { background: var(--bt-grass-ink); }
+  .bt-docs .bt-docs__step.is-done .bt-docs__pill--todo { display: none; }
+  .bt-docs .bt-docs__step.is-done .bt-docs__pill--done { display: inline-flex; }
+  .bt-docs .bt-docs__step.is-done .bt-docs__action,
+  .bt-docs .bt-docs__step.is-done .bt-docs__deadline { display: none; }
+  .bt-docs .bt-docs__icon-done { display: none; }
+  .bt-docs .bt-docs__step.is-done .bt-docs__icon-done { display: block; }
+  .bt-docs .bt-docs__step.is-done .bt-docs__icon-todo { display: none; }
+
+  .bt-docs .bt-docs__sr { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+  .bt-docs .bt-docs__foot { margin: 18px 0 0; font-size: 13px; color: var(--bt-muted); }
+  .bt-docs .bt-docs__foot a { color: var(--bt-link); font-weight: 600; text-underline-offset: 3px; white-space: nowrap; }
+  .bt-docs .bt-docs__foot a:focus-visible { outline: 3px solid var(--bt-link); outline-offset: 3px; border-radius: 6px; }
+
+  @media (max-width: 520px) {
+    .bt-docs .bt-docs__head { flex-wrap: nowrap; align-items: flex-start; }
+    .bt-docs .bt-docs__count { width: 72px; height: 72px; }
+    .bt-docs .bt-docs__count strong { font-size: 20px; }
+    .bt-docs .bt-docs__count span { font-size: 10px; }
+    .bt-docs .bt-docs__step { grid-template-columns: 44px 1fr; gap: 14px; padding: 16px; }
+    .bt-docs .bt-docs__num { width: 44px; height: 44px; border-radius: 14px; }
+    .bt-docs .bt-docs__btn { width: 100%; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .bt-docs .bt-docs__btn, .bt-docs .bt-docs__bar span { transition: none; }
+    .bt-docs .bt-docs__count { transform: none; }
+  }
+</style>
+
+  <header class="bt-docs__head">
+    <div>
+      <p class="bt-docs__eyebrow">Get ready for camp</p>
+      <h2 class="bt-docs__title">Your enrollment checklist</h2>
+      <p class="bt-docs__sub">Three quick steps so your camper is all set for the first day.</p>
+    </div>
+    <div class="bt-docs__count" aria-hidden="true">
+      <strong data-bt-out="done">0/3</strong>
+      <span>done</span>
+    </div>
+  </header>
+
+  <div class="bt-docs__bar" aria-hidden="true"><span></span><span></span><span></span></div>
+  <p class="bt-docs__sr" data-bt-out="sr" role="status"></p>
+
+  <ol class="bt-docs__list">
+
+    <!-- STEP 1 — Enrollment form -->
+    <li class="bt-docs__step is-sky" data-step="enrollment" data-filled="{{contact.portal__location}}">
+      <span class="bt-docs__num" aria-hidden="true">
+        <svg class="bt-docs__icon-todo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M9 13h6M9 17h4"/></svg>
+        <svg class="bt-docs__icon-done" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg>
+      </span>
+      <div>
+        <div class="bt-docs__top">
+          <h3 class="bt-docs__name">Enrollment form</h3>
+          <span class="bt-docs__pill bt-docs__pill--todo">To do</span>
+          <span class="bt-docs__pill bt-docs__pill--done"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg>Done</span>
+        </div>
+        <p class="bt-docs__desc">Tell us about your camper so we can welcome them on day one.</p>
+        <div class="bt-docs__action">
+          <a class="bt-docs__btn" href="[ENROLLMENT_FORM_LINK]">Fill out enrollment form
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+          </a>
+        </div>
+      </div>
+    </li>
+
+    <!-- STEP 2 — Meal plan -->
+    <li class="bt-docs__step is-sun" data-step="meal-plan" data-filled="{{contact.sub_sandwich_chips_included}}">
+      <span class="bt-docs__num" aria-hidden="true">
+        <svg class="bt-docs__icon-todo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 3v8M5 3v5a2 2 0 0 0 4 0V3M7 11v10M17 3c-2 0-3 2-3 6s1 5 3 5v7"/></svg>
+        <svg class="bt-docs__icon-done" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg>
+      </span>
+      <div>
+        <div class="bt-docs__top">
+          <h3 class="bt-docs__name">Meal plan</h3>
+          <span class="bt-docs__pill bt-docs__pill--todo">To do</span>
+          <span class="bt-docs__pill bt-docs__pill--done"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg>Done</span>
+        </div>
+        <p class="bt-docs__desc">Pick your camper&rsquo;s lunch choices and let us know about any allergies or dietary restrictions.</p>
+        <p class="bt-docs__deadline">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+          Please submit your meal plan at least 7 days before your child&rsquo;s first camp day.
+        </p>
+        <div class="bt-docs__action">
+          <a class="bt-docs__btn" href="[MEAL_PLAN_FORM_LINK]">Choose meals
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+          </a>
+        </div>
+      </div>
+    </li>
+
+    <!-- STEP 3 — Combined parent waiver (one GHL Documents & Contracts template) -->
+    <li class="bt-docs__step is-grass" data-step="waiver" data-status="{{contact.esign_status}}">
+      <span class="bt-docs__num" aria-hidden="true">
+        <svg class="bt-docs__icon-todo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 5 6v5c0 4.5 3 8.3 7 10 4-1.7 7-5.5 7-10V6z"/><path d="m9 12 2 2 4-4"/></svg>
+        <svg class="bt-docs__icon-done" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg>
+      </span>
+      <div>
+        <div class="bt-docs__top">
+          <h3 class="bt-docs__name">Camp waiver (Liability Release + Short Game!)</h3>
+          <span class="bt-docs__pill bt-docs__pill--todo">To do</span>
+          <span class="bt-docs__pill bt-docs__pill--done"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg>Done</span>
+        </div>
+        <p class="bt-docs__desc">One document, one signature. Covers the Day Camp Liability Release (with medical consent and the photography release, which you can accept or decline) and the Short Game! golf waiver and code of conduct, run with PATTS LLC.</p>
+        <div class="bt-docs__action">
+          <span class="bt-docs__email">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3.5 6.5 8.5 7 8.5-7"/></svg>
+            Check your email to sign
+          </span>
+        </div>
+      </div>
+    </li>
+
+  </ol>
+
+  <p class="bt-docs__foot">Can&rsquo;t find the signing email? Check your spam folder, or call us at <a href="tel:+14692611625">469-261-1625</a>.</p>
+
+<script>
+(function () {
+  var SEL = ".bt-docs";
+  var DONE = /^(done|complete|completed|signed|submitted|yes|true)$/i;
+
+  function init(root) {
+    if (root.getAttribute("data-bt-ready")) return;
+    root.setAttribute("data-bt-ready", "1");
+    var steps = root.querySelectorAll(".bt-docs__step");
+    var n = 0;
+    Array.prototype.forEach.call(steps, function (li) {
+      var v = (li.getAttribute("data-status") || "").trim();
+      var f = (li.getAttribute("data-filled") || "").trim();
+      var rendered = function (x) { return x && x.indexOf("{{") === -1; };
+      var done = (rendered(v) && DONE.test(v)) || rendered(f);
+      li.classList.toggle("is-done", done);
+      if (done) n++;
+    });
+    var total = steps.length;
+    root.querySelector('[data-bt-out="done"]').textContent = n + "/" + total;
+    root.querySelector('[data-bt-out="sr"]').textContent = n + " of " + total + " steps done";
+    Array.prototype.forEach.call(root.querySelectorAll(".bt-docs__bar span"), function (s, i) { s.classList.toggle("is-on", i < n); });
+    root.classList.toggle("is-all-done", n === total);
+  }
+
+  var s = document.currentScript, r = s && s.closest(SEL);
+  if (r) init(r);
+  function boot() { Array.prototype.forEach.call(document.querySelectorAll(SEL), init); }
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", boot); else boot();
+})();
+</script>
+</div>
+<!-- ===== END WIDGET ===== -->
+
+</body>
+</html>

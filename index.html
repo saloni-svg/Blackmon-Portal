@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<!--
+  PREVIEW MENU — local use only. Do NOT paste this into GHL.
+  Run:  python3 -m http.server 8000   then open http://localhost:8000
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Blackmon Tutoring — Portal preview</title>
+<link rel="icon" href="data:,">
+<style>
+  @import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Merriweather:wght@700;900&display=swap");
+  * { box-sizing: border-box; }
+  body { margin: 0; padding: 40px 16px 64px; background: #FFF8EC; color: #0B1F3F; font: 400 16px/1.5 "Inter", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif; }
+  .wrap { max-width: 960px; margin: 0 auto; }
+  header { margin-bottom: 32px; }
+  .eyebrow { display: inline-block; margin: 0 0 10px; padding: 4px 12px; border-radius: 999px; background: #FFC845; font: 700 12px/1.4 "Inter", sans-serif; letter-spacing: .08em; text-transform: uppercase; }
+  h1 { margin: 0; font: 900 clamp(28px, 5vw, 40px)/1.15 "Merriweather", Georgia, serif; }
+  header p { margin: 8px 0 0; color: #5A6679; }
+  h2 { margin: 32px 0 12px; font: 700 20px/1.3 "Merriweather", Georgia, serif; }
+  ul { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 12px; }
+  a.card { display: block; height: 100%; padding: 16px 18px; background: #fff; border: 1px solid #E4E8EF; border-radius: 18px; color: inherit; text-decoration: none; box-shadow: 0 2px 6px rgba(11,31,63,.05); transition: transform .15s ease, box-shadow .15s ease, border-color .15s ease; }
+  a.card:hover { transform: translateY(-2px); border-color: #5BABE0; box-shadow: 0 12px 24px -14px rgba(11,31,63,.35); }
+  a.card:focus-visible { outline: 3px solid #1F6FAE; outline-offset: 3px; }
+  .name { display: block; font-weight: 700; }
+  .desc { display: block; margin-top: 2px; font-size: 14px; color: #5A6679; }
+  .file { display: block; margin-top: 8px; font: 500 12px/1.4 ui-monospace, Menlo, Consolas, monospace; color: #1F6FAE; }
+  .note { margin-top: 36px; padding: 14px 18px; border-radius: 16px; background: #FFF1C9; border: 2px solid #FFC845; font-size: 14px; }
+  @media (prefers-reduced-motion: reduce) { a.card { transition: none; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <p class="eyebrow">Local preview</p>
+    <h1>Blackmon Tutoring portal</h1>
+    <p>Click any piece to preview it. This menu is for your computer only &mdash; it doesn&rsquo;t go into GHL.</p>
+  </header>
+
+  <h2>Portal widgets</h2>
+  <ul>
+    <li><a class="card" href="widgets/daily-schedule.html"><span class="name">A day at camp</span><span class="desc">Daily schedule timeline</span><span class="file">widgets/daily-schedule.html</span></a></li>
+    <li><a class="card" href="widgets/plan-summary.html"><span class="name">My payment plan</span><span class="desc">Plan, paid, balance, next due date</span><span class="file">widgets/plan-summary.html</span></a></li>
+    <li><a class="card" href="widgets/this-week.html"><span class="name">This week at camp</span><span class="desc">Weekly day cards Jordan edits</span><span class="file">widgets/this-week.html</span></a></li>
+    <li><a class="card" href="widgets/staff-directory.html"><span class="name">Your camp team</span><span class="desc">Staff cards with tap-to-call</span><span class="file">widgets/staff-directory.html</span></a></li>
+    <li><a class="card" href="widgets/documents-checklist.html"><span class="name">Enrollment checklist</span><span class="desc">3 steps with To do / Done</span><span class="file">widgets/documents-checklist.html</span></a></li>
+  </ul>
+
+  <h2>Website fixes</h2>
+  <ul>
+    <li><a class="card" href="website-fixes/summer-camp-locations.html"><span class="name">Our camp locations</span><span class="desc">Plano + Little Elm cards</span><span class="file">website-fixes/summer-camp-locations.html</span></a></li>
+    <li><a class="card" href="website-fixes/apply-buttons.html"><span class="name">Apply now block</span><span class="desc">Instructor + caregiver variants</span><span class="file">website-fixes/apply-buttons.html</span></a></li>
+  </ul>
+
+  <h2>Emails</h2>
+  <ul>
+    <li><a class="card" href="emails/welcome-after-payment.html"><span class="name">Welcome after payment</span><span class="desc">Spot confirmed + next steps</span><span class="file">emails/welcome-after-payment.html</span></a></li>
+    <li><a class="card" href="emails/documents-ready.html"><span class="name">Documents ready</span><span class="desc">One combined waiver to sign</span><span class="file">emails/documents-ready.html</span></a></li>
+    <li><a class="card" href="emails/installment-reminder.html"><span class="name">Installment reminder</span><span class="desc">Next due date + balance</span><span class="file">emails/installment-reminder.html</span></a></li>
+    <li><a class="card" href="emails/payment-failed.html"><span class="name">Payment failed</span><span class="desc">Update payment method</span><span class="file">emails/payment-failed.html</span></a></li>
+    <li><a class="card" href="emails/staff-approved.html"><span class="name">Staff approved</span><span class="desc">Welcome + onboarding steps</span><span class="file">emails/staff-approved.html</span></a></li>
+    <li><a class="card" href="emails/onboarding-complete-links.html"><span class="name">Onboarding complete</span><span class="desc">Camp staff + tutor versions</span><span class="file">emails/onboarding-complete-links.html</span></a></li>
+    <li><a class="card" href="emails/parent-dashboard-unlocked.html"><span class="name">Dashboard unlocked</span><span class="desc">Parent documents signed</span><span class="file">emails/parent-dashboard-unlocked.html</span></a></li>
+    <li><a class="card" href="emails/payment-failed-reminder.html"><span class="name">Payment failed (2nd)</span><span class="desc">Second reminder</span><span class="file">emails/payment-failed-reminder.html</span></a></li>
+    <li><a class="card" href="emails/staff-training-complete.html"><span class="name">Training complete</span><span class="desc">Sign your contract next</span><span class="file">emails/staff-training-complete.html</span></a></li>
+    <li><a class="card" href="emails/staff-contract-signed.html"><span class="name">Contract signed</span><span class="desc">Record your intro video</span><span class="file">emails/staff-contract-signed.html</span></a></li>
+    <li><a class="card" href="emails/onboarding-staff-plano.html"><span class="name">Onboarding: Plano staff</span><span class="desc">WhatsApp group link</span><span class="file">emails/onboarding-staff-plano.html</span></a></li>
+    <li><a class="card" href="emails/onboarding-staff-littleelm.html"><span class="name">Onboarding: Little Elm staff</span><span class="desc">WhatsApp group link</span><span class="file">emails/onboarding-staff-littleelm.html</span></a></li>
+    <li><a class="card" href="emails/onboarding-tutor-wise.html"><span class="name">Onboarding: Tutor</span><span class="desc">Wise invite</span><span class="file">emails/onboarding-tutor-wise.html</span></a></li>
+  </ul>
+
+  <h2>Sign-in page</h2>
+  <ul>
+    <li><a class="card" href="pages/portal-signin.html"><span class="name">Portal sign-in</span><span class="desc">Parent / Camp staff / Tutor sign-in</span><span class="file">pages/portal-signin.html</span></a></li>
+  </ul>
+
+  <p class="note">In emails, <code>{{contact.first_name}}</code>-style text <code>{{custom_values...}}</code> links and the remaining <code>[LINK]</code> placeholders show as-is here. GHL fills in the merge fields and custom values. Everything still to fill in is listed in placeholders.md.</p>
+</div>
+</body>
+</html>

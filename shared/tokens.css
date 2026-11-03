@@ -1,0 +1,104 @@
+/* ==========================================================================
+   Blackmon Tutoring — Portal design tokens
+   --------------------------------------------------------------------------
+   Single source of truth for colors, type, radii and shadows.
+
+   IMPORTANT: GHL "Custom HTML/Code" elements must be self-contained, so every
+   widget in /widgets carries its OWN copy of these values inside its <style>
+   block (scoped to the widget root, e.g. .bt-sched { --bt-navy: ... }).
+   If you change a value here, change it in each widget too.
+
+   All custom properties are prefixed --bt- so they can't collide with GHL.
+   ========================================================================== */
+
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Merriweather:wght@700;900&display=swap");
+
+:root {
+  /* ---- Brand colors ---------------------------------------------------- */
+  --bt-navy:   #0B1F3F;   /* primary text, buttons, headers            */
+  --bt-navy-2: #16335F;   /* hover / secondary dark surfaces           */
+  --bt-sky:    #5BABE0;   /* accents, focus halos, icon tiles          */
+  --bt-sun:    #FFC845;   /* highlights, button bottom edge, callouts  */
+  --bt-grass:  #43B37A;   /* success / "Done"                          */
+  --bt-coral:  #FF7A59;   /* use sparingly: warnings, extra charges    */
+  --bt-cream:  #FFF8EC;   /* page / widget background                  */
+  --bt-white:  #FFFFFF;
+  --bt-muted:  #5A6679;   /* secondary text (5.5:1 on cream)           */
+  --bt-line:   #E4E8EF;   /* borders, dividers                         */
+  --bt-link:   #1F6FAE;   /* links + focus outline (5.3:1 on white)    */
+
+  /* ---- Text-safe "ink" variants -----------------------------------------
+     Sky, grass, sun and coral are too light for text on white. Use these
+     darker inks for text/icons on the matching pale tints below.          */
+  --bt-sky-ink:   #1F6FAE;
+  --bt-grass-ink: #1D7148;
+  --bt-sun-ink:   #7A5300;
+  --bt-coral-ink: #A8401F;
+
+  /* ---- Pale tints (icon tiles, pills, callouts) ------------------------ */
+  --bt-sky-tint:   #E3F1FB;
+  --bt-grass-tint: #E2F5EA;
+  --bt-sun-tint:   #FFF1C9;
+  --bt-coral-tint: #FFE6DE;
+  --bt-navy-tint:  #E7ECF4;
+
+  /* ---- Typography ------------------------------------------------------ */
+  --bt-font-head: "Merriweather", Georgia, "Times New Roman", serif;  /* 700 / 900 */
+  --bt-font-body: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+
+  --bt-text-xs: 12px;
+  --bt-text-sm: 14px;
+  --bt-text-md: 16px;
+  --bt-text-lg: 18px;
+  --bt-text-xl: 22px;
+  --bt-text-2xl: clamp(24px, 4vw, 32px);
+
+  /* ---- Radii (rounded, friendly) --------------------------------------- */
+  --bt-r-sm: 14px;   /* inputs, buttons, small tiles */
+  --bt-r-md: 20px;   /* cards                         */
+  --bt-r-lg: 28px;   /* widget shells, hero blocks    */
+  --bt-r-pill: 999px;
+
+  /* ---- Shadows (soft, warm-tinted navy) -------------------------------- */
+  --bt-shadow-sm: 0 2px 6px rgba(11, 31, 63, 0.06);
+  --bt-shadow-md: 0 10px 28px -12px rgba(11, 31, 63, 0.22);
+  --bt-shadow-lg: 0 22px 48px -20px rgba(11, 31, 63, 0.30);
+
+  /* ---- Spacing scale --------------------------------------------------- */
+  --bt-s-1: 4px;
+  --bt-s-2: 8px;
+  --bt-s-3: 12px;
+  --bt-s-4: 16px;
+  --bt-s-5: 24px;
+  --bt-s-6: 32px;
+  --bt-s-7: 48px;
+
+  /* ---- Controls -------------------------------------------------------- */
+  --bt-control-h: 52px;
+  --bt-focus-ring: 0 0 0 4px rgba(91, 171, 224, 0.45);   /* sky halo  */
+  --bt-focus-outline: 3px solid #1F6FAE;                  /* keyboard  */
+}
+
+/* --------------------------------------------------------------------------
+   Reference recipes (copy into a widget, scoped under its root class)
+   --------------------------------------------------------------------------
+
+   Primary button — navy with a sun bottom edge:
+     min-height: 52px; padding: 0 22px; border-radius: 14px;
+     background: var(--bt-navy); color: #fff; font-weight: 600;
+     box-shadow: inset 0 -4px 0 var(--bt-sun), 0 8px 18px -8px rgba(11,31,63,.45);
+     :hover   -> background: var(--bt-navy-2); transform: translateY(-1px);
+     :active  -> transform: translateY(1px); box-shadow: inset 0 -2px 0 var(--bt-sun);
+     :focus-visible -> outline: var(--bt-focus-outline); outline-offset: 3px;
+
+   Sticker badge — small, slightly tilted, white edge:
+     display: inline-flex; padding: 4px 10px; border-radius: 999px;
+     font: 700 12px/1.2 var(--bt-font-body); letter-spacing: .02em;
+     background: var(--bt-sun); color: var(--bt-navy);
+     border: 2px solid #fff; box-shadow: var(--bt-shadow-sm);
+     transform: rotate(-2deg);
+
+   Icon tile — 44px rounded square, pale tint + ink icon:
+     width: 44px; height: 44px; border-radius: 14px;
+     background: var(--bt-sky-tint); color: var(--bt-sky-ink);
+   -------------------------------------------------------------------------- */

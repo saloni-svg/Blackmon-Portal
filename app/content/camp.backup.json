@@ -1,0 +1,62 @@
+{
+  "enrollmentForm": {
+    "formId": "FG3Bw2DX2cBbnGYN1i56",
+    "embedBase": "https://link.msgsndr.com/widget/form/"
+  },
+  "locations": {
+    "plano": { "name": "Plano camp", "address": "6300 Independence Pkwy, Unit A, Plano, TX", "photo": "/img/plano-camp.jpg" },
+    "littleelm": { "name": "Little Elm camp", "address": "528 Lake Ln, Little Elm, TX", "photo": "/img/littleelm-camp.jpg" }
+  },
+  "schedule": {
+    "earlyDropoffPrice": "+$15/day",
+    "latePickupPrice": "+$15/day",
+    "items": [
+      { "time": "7:00–9:00 AM", "title": "Early drop-off", "note": "Available for an additional charge.", "start": "07:00", "end": "09:00", "extra": "early" },
+      { "time": "9:00 AM", "title": "Camp starts", "note": "Arrival and check-in (roll call)", "milestone": true },
+      { "time": "9:00–10:00 AM", "title": "Free play", "note": "Board games, electronics, etc.", "start": "09:00", "end": "10:00" },
+      { "time": "10:00–11:00 AM", "title": "Academic enrichment", "start": "10:00", "end": "11:00" },
+      { "time": "11:00 AM–12:00 PM", "title": "Prepare for activity or sports clinic", "start": "11:00", "end": "12:00" },
+      { "time": "12:00–1:00 PM", "title": "Lunch", "note": "On field trip days, please pack your child's lunch. If it's forgotten, we'll have PB&J available.", "start": "12:00", "end": "13:00" },
+      { "time": "1:00–3:00 PM", "title": "Activity of the day", "start": "13:00", "end": "15:00" },
+      { "time": "3:00–3:30 PM", "title": "Afternoon snack", "start": "15:00", "end": "15:30" },
+      { "time": "3:30–4:00 PM", "title": "Free play", "note": "Board games, electronics, etc.", "start": "15:30", "end": "16:00" },
+      { "time": "4:00 PM", "title": "Camp day ends", "milestone": true },
+      { "time": "4:00–5:00 PM", "title": "Parent pick-up grace period", "note": "Kids may keep playing until you arrive.", "start": "16:00", "end": "17:00" },
+      { "time": "After 5:00 PM", "title": "Late pick-up", "note": "Available for an additional charge.", "extra": "late" }
+    ]
+  },
+  "weeks": {
+    "plano": {
+      "label": "Week of June 8",
+      "days": [
+        { "day": "Monday", "date": "June 8", "title": "[MONDAY_TITLE]", "description": "[Short description of Monday's activity of the day.]", "tag": "" },
+        { "day": "Tuesday", "date": "June 9", "title": "Sports clinic", "description": "[Which sport / what campers will practice.]", "tag": "Sports clinic" },
+        { "day": "Wednesday", "date": "June 10", "title": "[WEDNESDAY_TITLE]", "description": "[Short description of Wednesday's activity.]", "tag": "" },
+        { "day": "Thursday", "date": "June 11", "title": "Field trip: [FIELD_TRIP_DESTINATION]", "description": "[Where we're going and what to wear.]", "tag": "Field trip" },
+        { "day": "Friday", "date": "June 12", "title": "[FRIDAY_TITLE]", "description": "[Short description of Friday's activity.]", "tag": "" }
+      ]
+    },
+    "littleelm": {
+      "label": "Week of June 8",
+      "days": [
+        { "day": "Monday", "date": "June 8", "title": "[MONDAY_TITLE]", "description": "[Short description of Monday's activity of the day.]", "tag": "" },
+        { "day": "Tuesday", "date": "June 9", "title": "[TUESDAY_TITLE]", "description": "[Short description of Tuesday's activity.]", "tag": "" },
+        { "day": "Wednesday", "date": "June 10", "title": "Field trip: [FIELD_TRIP_DESTINATION]", "description": "[Where we're going and what to wear.]", "tag": "Field trip" },
+        { "day": "Thursday", "date": "June 11", "title": "Sports clinic", "description": "[Which sport / what campers will practice.]", "tag": "Sports clinic" },
+        { "day": "Friday", "date": "June 12", "title": "[FRIDAY_TITLE]", "description": "[Short description of Friday's activity.]", "tag": "Bring lunch" }
+      ]
+    }
+  },
+  "teams": {
+    "plano": [
+      { "name": "[STAFF_NAME]", "role": "Supervisor", "phone": "[STAFF_PHONE]" },
+      { "name": "[STAFF_NAME]", "role": "Counselor", "phone": "[STAFF_PHONE]" },
+      { "name": "[STAFF_NAME]", "role": "Counselor", "phone": "[STAFF_PHONE]" }
+    ],
+    "littleelm": [
+      { "name": "[STAFF_NAME]", "role": "Supervisor", "phone": "[STAFF_PHONE]" },
+      { "name": "[STAFF_NAME]", "role": "Counselor", "phone": "[STAFF_PHONE]" },
+      { "name": "[STAFF_NAME]", "role": "Counselor", "phone": "[STAFF_PHONE]" }
+    ]
+  }
+}
