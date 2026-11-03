@@ -141,9 +141,8 @@ function renderSignIn() {
         <h1 class="si__hero">Everything for camp, in one sign&#8209;in.</h1>
         <p class="si__intro">Enrollment, payments, weekly camp updates and team onboarding — each account sees only what belongs to it.</p>
         <div class="photo si__photo"><img src="/img/camp-signin.jpg" alt="Blackmon campers and coaches in team jerseys on the sports field"></div>
-        <div class="si__locs">
-          <div class="si__loc"><div class="photo"><img src="/img/plano-camp.jpg" alt="Coaches and campers at the Plano camp" loading="lazy"></div><strong>Plano camp</strong><span>6300 Independence Pkwy, Unit A<br>Plano, TX</span></div>
-          <div class="si__loc"><div class="photo"><img src="/img/littleelm-camp.jpg" alt="Campers laughing together at lunch at the Little Elm camp" loading="lazy"></div><strong>Little Elm camp</strong><span>520 Lobo Lane<br>Little Elm, TX</span></div>
+        <div class="si__locs si__locs--one">
+          <div class="si__loc"><div class="photo"><img src="/img/littleelm-camp.jpg" alt="Campers laughing together at lunch at the Little Elm camp" loading="lazy"></div><div><strong>Little Elm camp</strong><span>520 Lobo Lane<br>Little Elm, TX</span></div></div>
         </div>
       </aside>
       <main class="si__main">
@@ -186,7 +185,7 @@ function renderSignIn() {
         </div>
       </main>
     </div>
-    <footer class="si__foot"><span>© Blackmon Tutoring · Plano &amp; Little Elm, TX</span><span>Need help? <a href="mailto:Blackmontutoring@gmail.com">Blackmontutoring@gmail.com</a></span></footer>
+    <footer class="si__foot"><span>© Blackmon Tutoring · Little Elm, TX</span><span>Need help? <a href="mailto:Blackmontutoring@gmail.com">Blackmontutoring@gmail.com</a></span></footer>
   </div>`;
 
   const q = (s) => $app.querySelector(s);
