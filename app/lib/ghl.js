@@ -228,6 +228,20 @@ export function createGhlStore({ token, locationId }) {
       catch (err) { if (err.status === 404) return null; throw err; }
     },
 
+    // Submissions of a GHL form, newest first (read only). q: GHL's text search (e.g. an email), so
+    // callers match exactly. All pages, up to 2,000.
+    async formSubmissions({ formId, q = "" }) {
+      const out = [];
+      for (let page = 1; page <= 20; page++) {
+        const qs = new URLSearchParams({ locationId, formId, limit: "100", page: String(page) });
+        if (q) qs.set("q", q);
+        const data = await call("GET", `/forms/submissions?${qs}`);
+        out.push(...(data.submissions || []));
+        if ((data.submissions || []).length < 100 || out.length >= (data.meta?.total ?? 0)) break;
+      }
+      return out.sort((a, b) => Date.parse(b.createdAt || "") - Date.parse(a.createdAt || ""));
+    },
+
     // A contact's invoices, with their line items and totals (read only).
     async invoicesFor(contactId) {
       const data = await call("GET", `/invoices/?altId=${locationId}&altType=location&contactId=${encodeURIComponent(contactId)}&limit=20&offset=0`);

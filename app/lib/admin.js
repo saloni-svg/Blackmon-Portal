@@ -11,8 +11,8 @@ import { hashPassword, verifyPassword, burnTime } from "./passwords.js";
 import { createSessions } from "./sessions.js";
 import { ACCESS, ID_PROOF, PHOTO, validateStaff, fileError, nameError, emailError, passwordError } from "../public/validate.js";
 import { parentSteps, MEAL_FIELDS, campInclusions, yesNo } from "./portal.js";
-import { ROSTER_COLUMNS, rosterRows } from "./enrollment.js";
 import { ROSTER_COLUMNS as ROSTER, ROSTER_LISTS, familyRows } from "./roster.js";
+import { formAnswersOf } from "./enrollform.js";
 import { inAudience, afterJoin, saveJoinedAt, validateAnnouncement, ATTACHMENT } from "./announcements.js";
 import { LANG_EN } from "../public/chat-i18n.js";
 import { createContent } from "./content.js";
@@ -136,7 +136,7 @@ function emailFailure(err, email) {
 
 // db / base: the portal database and data folder (server.js keeps demo data separate from live).
 // docs: camp documents and notifications (lib/documents.js).
-export function createAdmin({ store, db, meals, campFile, clientIp = (req) => req.socket.remoteAddress || "", enrollments, enrollmentSettings, base, docs, oppSync, assistant, announcements, outreach, videos, assessment, acks, root, portalUrl, printLinks = false, send, readBody, readJson }) {
+export function createAdmin({ store, db, meals, enrollForm, campFile, clientIp = (req) => req.socket.remoteAddress || "", enrollments, enrollmentSettings, base, docs, oppSync, assistant, announcements, outreach, videos, assessment, acks, root, portalUrl, printLinks = false, send, readBody, readJson }) {
   const demo = !store.live;
   const proofsDir = path.join(base, "id-proofs"), photosDir = path.join(base, "photos");
   fs.mkdirSync(proofsDir, { recursive: true });
@@ -473,6 +473,17 @@ export function createAdmin({ store, db, meals, campFile, clientIp = (req) => re
 
   // One parent's Winter Camp 2026 Paid (won) opportunities (the same fields as the Parents list,
   // plus the opportunity's other custom fields), their portal status and their documents.
+  // A contact with their enrollment form answers: its own contact.wc26__ fields, or, when it has none,
+  // the answers of the latest form submission with its email (GHL may have saved that submission on
+  // a second contact with the same email). sub: that submission, if known.
+  async function withFormAnswers(contact, sub) {
+    if (!contact) return { contact, source: null };
+    if (Object.keys(formAnswersOf(contact.fields)).length) return { contact, source: "contact" };
+    const answers = sub ? await enrollForm.answersOf(sub) : {};
+    if (!Object.keys(answers).length) return { contact, source: null };
+    return { contact: { ...contact, fields: { ...contact.fields, ...answers } }, source: "submission" };
+  }
+
   // Read live every time the page opens (and on "Reload from GHL"): this parent's Winter Camp 2026
   // Paid (won) opportunities (GET /opportunities/{id}) and their contact (GET /contacts/{id}).
   async function parentDetail(id) {
@@ -498,9 +509,14 @@ export function createAdmin({ store, db, meals, campFile, clientIp = (req) => re
     const state = parentState(id), invites = inviteState().byContact.get(id);
     // The meal plan is saved in the portal (lib/meals.js), so it shows as soon as the parent saves it.
     const plan = meals.of(fresh || { id });
-    const settings = enrollmentSettings(), form = enrollments.get(id, settings.tag);
+    // The GHL enrollment form: submitted (tag or a submission with their email) and the answers, as
+    // on the Roster (one row per child).
+    const sub = await enrollForm.latestFor(fresh?.email).catch(() => null);
+    const { contact: answered, source } = await withFormAnswers(fresh, sub);
+    const submitted = !!sub || (fresh?.tags || []).includes("enrollment-submitted") || source === "contact";
     return {
-      enrollment: form ? { camp: form.camp, updatedAt: form.updatedAt, columns: ROSTER_COLUMNS, children: rosterRows([form], settings) } : null,
+      enrollment: submitted ? { camp: "Winter Camp 2026", submittedAt: sub?.createdAt || null, source, columns: ROSTER,
+        children: source ? familyRows(rows[0], answered) : [] } : null,
       syncedAt,
       parent: { ...rows[0], inviteSentAt: state?.invite_sent_at || null, inviteTestAt: state?.test_invite_at || null, hidden: !!state?.hidden_at,
         inviteCount: invites?.count || (state?.invite_sent_at ? 1 : 0), inviteMessageId: invites?.last?.message_id || null,
@@ -1184,7 +1200,11 @@ export function createAdmin({ store, db, meals, campFile, clientIp = (req) => re
     // Camp = the contact's camp tag ("winter 2026"); "all" = every paid family.
     if (m === "GET" && (p === "/api/admin/roster" || p === "/api/admin/roster.csv")) {
       const q = url.searchParams, settings = enrollmentSettings();
-      const all = (await activeParents(true)).flatMap((x) => familyRows(x, parentsCache.contacts.get(x.contactId)));
+      const parents = await activeParents(true), subs = await enrollForm.latestByEmail(true).catch(() => new Map());
+      const all = (await Promise.all(parents.map(async (x) => {
+        const c = parentsCache.contacts.get(x.contactId);
+        return familyRows(x, (await withFormAnswers(c, subs.get(String(c?.email || x.email || "").toLowerCase()))).contact);
+      }))).flat();
       const campCount = new Map();
       for (const r of all) for (const c of new Set(r.camps)) campCount.set(c, (campCount.get(c) || 0) + 1);
       const camps = [...campCount].map(([camp, n]) => ({ camp, n })).sort((a, b) => a.camp.localeCompare(b.camp));

@@ -28,6 +28,7 @@ import { createOppSync } from "./lib/oppsync.js";
 import { createChildCheck } from "./lib/childcheck.js";
 import { registrationsFor } from "./lib/receipts.js";
 import { enrollPrefill } from "./lib/enroll-prefill.js";
+import { createEnrollForm } from "./lib/enrollform.js";
 
 const ROOT = path.dirname(fileURLToPath(import.meta.url));
 const PUBLIC = path.join(ROOT, "public");
@@ -106,6 +107,7 @@ if (!fs.existsSync(CAMP_FILE)) {
   }
 }
 const docs = createDocuments({ db, store, root: ROOT, base: DATA_BASE });
+const enrollForm = createEnrollForm(store);
 // Before launch (PARENT_MESSAGES isn't "live"), the portal changes and emails real GHL contacts only
 // when they're tagged portal-test; everyone else is left alone until launch.
 const LIVE = process.env.PARENT_MESSAGES === "live";
@@ -167,7 +169,7 @@ const outreach = createOutreach({ db, store, apiKey: process.env.OPENAI_API_KEY 
   testEmail: process.env.ADMIN_ALERT_EMAIL || "", testPhone: process.env.ADMIN_ALERT_PHONE || "", testContactId: ALERT_CONTACT_ID, live: LIVE });
 const meals = createMeals(db);
 const enrollments = createEnrollments(db);
-const admin = createAdmin({ store, db, meals, campFile: CAMP_FILE, clientIp, enrollments, enrollmentSettings: () => enrollmentSettings(ROOT), base: DATA_BASE, docs, oppSync, assistant, announcements, outreach, videos, assessment, acks, root: ROOT, portalUrl: PORTAL_URL, printLinks: PRINT_CODES, send, readBody, readJson });
+const admin = createAdmin({ store, db, meals, enrollForm, campFile: CAMP_FILE, clientIp, enrollments, enrollmentSettings: () => enrollmentSettings(ROOT), base: DATA_BASE, docs, oppSync, assistant, announcements, outreach, videos, assessment, acks, root: ROOT, portalUrl: PORTAL_URL, printLinks: PRINT_CODES, send, readBody, readJson });
 
 // GHL allows several contacts with the same email. Sign-in uses the one that matters: on the Parent
 // tab, the contact with the Winter Camp 2026 "Paid (won)" opportunity (that's where documents and
@@ -575,6 +577,8 @@ async function api(req, res, url) {
       // The enrollment step is done once the GHL enrollment form's answers are on their opportunity.
       if (opp !== undefined) {
         view.enrollmentStatus = enrollmentStatus(opp);
+        // The dashboard card counts the enrollment-submitted tag too (the form page also checks GHL's submissions).
+        if ((contact.tags || []).includes(ENROLLMENT_TAG)) view.enrollmentStatus = { ...view.enrollmentStatus, found: true, submitted: true };
         const enrollStep = view.checklist.find((s) => s.id === "enroll");
         if (enrollStep) enrollStep.done = view.enrollmentStatus.submitted;
       }
@@ -680,10 +684,13 @@ async function api(req, res, url) {
   // Enrollment form page and dashboard card: read fresh from GHL on every visit.
   if (route === "GET /api/enrollment-status" && role === "parent") {
     try {
-      const { opp, matchedBy } = await winterCampOpportunity(contact);
+      // Submitted: the opportunity's Camp Session is filled (GHL workflow), the contact has the
+      // enrollment-submitted tag, or GHL has a submission of the form with their email.
+      const [{ opp, matchedBy }, form] = await Promise.all([winterCampOpportunity(contact), enrollForm.status(contact)]);
       const status = enrollmentStatus(opp);
-      console.log(`  Enrollment status for ${contact.email}: ${opp ? `opportunity ${opp.id} (by ${matchedBy}), Camp Session ${status.session ? `"${status.session}"` : "empty"}` : "no Winter Camp 2026 opportunity"}`);
-      return send(res, 200, status);
+      const submitted = status.submitted || form.submitted;
+      console.log(`  Enrollment status for ${contact.email}: ${submitted ? `submitted (${[status.submitted && "opportunity Camp Session", form.via].filter(Boolean).join(", ")}${form.submittedAt ? `, ${form.submittedAt}` : ""})` : "not submitted"}; ${opp ? `opportunity ${opp.id} (by ${matchedBy})` : "no Winter Camp 2026 opportunity"}`);
+      return send(res, 200, { ...status, found: status.found || form.submitted, submitted, submittedAt: form.submittedAt });
     } catch (err) {
       console.error(`  Enrollment status for ${contact.email} failed: ${err.message}`);
       return send(res, 502, { error: "We couldn't check your enrollment form right now. Please try again in a minute." });
@@ -694,8 +701,11 @@ async function api(req, res, url) {
   // Camp 2026 opportunity (lib/enroll-prefill.js). Read only.
   if (route === "GET /api/enrollment-prefill" && role === "parent") {
     try {
-      const [raw, contactDefs, { opp }] = await Promise.all([store.getContactRaw(contact.id), store.fieldDefinitions("contact"), winterCampOpportunity(contact)]);
-      const p = enrollPrefill({ raw, contactDefs, opp, portalLocation: contact.fields.portal__location || "" });
+      // The contact's saved answers first; where it has none, their latest form submission's (GHL may
+      // have saved that on a second contact with the same email).
+      const [raw, contactDefs, { opp }, sub] = await Promise.all([store.getContactRaw(contact.id), store.fieldDefinitions("contact"), winterCampOpportunity(contact),
+        enrollForm.latestFor(contact.email).catch(() => null)]);
+      const p = enrollPrefill({ raw, contactDefs, opp, portalLocation: contact.fields.portal__location || "", submitted: await enrollForm.answersOf(sub) });
       console.log(`  Enrollment prefill for ${contact.email}: ${p.filled} fields (${Object.keys(p.query).join(", ")})${opp ? "" : "; no Winter Camp 2026 opportunity"}.`);
       return send(res, 200, p);
     } catch (err) {

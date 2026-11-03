@@ -399,15 +399,17 @@ function enrollStatusHtml(st, full) {
   if (!st) return '<p class="hint" style="margin:0">Checking your enrollment form…</p>';
   if (st.error) return '<p class="muted" role="status" style="margin:0">We couldn\'t check your enrollment status right now. You can still fill in the form below.</p>';
   if (!st.found || !st.submitted) {
-    if (full) return ""; // the form itself is right below on the Enrollment form page
+    // Enrollment form page: the form is right below; GHL keeps nothing until Submit is pressed.
+    if (full) return '<p class="hint" role="status" style="margin:0">Your answers save when you press Submit.</p>';
     return `<p class="alert alert--info" role="status" style="margin:0">${ico("clock")} Enrollment form not submitted yet — please complete it before camp starts.</p>
       <a class="btn" href="#/enroll" style="margin-top:14px">Complete enrollment form</a>`;
   }
-  const rows = [["Child", st.child], ["Age", st.age], ["Session", st.session], ["Location", st.location], ["Lunch", st.lunch],
-    ["Early drop-off", st.early], ["Late pick-up", st.late], ["Transportation", st.transport]];
-  return `<p class="alert alert--ok" role="status" style="margin:0">${ico("check")} Enrollment form received</p>
-    ${full ? `<section class="card" style="margin-top:16px"><div class="card__h"><div><h2>Your answers</h2><p class="card__sub">From your latest enrollment form</p></div></div>
-      <dl class="kv kv--left">${rows.map(([k, v]) => `<dt>${k}</dt><dd>${esc(v || "—")}</dd>`).join("")}</dl></section>` : ""}`;
+  // Enrollment form page: their saved answers are already filled in the form below.
+  if (full) {
+    const on = st.submittedAt ? ` ${new Date(st.submittedAt).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" })}` : "";
+    return `<p class="alert alert--ok" role="status" style="margin:0">${ico("check")} Submitted${esc(on)} – you can update and resubmit</p>`;
+  }
+  return `<p class="alert alert--ok" role="status" style="margin:0">${ico("check")} Enrollment form received</p>`;
 }
 // Reads the status fresh from GHL and draws it (and the "submit again" note on the form page). The
 // loading state always ends: on an answer, an error, or after 10 seconds.
@@ -426,8 +428,6 @@ async function refreshEnrollStatus(el, full) {
     if (el.isConnected) {
       const box = el.querySelector("[data-enroll-status]");
       if (box) box.innerHTML = enrollStatusHtml(st, full);
-      const note = el.querySelector("[data-enroll-note]");
-      if (note) note.hidden = !st.submitted;
     }
   }
 }
@@ -514,22 +514,42 @@ VIEWS.parent = {
   enroll(el, me) {
     el.innerHTML = `${header("Enrollment form", "Your child's camp details: session, location, lunch, drop-off, pick-up and transportation.")}
       <div data-enroll-status>${enrollStatusHtml(undefined, true)}</div>
-      <p class="hint" data-enroll-note hidden style="margin:16px 0 0">Need to change something? Submit the form again — the latest submission replaces the earlier one.</p>
       <div data-prefill></div>
       <section class="enroll-embed" data-enroll-form><p class="hint">Loading the form…</p></section>`;
-    refreshEnrollStatus(el, true);
     // Without the pre-fill (GHL slow or down), the form still opens with their name, email and phone.
     const basic = { first_name: me.person.firstName, last_name: me.person.lastName, email: me.person.email, phone: me.enrollment?.phone };
-    const ctrl = new AbortController(), timer = setTimeout(() => ctrl.abort(), 8000);
-    fetch("/api/enrollment-prefill", { credentials: "same-origin", signal: ctrl.signal })
-      .then((r) => (r.ok ? r.json() : null)).catch(() => null)
-      .then((p) => {
-        clearTimeout(timer);
-        if (!el.isConnected) return;
-        const box = el.querySelector("[data-prefill]");
-        if (p && box) box.innerHTML = prefillHtml(p);
-        drawEnrollForm(el, p?.query || basic);
-      });
+    // Status and the form, read fresh from GHL: their saved answers (contact, else their latest
+    // submission) are filled in, so after submitting they see what they sent and can resubmit.
+    const load = () => {
+      refreshEnrollStatus(el, true);
+      const ctrl = new AbortController(), timer = setTimeout(() => ctrl.abort(), 8000);
+      fetch("/api/enrollment-prefill", { credentials: "same-origin", signal: ctrl.signal })
+        .then((r) => (r.ok ? r.json() : null)).catch(() => null)
+        .then((p) => {
+          clearTimeout(timer);
+          if (!el.isConnected) return;
+          const box = el.querySelector("[data-prefill]");
+          if (p && box) box.innerHTML = prefillHtml(p);
+          drawEnrollForm(el, p?.query || basic);
+        });
+    };
+    load();
+    // After Submit: the GHL form tells the page (a message from its iframe mentioning the submission);
+    // then GHL needs a moment to save it, so the page reloads the status and answers a few seconds later.
+    // Coming back to the tab re-checks the status too.
+    let reloading = null;
+    const onMessage = (e) => {
+      if (!/leadconnectorhq\.com|msgsndr\.com/.test(e.origin)) return;
+      const said = typeof e.data === "string" ? e.data : JSON.stringify(e.data || "");
+      if (!/submit/i.test(said) || reloading || !el.isConnected) return;
+      reloading = setTimeout(() => { reloading = null; if (el.isConnected) load(); }, 4000);
+    };
+    const onVisible = () => { if (document.visibilityState === "visible" && el.isConnected) refreshEnrollStatus(el, true); };
+    window.addEventListener("message", onMessage);
+    document.addEventListener("visibilitychange", onVisible);
+    // Stop listening when another page is opened.
+    const stop = () => { if (!el.isConnected || route() !== "enroll") { window.removeEventListener("message", onMessage); document.removeEventListener("visibilitychange", onVisible); window.removeEventListener("hashchange", stop); } };
+    window.addEventListener("hashchange", stop);
   },
 
   meals(el, me) {

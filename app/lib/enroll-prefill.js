@@ -24,8 +24,10 @@ const text = (v) => String(v ?? "").trim();
 const field = (opp, id) => text(opp?.customFields?.find((f) => f.id === id)?.value);
 
 // raw: GET /contacts/{id} contact; contactDefs: fieldDefinitions("contact"); opp: their Winter Camp
-// 2026 opportunity (or null); portalLocation: Portal - Location ("Little Elm").
-export function enrollPrefill({ raw, contactDefs, opp, portalLocation = "" }) {
+// 2026 opportunity (or null); portalLocation: Portal - Location ("Little Elm"); submitted: their latest
+// form submission's answers by field key (lib/enrollform.js), used where the contact itself is empty
+// (e.g. GHL saved the submission on a second contact with the same email).
+export function enrollPrefill({ raw, contactDefs, opp, portalLocation = "", submitted = {} }) {
   const query = {};
   const put = (key, value) => { if (text(value)) query[key] = text(value); };
   const saved = new Map(); // wc26__ key -> the parent's saved answer
@@ -35,15 +37,21 @@ export function enrollPrefill({ raw, contactDefs, opp, portalLocation = "" }) {
     const v = Array.isArray(f.value) ? f.value.join(", ") : text(f.value);
     if (d && /^wc26__/.test(d.key) && !NEVER.has(d.key) && v) saved.set(d.key, { q: queryKey(d.name), v });
   }
+  const defByKey = new Map(contactDefs.map((d) => [d.key, d]));
+  for (const [key, v] of Object.entries(submitted)) {
+    const d = defByKey.get(key);
+    if (d && /^wc26__/.test(key) && !NEVER.has(key) && !saved.has(key) && text(v)) saved.set(key, { q: queryKey(d.name), v: text(v) });
+  }
   const savedOr = (key, fallback) => saved.get(key)?.v || fallback;
   const qOf = (key, name) => saved.get(key)?.q || queryKey(name);
 
   // Parent / contact.
-  put("first_name", raw?.firstName); put("last_name", raw?.lastName); put("email", raw?.email);
+  put("first_name", raw?.firstName || submitted.first_name); put("last_name", raw?.lastName || submitted.last_name); put("email", raw?.email);
   // GHL's phone box needs the country code ("(470) 261-1623" alone is read as a non-US number).
-  const phone = text(raw?.phone) || field(opp, OPP.phone), digits = phone.replace(/\D/g, "");
+  const phone = text(raw?.phone) || field(opp, OPP.phone) || text(submitted.phone), digits = phone.replace(/\D/g, "");
   put("phone", phone.startsWith("+") ? phone : digits.length === 10 ? `+1${digits}` : digits.length === 11 && digits[0] === "1" ? `+${digits}` : phone);
-  put("address", raw?.address1); put("city", raw?.city); put("state", raw?.state); put("postal_code", raw?.postalCode);
+  put("address", raw?.address1 || submitted.address); put("city", raw?.city || submitted.city);
+  put("state", raw?.state || submitted.state); put("postal_code", raw?.postalCode || submitted.postal_code);
   for (const [, s] of saved) put(s.q, s.v);
 
   // Child and camp location (the parent can change these).
