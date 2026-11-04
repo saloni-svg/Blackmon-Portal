@@ -49,7 +49,7 @@ services:
       - key: ADMIN_ALERT_CONTACT_ID
         value: gLTEQ2vq7iB3wLyFpHQH
       - key: ADMIN_EMAIL         # the dashboard Owner, created on first start if the database has none
-        value: saloni@digitalryze.com
+        value: Jordan@blackmontutoring.com
       - key: ADMIN_PASSWORD
         sync: false
       - key: ANTHROPIC_API_KEY

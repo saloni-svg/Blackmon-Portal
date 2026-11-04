@@ -739,13 +739,26 @@ export function createAdmin({ store, db, meals, enrollForm, campFile, clientIp =
 
   // ---------- startup: Owner from .env, sample data in demo mode ----------
   async function seedOwner() {
-    if (db.prepare("SELECT 1 FROM admin_users WHERE level = 'owner'").get()) return;
     const email = String(process.env.ADMIN_EMAIL || "").trim().toLowerCase(), password = process.env.ADMIN_PASSWORD || "";
+    const first = email.split("@")[0].replace(/[^\p{L}]+/gu, " ").trim().split(" ")[0] || "Owner";
+    const owner = db.prepare("SELECT * FROM admin_users WHERE level = 'owner'").get();
+    // ADMIN_EMAIL changed: the Owner login moves to it, with ADMIN_PASSWORD (once; later password
+    // changes in the dashboard are kept). Their old sessions end; a login already on that email goes.
+    if (owner && email && password && owner.email.toLowerCase() !== email) {
+      db.prepare("DELETE FROM admin_users WHERE email = ? AND id != ?").run(email, owner.id);
+      db.prepare(`UPDATE admin_users SET email = ?, first_name = ?, last_name = '', password_hash = ?, must_change_password = 0,
+        photo_path = NULL, setup_token_hash = NULL, setup_expires_at = NULL, updated_at = ? WHERE id = ?`)
+        .run(email, first[0].toUpperCase() + first.slice(1), await hashPassword(password), now(), owner.id);
+      killSessions(owner.id);
+      log(null, "Moved the Owner login", email, `from ${owner.email}`);
+      console.log(`  Admin: the Owner login moved from ${owner.email} to ${email} (from .env).`);
+      return;
+    }
+    if (owner) return;
     if (!email || !password) {
       console.log("  Admin: set ADMIN_EMAIL and ADMIN_PASSWORD in .env, then restart, to create the Owner account.");
       return;
     }
-    const first = email.split("@")[0].replace(/[^\p{L}]+/gu, " ").trim().split(" ")[0] || "Owner";
     db.prepare(`INSERT INTO admin_users (id, email, first_name, last_name, level, password_hash, must_change_password, created_at, updated_at)
       VALUES (?, ?, ?, '', 'owner', ?, 1, ?, ?)`).run(crypto.randomUUID(), email, first[0].toUpperCase() + first.slice(1), await hashPassword(password), now(), now());
     console.log(`  Admin: created the Owner account for ${email} (from .env).`);
