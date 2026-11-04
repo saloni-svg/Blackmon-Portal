@@ -842,6 +842,10 @@ async function api(req, res, url) {
         outreach.setLanguage(contact.id, language);
         return send(res, 200, await assistant.ask(contact, await parentFacts(contact), text, language));
       }
+      if (route === "POST /api/chat/concern") {
+        const { text, language } = await readJson(req);
+        return send(res, 200, assistant.concern(contact, await parentFacts(contact), text, language));
+      }
       if (route === "POST /api/chat/handoff") {
         const { language } = await readJson(req);
         return send(res, 200, await assistant.handoff(contact, await parentFacts(contact), language));
