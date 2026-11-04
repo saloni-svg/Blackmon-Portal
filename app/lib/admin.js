@@ -136,7 +136,7 @@ function emailFailure(err, email) {
 
 // db / base: the portal database and data folder (server.js keeps demo data separate from live).
 // docs: camp documents and notifications (lib/documents.js).
-export function createAdmin({ store, db, meals, enrollForm, campFile, clientIp = (req) => req.socket.remoteAddress || "", enrollments, enrollmentSettings, base, docs, oppSync, assistant, announcements, outreach, videos, assessment, acks, root, portalUrl, printLinks = false, send, readBody, readJson }) {
+export function createAdmin({ store, db, live = { send() {}, drop() {} }, meals, enrollForm, campFile, clientIp = (req) => req.socket.remoteAddress || "", enrollments, enrollmentSettings, base, docs, oppSync, assistant, announcements, outreach, videos, assessment, acks, root, portalUrl, printLinks = false, send, readBody, readJson }) {
   const demo = !store.live;
   const proofsDir = path.join(base, "id-proofs"), photosDir = path.join(base, "photos");
   fs.mkdirSync(proofsDir, { recursive: true });
@@ -616,6 +616,7 @@ export function createAdmin({ store, db, meals, enrollForm, campFile, clientIp =
 
     upsertParent(id, { removed_at: now(), removed_by: me.email, removed_how: how, invite_sent_at: null });
     portalSessions.removeFor(id);
+    live.drop(id);
     if (parentsCache.list) parentsCache.list = parentsCache.list.filter((x) => x.contactId !== id);
     const what = how === "deleted" ? `deleted ${ids.length} Winter Camp 2026 opportunit${ids.length === 1 ? "y" : "ies"} in GHL` : `set ${ids.length} Winter Camp 2026 opportunit${ids.length === 1 ? "y" : "ies"} to Lost in GHL`;
     log(me, how === "deleted" ? "Deleted parent from Winter Camp 2026" : "Removed parent from camp (Lost)", pa.name, `${pa.email} · ${what}; tags removed, portal access off`);
@@ -679,6 +680,7 @@ export function createAdmin({ store, db, meals, enrollForm, campFile, clientIp =
         catch (err) { console.error(`  Announcement ${id}: ${LANG_EN[lang]} translation failed (${err.message}); sending English.`); }
       }
       announcements.saveTranslations(id, translations);
+      live.send("announcements"); // in the portal now; the emails / texts follow
       const summary = { recipients: parents.length, email: 0, sms: 0, failed: 0, skipped: 0, live: outreach.live };
       const channels = a.channels.filter((c) => c !== "portal");
       const files = announcements.fileCount(id);
@@ -1154,6 +1156,7 @@ export function createAdmin({ store, db, meals, enrollForm, campFile, clientIp =
       manage();
       const { version, campInfo } = await readJson(req);
       const out = content.saveCampInfo(version, campInfo);
+      live.send("content");
       log(me, "Edited camp info", out.campInfo.title);
       return send(res, 200, out);
     }
@@ -1162,6 +1165,7 @@ export function createAdmin({ store, db, meals, enrollForm, campFile, clientIp =
       manage();
       const { version, week } = await readJson(req);
       const out = content.saveWeek(version, wk[1], week);
+      live.send("content");
       log(me, "Edited this week", out.locations[wk[1]] || wk[1], out.weeks[wk[1]].label);
       return send(res, 200, out);
     }
@@ -1226,11 +1230,13 @@ export function createAdmin({ store, db, meals, enrollForm, campFile, clientIp =
             translations[lang] = await outreach.announcementIn(lang, a.title, a.body).catch(() => ({ title: a.title, body: a.body }));
           }
           announcements.saveTranslations(id, translations);
+          live.send("announcements");
         } else if (!a.send_at) await publish(id, me);
         return send(res, 200, { announcement: announcements.view(id) });
       }
       if (m === "DELETE") {
         const a = announcements.remove(id);
+        live.send("announcements");
         log(me, "Deleted announcement", a.title);
         return send(res, 200, { ok: true });
       }
@@ -1281,7 +1287,10 @@ export function createAdmin({ store, db, meals, enrollForm, campFile, clientIp =
       if (!found) throw httpError(404, "Chat not found.");
       if (m === "GET" && !chat[2]) return send(res, 200, found);
       if (m === "POST" && chat[2]) {
-        if (assistant.markHandled(chat[1], fullName(me) || me.email)) log(me, "Marked chat handled", found.conversation.parentName, found.conversation.parentEmail);
+        if (assistant.markHandled(chat[1], fullName(me) || me.email)) {
+          live.send("chat", found.conversation.contactId);
+          log(me, "Marked chat handled", found.conversation.parentName, found.conversation.parentEmail);
+        }
         return send(res, 200, assistant.conversation(chat[1]));
       }
       return send(res, 405, { error: "Method not allowed" });

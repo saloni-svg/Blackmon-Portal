@@ -240,19 +240,68 @@ async function signOut() {
   await api("/api/auth/logout", { method: "POST" }).catch(() => {});
   state.me = null;
   unmountChat();
+  stopLive();
   history.replaceState(null, "", "/");
   render();
 }
 
+// ---------- live updates (lib/live.js) ----------
+// When an admin changes Camp info, This week or the announcements, or closes the parent's chat, the
+// server says so on /api/events. Pages that only show that content are redrawn in place; on the
+// others (forms, documents, the enrollment form) only the menu badges change, so nothing the parent
+// is typing is lost.
+const LIVE_VIEWS = new Set(["home", "notifications", "camp", "week", "schedule", "team"]);
+let liveSource = null, liveOpened = false, liveTimer = null;
+function startLive() {
+  if (liveSource || !window.EventSource) return;
+  liveSource = new EventSource("/api/events");
+  liveSource.addEventListener("change", (e) => { let d = {}; try { d = JSON.parse(e.data); } catch {} onLive(d.what); });
+  // Reconnected after a drop (laptop asleep, phone offline): anything may have changed meanwhile.
+  liveSource.addEventListener("open", () => { if (liveOpened) { onLive("content"); onLive("chat"); } liveOpened = true; });
+  liveSource.addEventListener("error", () => { if (liveSource?.readyState === EventSource.CLOSED) stopLive(); });
+}
+function stopLive() { liveSource?.close(); liveSource = null; liveOpened = false; clearTimeout(liveTimer); }
+function onLive(what) {
+  if (what === "chat") return window.dispatchEvent(new Event("portal:chat"));
+  clearTimeout(liveTimer);
+  // Spread out a little, so every family's page doesn't reload at the same moment.
+  liveTimer = setTimeout(refreshLive, 300 + Math.random() * 2500);
+}
+async function refreshLive() {
+  let me;
+  try { me = await api("/api/me"); } catch (e) { if (e.status === 401) location.reload(); return; }
+  if (!state.me || state.me.role !== "parent") return;
+  state.me = me;
+  if (LIVE_VIEWS.has(route()) && !document.querySelector("dialog[open]")) {
+    const y = window.scrollY;
+    renderShell();
+    window.scrollTo(0, y);
+  } else updateNav();
+}
+
 // ---------- shell ----------
+// The sidebar links, with their lock icons and badges.
+function navHtml(me, r) {
+  const nav = (me.role === "parent" ? PARENT_NAV : STAFF_NAV).filter((n) => !n.only || n.only === me.role);
+  const unread = me.documents?.unread || 0;
+  const toSign = (me.documents?.list || []).filter((d) => d.type === "sign" && d.status !== "signed").length;
+  return nav.map((n) => `<li><a href="#/${n.r}" ${n.r === r ? 'aria-current="page"' : ""}>${ico(n.icon)}<span>${n.label}</span>${n.locked && !me.unlocked ? ico("lock", "lock") : ""}${n.badge && unread ? `<span class="badge" aria-label="${unread} unread">${unread}</span>` : ""}${n.docBadge && toSign ? `<span class="badge" aria-label="${toSign} to sign">${toSign}</span>` : ""}</a></li>`).join("");
+}
+function updateNav() {
+  const ul = $app.querySelector(".nav");
+  if (!ul) return;
+  ul.innerHTML = navHtml(state.me, route().split("/")[0]);
+  ul.querySelectorAll("a").forEach((a) => a.addEventListener("click", () => {
+    $app.querySelector(".shell")?.classList.remove("is-open");
+    $app.querySelector("[data-menu]")?.setAttribute("aria-expanded", "false");
+  }));
+}
+
 function renderShell() {
   const me = state.me;
-  const nav = (me.role === "parent" ? PARENT_NAV : STAFF_NAV).filter((n) => !n.only || n.only === me.role);
   let r = route(), arg;
   if (r.startsWith("doc/")) [r, arg] = r.split("/"); // #/doc/<document id>
   if (!VIEWS[me.role]?.[r]) { r = "home"; history.replaceState(null, "", "#/home"); }
-  const unread = me.documents?.unread || 0;
-  const toSign = (me.documents?.list || []).filter((d) => d.type === "sign" && d.status !== "signed").length;
   const roleName = { parent: "Parent", staff: "Camp staff", tutor: "Tutor" }[me.role];
   const sub = [roleName, me.locationName].filter(Boolean).join(" · ");
 
@@ -266,7 +315,7 @@ function renderShell() {
       <a class="brand brand--chip" href="#/home"><img class="logo" src="/logo/blackmon-tutoring-logo.png" alt="Blackmon Tutoring"><span>Portal</span></a>
       <div class="who"><b>${esc(me.person.firstName)} ${esc(me.person.lastName)}</b><span>${esc(sub)}</span></div>
       <ul class="nav">
-        ${nav.map((n) => `<li><a href="#/${n.r}" ${n.r === r ? 'aria-current="page"' : ""}>${ico(n.icon)}<span>${n.label}</span>${n.locked && !me.unlocked ? ico("lock", "lock") : ""}${n.badge && unread ? `<span class="badge" aria-label="${unread} unread">${unread}</span>` : ""}${n.docBadge && toSign ? `<span class="badge" aria-label="${toSign} to sign">${toSign}</span>` : ""}</a></li>`).join("")}
+        ${navHtml(me, r)}
       </ul>
       <div class="side__foot">
         <span>Questions? <a href="tel:+14692611625">469-261-1625</a></span>
@@ -292,7 +341,7 @@ function renderShell() {
   $app.querySelectorAll(".nav a").forEach((a) => a.addEventListener("click", () => toggle(false)));
   $app.querySelector("[data-out]").onclick = signOut;
 
-  if (me.role === "parent") { adoptChatLanguage(); mountChat({ language: me.language }); } else unmountChat();
+  if (me.role === "parent") { adoptChatLanguage(); mountChat({ language: me.language }); startLive(); } else { unmountChat(); stopLive(); }
   $app.querySelector("[data-lang]")?.addEventListener("change", (e) => changeLanguage(e.target));
 
   const view = $app.querySelector("[data-view]");

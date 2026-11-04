@@ -29,6 +29,7 @@ import { createChildCheck } from "./lib/childcheck.js";
 import { registrationsFor } from "./lib/receipts.js";
 import { enrollPrefill } from "./lib/enroll-prefill.js";
 import { createEnrollForm } from "./lib/enrollform.js";
+import { createLive } from "./lib/live.js";
 
 const ROOT = path.dirname(fileURLToPath(import.meta.url));
 const PUBLIC = path.join(ROOT, "public");
@@ -173,7 +174,8 @@ const outreach = createOutreach({ db, store, apiKey: process.env.OPENAI_API_KEY 
   testEmail: process.env.ADMIN_ALERT_EMAIL || "", testPhone: process.env.ADMIN_ALERT_PHONE || "", testContactId: ALERT_CONTACT_ID, live: LIVE });
 const meals = createMeals(db);
 const enrollments = createEnrollments(db);
-const admin = createAdmin({ store, db, meals, enrollForm, campFile: CAMP_FILE, clientIp, enrollments, enrollmentSettings: () => enrollmentSettings(ROOT), base: DATA_BASE, docs, oppSync, assistant, announcements, outreach, videos, assessment, acks, root: ROOT, portalUrl: PORTAL_URL, printLinks: PRINT_CODES, send, readBody, readJson });
+const live = createLive();
+const admin = createAdmin({ store, db, live, meals, enrollForm, campFile: CAMP_FILE, clientIp, enrollments, enrollmentSettings: () => enrollmentSettings(ROOT), base: DATA_BASE, docs, oppSync, assistant, announcements, outreach, videos, assessment, acks, root: ROOT, portalUrl: PORTAL_URL, printLinks: PRINT_CODES, send, readBody, readJson });
 
 // GHL allows several contacts with the same email. Sign-in uses the one that matters: on the Parent
 // tab, the contact with the Winter Camp 2026 "Paid (won)" opportunity (that's where documents and
@@ -554,6 +556,12 @@ async function api(req, res, url) {
   if (url.pathname === "/api/profile" || url.pathname === "/api/profile/id-proof") {
     if (role !== "staff" && role !== "tutor") return send(res, 403, { error: "This page isn't available for your account." });
     return admin.profile(req, res, url, normEmail(contact.email));
+  }
+
+  // Live updates for parents (lib/live.js): stays open; the page reloads what an admin changed.
+  if (route === "GET /api/events") {
+    if (role !== "parent") return send(res, 403, { error: "This page isn't available for your account." });
+    return live.connect(req, res, contact.id);
   }
 
   if (route === "GET /api/me") {

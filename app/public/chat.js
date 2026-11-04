@@ -115,21 +115,21 @@ export function mountChat({ language } = {}) {
     mute.setAttribute("aria-label", s.muted ? x.unmute : x.mute); mute.title = s.muted ? x.unmute : x.mute;
     q("[data-end] span").textContent = x.endCall;
     q("[data-orb]").dataset.state = s.vstatus || "";
-    const handedOff = s.conv?.status === "handoff";
-    humanBtn.querySelector("span").textContent = handedOff ? x.humanSent : x.human;
-    humanBtn.disabled = handedOff || s.busy;
+    const handedOff = s.conv?.status === "handoff", closed = s.conv?.status === "handled";
+    humanBtn.querySelector("span").textContent = handedOff ? x.humanSent : closed ? x.humanClosed : x.human;
+    humanBtn.disabled = handedOff || closed || s.busy;
     panel.dir = LANGS[s.lang].dir;
   }
 
   function bubble(m) {
     const x = t();
-    if (m.role === "event") return `<p class="askb__event ${m.text.startsWith("Voice") ? "askb__event--voice" : ""}">${esc(m.text === "Voice call started" ? x.voiceStarted : m.text === "Voice call ended" ? x.voiceEnded : x.humanSent)}</p>`;
+    if (m.role === "event") return `<p class="askb__event ${m.text.startsWith("Voice") ? "askb__event--voice" : ""}">${esc(m.text === "Voice call started" ? x.voiceStarted : m.text === "Voice call ended" ? x.voiceEnded : m.text === "Closed by the Blackmon team" ? x.humanClosed : x.humanSent)}</p>`;
     if (m.role === "parent") return `<div class="askb__msg askb__msg--me"><p>${esc(m.text)}</p></div>`;
     const sources = m.sources?.length ? `<p class="askb__src">${esc(x.from)}: ${m.sources.map(esc).join(" · ")}</p>` : "";
     const fb = m.id ? `<div class="askb__fb">
         <button type="button" data-fb="1" data-id="${m.id}" aria-pressed="${m.feedback === 1}" aria-label="${esc(x.helpful)}" title="${esc(x.helpful)}">${ICONS.up}</button>
         <button type="button" data-fb="-1" data-id="${m.id}" aria-pressed="${m.feedback === -1}" aria-label="${esc(x.notHelpful)}" title="${esc(x.notHelpful)}">${ICONS.down}</button></div>` : "";
-    const offer = m.offerHandoff && s.conv?.status !== "handoff" ? `<button type="button" class="askb__offer" data-offer>${ICONS.person} ${esc(x.offerYes)}</button>` : "";
+    const offer = m.offerHandoff && s.conv?.status !== "handoff" && s.conv?.status !== "handled" ? `<button type="button" class="askb__offer" data-offer>${ICONS.person} ${esc(x.offerYes)}</button>` : "";
     return `<div class="askb__msg askb__msg--bot"><p>${esc(m.text)}</p>${sources}${offer}${fb}</div>`;
   }
 
@@ -261,6 +261,9 @@ export function mountChat({ language } = {}) {
       .catch((err) => signedOut(err));
   };
   window.addEventListener("portal:language", (e) => { if (root && e.detail.from !== "chat") setLang(e.detail.code); });
+  // The team closed this chat (live update from public/app.js): show it without a refresh.
+  const mine = root;
+  window.addEventListener("portal:chat", () => { if (root === mine && s.loaded && !s.busy && !s.call) load(); });
   q("[data-talk]").onclick = startCall;
   q("[data-end]").onclick = () => s.call?.end?.();
   q("[data-mute]").onclick = () => { if (!s.call?.setMuted) return; s.muted = !s.muted; s.call.setMuted(s.muted); labels(); };
