@@ -136,7 +136,7 @@ function emailFailure(err, email) {
 
 // db / base: the portal database and data folder (server.js keeps demo data separate from live).
 // docs: camp documents and notifications (lib/documents.js).
-export function createAdmin({ store, db, live = { send() {}, drop() {} }, meals, enrollForm, campFile, clientIp = (req) => req.socket.remoteAddress || "", enrollments, enrollmentSettings, base, docs, oppSync, assistant, announcements, outreach, videos, assessment, acks, root, portalUrl, printLinks = false, send, readBody, readJson }) {
+export function createAdmin({ store, db, live = { send() {}, drop() {} }, parentAccounts, meals, enrollForm, campFile, clientIp = (req) => req.socket.remoteAddress || "", enrollments, enrollmentSettings, base, docs, oppSync, assistant, announcements, outreach, videos, assessment, acks, root, portalUrl, printLinks = false, send, readBody, readJson }) {
   const demo = !store.live;
   const proofsDir = path.join(base, "id-proofs"), photosDir = path.join(base, "photos");
   fs.mkdirSync(proofsDir, { recursive: true });
@@ -1014,6 +1014,33 @@ export function createAdmin({ store, db, live = { send() {}, drop() {} }, meals,
     }
 
     // ----- parents -----
+    // "Sync portal accounts from GHL": every Winter Camp 2026 Paid (won) family gets a working parent
+    // account (lib/parentaccount.js), as if they had signed in. Safe to run again: accounts that work
+    // are left alone, and parents an admin removed from camp stay removed.
+    if (m === "POST" && p === "/api/admin/parents/sync-accounts") {
+      manage();
+      const list = await paidParents(true), seen = new Set(), results = [];
+      for (const x of list) {
+        if (seen.has(x.contactId)) continue;
+        seen.add(x.contactId);
+        const contact = parentsCache.contacts.get(x.contactId) || await store.getContact(x.contactId).catch(() => null);
+        try {
+          const r = await parentAccounts.ensure(contact);
+          results.push({ contactId: x.contactId, email: contact?.email || x.email, outcome: r.outcome, why: r.why || null });
+          console.log(`  Sync portal accounts: ${contact?.email || x.contactId}: ${r.outcome}${r.why ? `: ${r.why}` : ""}.`);
+        } catch (err) {
+          results.push({ contactId: x.contactId, email: contact?.email || x.email, outcome: "failed", why: err.message });
+          console.error(`  Sync portal accounts: ${contact?.email || x.contactId}: failed: ${err.message}`);
+        }
+      }
+      const n = (o) => results.filter((r) => r.outcome === o).length;
+      const out = { families: results.length, created: n("created-from-ghl"), found: n("found"), skipped: n("not-eligible"), failed: n("failed"), results };
+      log(me, "Synced portal accounts from GHL", `${out.families} paid ${out.families === 1 ? "family" : "families"}`,
+        `${out.created} set up, ${out.found} already working, ${out.skipped} not eligible${out.failed ? `, ${out.failed} failed` : ""}`);
+      if (out.failed) throw httpError(502, `${out.failed} account${out.failed === 1 ? "" : "s"} couldn't be set up in GHL (see the server log). ${out.created} set up, ${out.found} already working.`);
+      return send(res, 200, out);
+    }
+
     if (m === "GET" && p === "/api/admin/parents") {
       const refresh = url.searchParams.get("refresh") === "1";
       // Refresh by an admin also brings every parent's documents up to date (view only just reloads).

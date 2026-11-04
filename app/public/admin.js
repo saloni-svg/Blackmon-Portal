@@ -420,7 +420,8 @@ async function parentsView(el, me) {
       <button class="btn btn--ghost" data-refresh>${ico("refresh")} Refresh</button>
       <a class="btn btn--ghost" href="/api/admin/meals.csv">${ico("download")} Export meal plans</a>
       ${me.canManage ? `<button class="btn btn--ghost" data-sync>${ico("file")} Sync documents</button>
-        <button class="btn btn--ghost" data-childsync>${ico("refresh")} Sync from Winter Camp 2026</button>` : ""}</div>`)}
+        <button class="btn btn--ghost" data-childsync>${ico("refresh")} Sync from Winter Camp 2026</button>
+        <button class="btn btn--ghost" data-accounts>${ico("team")} Sync portal accounts from GHL</button>` : ""}</div>`)}
     <section class="card" data-list><p class="hint">Loading parents from GHL…</p></section>
     <p class="muted" data-at style="margin-top:10px"></p>`;
   const box = el.querySelector("[data-list]"), q = el.querySelector("[data-q]");
@@ -485,6 +486,14 @@ async function parentsView(el, me) {
     try {
       const r = await api("/api/admin/opportunities/sync-child", { method: "POST" });
       toast(`Loaded ${r.parents} Paid (won) ${r.parents === 1 ? "opportunity" : "opportunities"} from Winter Camp 2026. Documents: ${r.added} added, ${r.removed} removed.`);
+      await load(false);
+    } catch (err) { toast(err.message, "err"); }
+  }));
+  el.querySelector("[data-accounts]")?.addEventListener("click", (e) => busy(e.currentTarget, "Syncing…", async () => {
+    try {
+      const r = await api("/api/admin/parents/sync-accounts", { method: "POST" });
+      toast(`Portal accounts: ${r.created} set up from GHL, ${r.found} already working, ${r.skipped} not eligible (${r.families} paid ${r.families === 1 ? "family" : "families"}).`);
+      for (const x of r.results.filter((x) => x.outcome === "not-eligible")) console.info(`Not eligible: ${x.email}: ${x.why}`);
       await load(false);
     } catch (err) { toast(err.message, "err"); }
   }));

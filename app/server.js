@@ -30,6 +30,7 @@ import { registrationsFor } from "./lib/receipts.js";
 import { enrollPrefill } from "./lib/enroll-prefill.js";
 import { createEnrollForm } from "./lib/enrollform.js";
 import { createLive } from "./lib/live.js";
+import { createParentAccounts, PORTAL_PARENT_TAG } from "./lib/parentaccount.js";
 
 const ROOT = path.dirname(fileURLToPath(import.meta.url));
 const PUBLIC = path.join(ROOT, "public");
@@ -177,7 +178,8 @@ const outreach = createOutreach({ db, store, apiKey: process.env.OPENAI_API_KEY 
 const meals = createMeals(db);
 const enrollments = createEnrollments(db);
 const live = createLive();
-const admin = createAdmin({ store, db, live, meals, enrollForm, campFile: CAMP_FILE, clientIp, enrollments, enrollmentSettings: () => enrollmentSettings(ROOT), base: DATA_BASE, docs, oppSync, assistant, announcements, outreach, videos, assessment, acks, root: ROOT, portalUrl: PORTAL_URL, printLinks: PRINT_CODES, send, readBody, readJson });
+const parentAccounts = createParentAccounts({ store, db, mayChange });
+const admin = createAdmin({ store, db, live, parentAccounts, meals, enrollForm, campFile: CAMP_FILE, clientIp, enrollments, enrollmentSettings: () => enrollmentSettings(ROOT), base: DATA_BASE, docs, oppSync, assistant, announcements, outreach, videos, assessment, acks, root: ROOT, portalUrl: PORTAL_URL, printLinks: PRINT_CODES, send, readBody, readJson });
 
 // GHL allows several contacts with the same email. Sign-in uses the one that matters: on the Parent
 // tab, the contact with the Winter Camp 2026 "Paid (won)" opportunity (that's where documents and
@@ -191,7 +193,8 @@ async function findPortalContact(email, picked) {
   if (picked === "parent") {
     for (const c of all) if (await docs.paidOpportunity(c.id).catch(() => null)) { chosen = c; break; }
   }
-  chosen ||= all.find((c) => roleOf(c) === picked) || all.find((c) => roleOf(c)) || all[0];
+  chosen ||= all.find((c) => roleOf(c) === picked) || all.find((c) => roleOf(c))
+    || (picked === "parent" && all.find((c) => (c.tags || []).includes(PORTAL_PARENT_TAG))) || all[0];
   console.log(`  ${all.length} GHL contacts share ${email} (${all.map((c) => c.id).join(", ")}); signing in with ${chosen.id}.`);
   return chosen;
 }
@@ -438,7 +441,12 @@ async function api(req, res, url) {
     // Parent tab (or no tab given): no code, and no test-mode contact setup, unless the email has a
     // paid opportunity. Camp staff and Tutor are unchanged.
     const paidGate = async () => {
-      try { if (await hasPaidOpportunity(email)) return false; send(res, 403, { error: NOT_PAID }); }
+      try {
+        if (await hasPaidOpportunity(email)) return false;
+        if ((await store.findAllByEmail(email).catch(() => [])).some((c) => (c?.tags || []).includes(PORTAL_PARENT_TAG))) return false;
+        console.log(`  Sign-in ${email}: not-eligible (no paid opportunity and no portal-parent tag).`);
+        send(res, 403, { error: NOT_PAID });
+      }
       catch (err) { console.error(`  Paid-parent check for ${email} failed: ${err.message}`); send(res, 502, { error: "Something went wrong, please try again." }); }
       return true; // blocked; the reply has been sent
     };
@@ -459,13 +467,18 @@ async function api(req, res, url) {
       console.log(`  Sign-in attempt for ${email}: removed from Winter Camp 2026 by an admin.`);
       return send(res, 403, { error: NOT_PAID });
     }
-    // A paid parent whose contact has no Portal - Role yet (nobody sent the invite) gets Parent now,
-    // instead of silently receiving no code. Never re-opens access an admin removed.
-    if (picked !== "staff" && picked !== "tutor" && contact && !contact.fields.portal__role
-      && contact.fields.portal__access_granted !== "No" && mayChange(contact)) {
-      await store.updateFields(contact.id, { portal__role: "Parent", portal__access_granted: "Yes" });
-      console.log(`  Paid parent ${email} had no Portal - Role; set it to Parent at sign-in.`);
-      contact = await store.getContact(contact.id);
+    // A paid parent (Winter Camp 2026 Paid (won), or the portal-parent tag) whose account isn't set up
+    // (no invite yet, or Access Granted turned off outside the portal) gets it now, from GHL, instead
+    // of silently receiving no code. Parents an admin removed from camp in the portal stay out.
+    if (picked !== "staff" && picked !== "tutor") {
+      let r;
+      try { r = await parentAccounts.ensure(contact); }
+      catch (err) {
+        console.error(`  Sign-in ${email}: couldn't check or set up the parent account in GHL: ${err.message}`);
+        return send(res, 502, { error: "Something went wrong, please try again." });
+      }
+      console.log(`  Sign-in ${email}: ${r.outcome}${contact ? ` (contact ${contact.id}${r.opportunityId ? `, opportunity ${r.opportunityId}` : ""})` : ""}${r.why ? `: ${r.why}` : ""}.`);
+      contact = r.contact;
     }
     // Test mode never re-opens access an admin removed (Portal - Access Granted = No).
     if (ALLOW_ANY_EMAIL && !(contact && roleOf(contact)) && contact?.fields?.portal__access_granted !== "No") contact = await setUpTestContact(email, contact, picked);
@@ -490,7 +503,12 @@ async function api(req, res, url) {
       const code = String(crypto.randomInt(0, 1_000_000)).padStart(6, "0");
       codes.set(email, { hash: sha(email + code), contactId: contact.id, exp: Date.now() + 10 * 60_000, tries: 0, sentAt: Date.now() });
       if (PRINT_CODES) console.log(`\n  Sign-in code for ${email}: ${code}   (DEV_PRINT_CODES is on; no email sent)\n`);
-      else await store.sendCode(contact, code, LOCAL_LINK_BLOCKED ? "" : PORTAL_URL);
+      else {
+        // The reply stays the same either way (it never says whether an account exists); a failed
+        // send is logged with GHL's error.
+        try { await store.sendCode(contact, code, LOCAL_LINK_BLOCKED ? "" : PORTAL_URL); console.log(`  Sign-in ${email}: code sent (contact ${contact.id}).`); }
+        catch (err) { console.error(`  Sign-in ${email}: send-failed (contact ${contact.id}): ${err.message}`); }
+      }
     } else {
       console.log(`  Sign-in attempt for ${email}: no portal contact (needs Portal - Role set in GHL).`);
     }
