@@ -888,8 +888,14 @@ async function api(req, res, url) {
   // ----- camp staff / tutors: training videos (uploaded by admins) and their own intro video -----
   if (role === "staff" || role === "tutor") {
     const audience = TEST_ROLES[role]; // "Camp Staff" | "Tutor"
+    // Camp staff who passed the assessment have finished training: their videos show as watched,
+    // including ones an admin uploaded or replaced after they watched the earlier copies.
+    const trainingList = () => {
+      const list = videos.trainingFor(audience, contact.id);
+      return role === "staff" && assessment.passed(contact.id) ? list.map((v) => ({ ...v, watched: true })) : list;
+    };
     try {
-      if (route === "GET /api/training") return send(res, 200, { videos: videos.trainingFor(audience, contact.id) });
+      if (route === "GET /api/training") return send(res, 200, { videos: trainingList() });
       const tv = /^\/api\/training\/(\d+)\/(file|watched)$/.exec(url.pathname);
       if (tv && req.method === "GET" && tv[2] === "file") {
         const f = videos.trainingFile(tv[1]);
@@ -905,7 +911,7 @@ async function api(req, res, url) {
           await store.updateFields(contact.id, { portal__onboarding_status: next })
             .catch((err) => console.error(`  Training: couldn't set ${contact.email} to ${next} in GHL: ${err.message}`));
         }
-        return send(res, 200, { done, videos: videos.trainingFor(audience, contact.id) });
+        return send(res, 200, { done, videos: trainingList() });
       }
       if (role === "staff" && (route === "GET /api/assessment" || route === "POST /api/assessment")) {
         const unlocked = trainingDone(contact);
