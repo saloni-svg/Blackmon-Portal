@@ -1555,7 +1555,7 @@ function drawStaff(el, box, me, role) {
     return;
   }
   const accessCell = (s) => {
-    if (!me.canManage || s.isSelf) return `<span class="pill ${s.access === "none" ? "pill--todo" : s.access === "view" ? "pill--sky" : "pill--ok"}">${esc(ACCESS[s.access])}</span>${s.isSelf ? '<span class="sub">You can\'t change your own access</span>' : ""}`;
+    if (!me.canManage || s.isSelf || s.sharedLogin) return `<span class="pill ${s.access === "none" ? "pill--todo" : s.access === "view" ? "pill--sky" : "pill--ok"}">${esc(ACCESS[s.access])}</span>${s.sharedLogin ? `<span class="sub">Shares the ${esc(s.sharedLogin)} login</span>` : s.isSelf ? '<span class="sub">You can\'t change your own access</span>' : ""}`;
     return `<label class="sr" for="acc-${s.id}">Dashboard access for ${esc(fullName(s))}</label>
       <select class="input" id="acc-${s.id}" data-access="${s.id}">${Object.entries(ACCESS).map(([k, v]) => `<option value="${k}" ${k === s.access ? "selected" : ""}>${v}</option>`).join("")}</select>
       ${s.access !== "none" ? `<span class="sub">${s.setupPending ? "Setup pending · " : ""}<button type="button" class="linkbtn" data-setup="${s.id}">Resend setup link</button></span>` : ""}`;
@@ -1570,7 +1570,7 @@ function drawStaff(el, box, me, role) {
       <td data-label="Access"><div>${accessCell(s)}</div></td>
       ${me.canManage ? `<td data-label="ID proof"><a href="/api/admin/staff/${s.id}/id-proof" target="_blank" rel="noopener">View</a></td>
       <td class="act"><button type="button" class="btn btn--ghost btn--sm" data-edit="${s.id}" aria-label="Edit ${esc(fullName(s))}">Edit</button>
-        <button type="button" class="btn btn--ghost btn--sm btn--del" data-del="${s.id}" aria-label="Delete ${esc(fullName(s))}" ${s.isSelf ? 'disabled title="You can\'t delete yourself"' : ""}>Delete</button></td>` : ""}
+        <button type="button" class="btn btn--ghost btn--sm btn--del" data-del="${s.id}" aria-label="Delete ${esc(fullName(s))}" ${s.isSelf && !s.sharedLogin ? 'disabled title="You can\'t delete yourself"' : ""}>Delete</button></td>` : ""}
     </tr>`).join("")}</tbody></table></div>`;
 
   const byId = (id) => state.staff.find((s) => s.id === id);
@@ -1630,10 +1630,10 @@ function staffForm(el, me, s, role = "Camp Staff") {
         ${select("role", "Role", pairs(STAFF_ROLES), p.role, "required")}
         ${select("location", "Location", pairs(LOCATIONS), p.location, "required")}
         <div><label class="label" for="f-access">Dashboard access</label>
-          <select class="input" id="f-access" name="access" aria-describedby="h-access e-access" ${editing && s.isSelf ? "disabled" : ""}>
+          <select class="input" id="f-access" name="access" aria-describedby="h-access e-access" ${editing && (s.isSelf || s.sharedLogin) ? "disabled" : ""}>
             ${Object.entries(ACCESS).map(([k, v]) => `<option value="${k}" ${k === p.access ? "selected" : ""}>${v}</option>`).join("")}</select>
-          <p class="hint" id="h-access">${editing && s.isSelf ? "You can't change your own access. Change your own password in Settings." : "Whether they can sign in to this admin dashboard at /admin."}</p>${errSlot("access")}</div>
-        <div class="fld--full" data-pwbox ${p.access === "none" || (editing && s.isSelf) ? "hidden" : ""}>
+          <p class="hint" id="h-access">${editing && s.sharedLogin ? `They share the ${esc(s.sharedLogin)} dashboard login; its access and password are changed on the record that owns it.` : editing && s.isSelf ? "You can't change your own access. Change your own password in Settings." : "Whether they can sign in to this admin dashboard at /admin. If this email already signs in, they share that login."}</p>${errSlot("access")}</div>
+        <div class="fld--full" data-pwbox ${p.access === "none" || (editing && (s.isSelf || s.sharedLogin)) ? "hidden" : ""}>
           <div class="grid grid--2">
             <div><label class="label" for="f-password">Dashboard password</label>
               <input class="input" id="f-password" name="password" type="password" autocomplete="new-password" aria-describedby="h-password e-password">${errSlot("password")}</div>
@@ -1691,7 +1691,7 @@ function staffForm(el, me, s, role = "Camp Staff") {
   };
 
   // Password fields only matter when the person gets dashboard access.
-  const selfEdit = editing && s.isSelf;
+  const selfEdit = editing && (s.isSelf || !!s.sharedLogin);
   form.elements.access.addEventListener("change", () => {
     pwbox.hidden = selfEdit || form.elements.access.value === "none";
     if (pwbox.hidden) { pw.value = pw2.value = ""; fe.set("password", ""); fe.set("confirm", ""); }
@@ -1752,7 +1752,8 @@ function staffForm(el, me, s, role = "Camp Staff") {
     try {
       const r = await busy(btn, file ? "Uploading…" : "Saving…", () => api(editing ? `/api/admin/staff/${s.id}` : "/api/admin/staff", { method: editing ? "PUT" : "POST", body }));
       toast(editing ? `Saved changes to ${fullName(r.staff)}.` : `${fullName(r.staff)} added.`);
-      if (setsPassword) toast(`${fullName(r.staff)} can sign in at /admin with their email and the password you set.`);
+      if (r.note) toast(r.note);
+      else if (setsPassword) toast(`${fullName(r.staff)} can sign in at /admin with their email and the password you set.`);
       if (r.warning) toast(r.warning, "warn");
       if (preview) URL.revokeObjectURL(preview);
       if (r.staff.role !== role) toast(`${fullName(r.staff)} is now listed under ${staffPage(r.staff.role).title}.`);
