@@ -388,12 +388,18 @@ async function notifyParent(p, btn, done) {
     done();
   } catch (err) { toast(err.message, "err"); }
 }
-async function removeParent(p, btn, done) {
-  if (!(await confirmDialog(`Remove ${p.name} from the portal?`, "Nothing is deleted in GHL: their contact and Winter Camp 2026 opportunity stay exactly as they are. This only sets Portal - Access Granted to No (so they can't sign in to the portal) and hides them from this list.", "Remove portal access"))) return;
+// how "deleted": Delete (their Winter Camp 2026 opportunity is deleted in GHL); "lost": Remove from
+// camp (set to Lost in GHL, kept for history: refunds, cancellations). Both done by the server.
+const REMOVE_TEXT = {
+  deleted: (n) => [`Remove ${n} from Winter Camp 2026?`, "This deletes their Winter Camp 2026 opportunity in GHL and removes their portal access. Payment records in GHL are kept.", "Delete"],
+  lost: (n) => [`Remove ${n} from camp?`, "This sets their Winter Camp 2026 opportunity to Lost in GHL (it stays there for history, e.g. a refund or cancellation) and removes their portal access. Payment records in GHL are kept.", "Remove from camp"],
+};
+async function removeParent(p, btn, done, how = "deleted") {
+  if (!(await confirmDialog(...REMOVE_TEXT[how](p.name || p.email)))) return;
   try {
-    await busy(btn, "Removing…", () => api(`/api/admin/parents/${encodeURIComponent(p.contactId)}`, { method: "DELETE" }));
+    await busy(btn, "Removing…", () => api(`/api/admin/parents/${encodeURIComponent(p.contactId)}${how === "lost" ? "?how=lost" : ""}`, { method: "DELETE" }));
     state.parents = (state.parents || []).filter((x) => x.contactId !== p.contactId);
-    toast(`${p.name} no longer has portal access.`);
+    toast(how === "lost" ? `${p.name} was removed from camp (set to Lost in GHL).` : `${p.name} was removed from Winter Camp 2026 and deleted from Paid (won) in GHL.`);
     done();
   } catch (err) { toast(err.message, "err"); }
 }
@@ -456,11 +462,13 @@ async function parentsView(el, me) {
         <td data-label="Portal invite">${inviteHtml(p)}</td>
         ${me.canManage ? `<td class="act">
           <button type="button" class="btn btn--sm ${p.inviteSentAt ? "btn--ghost" : ""}" data-notify="${esc(p.contactId)}" ${p.email ? "" : "disabled"}>${ico("mail")} ${p.inviteSentAt || p.paidAgain ? "Resend invite" : "Send invite"}</button>
-          <button type="button" class="btn btn--ghost btn--sm btn--del" data-remove="${esc(p.contactId)}" aria-label="Remove ${esc(p.name)}">Delete</button></td>` : ""}
+          <button type="button" class="btn btn--ghost btn--sm" data-lost="${esc(p.contactId)}" aria-label="Remove ${esc(p.name)} from camp (Lost)">Remove from camp</button>
+          <button type="button" class="btn btn--ghost btn--sm btn--del" data-remove="${esc(p.contactId)}" aria-label="Delete ${esc(p.name)}">Delete</button></td>` : ""}
       </tr>`).join("")}</tbody></table></div>`;
     const byId = (id) => state.parents.find((p) => p.contactId === id);
     box.querySelectorAll("[data-notify]").forEach((b) => (b.onclick = () => notifyParent(byId(b.dataset.notify), b, draw)));
     box.querySelectorAll("[data-remove]").forEach((b) => (b.onclick = () => removeParent(byId(b.dataset.remove), b, draw)));
+    box.querySelectorAll("[data-lost]").forEach((b) => (b.onclick = () => removeParent(byId(b.dataset.lost), b, draw, "lost")));
     box.querySelectorAll("[data-meal]").forEach((b) => (b.onclick = () => mealDialog(byId(b.dataset.meal))));
   }
 
@@ -562,7 +570,7 @@ async function parentDetailView(el, me, id) {
     ];
     el.innerHTML = `${header(esc(p.name || "—"), `${esc(p.email || "—")} · Winter Camp 2026 · Paid (won)`,
       `<div class="tools">${me.canManage ? `<button class="btn btn--sm ${p.inviteSentAt ? "btn--ghost" : ""}" data-notify ${p.email && !p.hidden ? "" : "disabled"}>${ico("mail")} ${p.inviteSentAt || p.paidAgain ? "Resend invite" : "Send invite"}</button>
-        ${p.hidden ? "" : '<button class="btn btn--ghost btn--sm btn--del" data-remove>Delete</button>'}` : ""}
+        ${p.hidden ? "" : '<button class="btn btn--ghost btn--sm" data-lost>Remove from camp</button><button class="btn btn--ghost btn--sm btn--del" data-remove>Delete</button>'}` : ""}
         <button class="btn btn--ghost btn--sm" data-reload>${ico("refresh")} Reload from GHL</button>
         <a class="btn btn--ghost btn--sm" href="#/parents">Back to parents</a></div>`)}
       <p class="muted" style="margin:-8px 0 16px;font-size:14px">Last synced from GHL: ${esc(when(data.syncedAt))}</p>
@@ -600,6 +608,7 @@ async function parentDetailView(el, me, id) {
       catch (err) { toast(err.message, "err"); }
     }));
     el.querySelector("[data-remove]")?.addEventListener("click", (e) => removeParent(p, e.currentTarget, () => { location.hash = "#/parents"; }));
+    el.querySelector("[data-lost]")?.addEventListener("click", (e) => removeParent(p, e.currentTarget, () => { location.hash = "#/parents"; }, "lost"));
     el.querySelector("[data-sync]")?.addEventListener("click", (e) => busy(e.currentTarget, "Syncing…", async () => {
       try {
         const r = await api(`${base}/sync`, { method: "POST" });

@@ -202,6 +202,8 @@ async function hasPaidOpportunity(email) {
     || normEmail(o.customFields.find((cf) => cf.id === OPP_PARENT_EMAIL)?.value) === email));
 }
 const NOT_PAID = "Please enter correct email id.";
+// A parent an admin removed from Winter Camp 2026 (admin Parents → Delete / Remove from camp).
+const removedParent = (contactId) => !!db.prepare("SELECT 1 FROM parent_access WHERE contact_id = ? AND removed_at IS NOT NULL").get(contactId);
 const NOT_STAFF = { staff: "Incorrect email. Please sign in with the email Blackmon Tutoring added you with as camp staff.",
   tutor: "Incorrect email. Please sign in with the email Blackmon Tutoring added you with as a tutor." };
 
@@ -449,6 +451,10 @@ async function api(req, res, url) {
     }
 
     let contact = await findPortalContact(email, picked);
+    if (picked !== "staff" && picked !== "tutor" && contact && removedParent(contact.id)) {
+      console.log(`  Sign-in attempt for ${email}: removed from Winter Camp 2026 by an admin.`);
+      return send(res, 403, { error: NOT_PAID });
+    }
     // A paid parent whose contact has no Portal - Role yet (nobody sent the invite) gets Parent now,
     // instead of silently receiving no code. Never re-opens access an admin removed.
     if (picked !== "staff" && picked !== "tutor" && contact && !contact.fields.portal__role
@@ -535,7 +541,7 @@ async function api(req, res, url) {
   const role = roleOf(contact);
   // No portal role any more (an admin removed their access: Access Granted = No), or camp staff /
   // tutors no longer on the admin's Camp staff / Tutors page with that role: the session ends.
-  if (!role || ((role === "staff" || role === "tutor")
+  if (!role || (role === "parent" && removedParent(contact.id)) || ((role === "staff" || role === "tutor")
     && db.prepare("SELECT role FROM staff WHERE email = ? COLLATE NOCASE").get(normEmail(contact.email))?.role !== TEST_ROLES[role])) {
     sessions.remove(session.sid);
     return send(res, 401, { error: "Please sign in." }, { "Set-Cookie": `bt_sid=; HttpOnly; SameSite=Lax; Path=/; Max-Age=0${SECURE_COOKIE}` });
