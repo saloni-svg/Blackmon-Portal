@@ -162,8 +162,10 @@ function ackDetails(contact) {
 }
 // Camp staff must watch every training video in the portal before the assessment (and the steps
 // after it) open, whatever GHL's onboarding status says. Only while no videos are uploaded yet does
-// GHL's "Training Complete" count.
+// GHL's "Training Complete" count. Someone who already passed the assessment has finished training:
+// videos an admin uploads (or replaces) afterwards don't lock them out again.
 function trainingDone(contact) {
+  if (assessment.passed(contact.id)) return true;
   const list = videos.trainingFor("Camp Staff", contact.id);
   if (list.length) return list.every((v) => v.watched);
   return Math.max(0, ONBOARDING.indexOf(contact.fields.portal__onboarding_status || "Not Started")) >= ONBOARDING.indexOf("Training Complete");
