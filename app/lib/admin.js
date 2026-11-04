@@ -152,6 +152,12 @@ export function createAdmin({ store, db, meals, enrollForm, campFile, clientIp =
   const userById = (id) => db.prepare("SELECT * FROM admin_users WHERE id = ?").get(id);
   const userByEmail = (email) => db.prepare("SELECT * FROM admin_users WHERE email = ?").get(String(email || "").toLowerCase());
   const userByStaff = (staffId) => db.prepare("SELECT * FROM admin_users WHERE staff_id = ?").get(staffId);
+  // Staff can share an email; they then share that email's one dashboard login (owned by one of them,
+  // or by the Owner). own: the login is this record's; otherwise it's shared.
+  const loginOf = (s) => {
+    const own = userByStaff(s.id);
+    return own ? { login: own, own: true } : { login: userByEmail(s.email) || null, own: false };
+  };
   const staffById = (id) => db.prepare("SELECT * FROM staff WHERE id = ?").get(id);
   const adminCount = () => db.prepare("SELECT COUNT(*) AS n FROM admin_users WHERE level IN ('owner', 'admin')").get().n;
   const canManage = (u) => u.level === "owner" || u.level === "admin";
@@ -228,12 +234,12 @@ export function createAdmin({ store, db, meals, enrollForm, campFile, clientIp =
     };
   }
   function publicStaff(s, actor) {
-    const login = userByStaff(s.id);
+    const { login, own } = loginOf(s);
     return {
       id: s.id, firstName: s.first_name, lastName: s.last_name, gender: s.gender, email: s.email, phone: s.phone,
       role: s.role, location: s.location, idProofFileName: s.id_proof_file_name,
       access: login?.level || "none", setupPending: !!login && !login.password_hash, isSelf: !!login && login.id === actor.id,
-      updatedAt: s.updated_at,
+      sharedLogin: !!login && !own ? login.email : null, updatedAt: s.updated_at,
     };
   }
 
@@ -345,6 +351,11 @@ export function createAdmin({ store, db, meals, enrollForm, campFile, clientIp =
   // Returns a warning string if that setup email couldn't be sent (access is still granted).
   async function setAccess(actor, staff, level, { password } = {}) {
     const login = userByStaff(staff.id);
+    const shared = !login && userByEmail(staff.email);
+    if (shared) {
+      if (shared.level === level && !password) return null;
+      throw httpError(409, `${staff.email} already signs in to the dashboard (${LEVEL_NAMES[shared.level]}), and this person shares that login. Change its access or password on the record that owns it.`);
+    }
     const from = login?.level || "none";
     if (from === level) {
       if (password && login) await setLoginPassword(actor, login, staff, password);
@@ -1348,10 +1359,13 @@ export function createAdmin({ store, db, meals, enrollForm, campFile, clientIp =
       }
       if (m === "PUT" && !sub) return saveStaff(req, res, me, staff);
       if (m === "DELETE" && !sub) {
-        const login = userByStaff(staff.id);
+        let login = userByStaff(staff.id);
+        // Others with this email keep the GHL contact's portal access, and the login moves to one of them.
+        const other = db.prepare("SELECT id FROM staff WHERE email = ? AND id != ? ORDER BY created_at").get(staff.email, staff.id);
+        if (login && other) { db.prepare("UPDATE admin_users SET staff_id = ? WHERE id = ?").run(other.id, login.id); login = null; }
         if (login?.id === me.id) throw httpError(403, "You can't delete your own staff record.");
         if (login?.level === "admin" && adminCount() <= 1) throw httpError(409, "There must always be at least one admin.");
-        if (staff.ghl_contact_id) {
+        if (staff.ghl_contact_id && !other) {
           await store.updateFields(staff.ghl_contact_id, { portal__access_granted: "No" }).catch((err) => {
             console.error(`  Couldn't remove portal access for ${staff.email} in GHL: ${err.message}`);
             throw httpError(502, "Couldn't update GHL, so nothing was deleted. Please try again.");
@@ -1384,18 +1398,18 @@ export function createAdmin({ store, db, meals, enrollForm, campFile, clientIp =
     if (staff && !text.access) values.access = login?.level || "none"; // field left out = access unchanged
     const up = await readUpload(form, "idProof", ID_PROOF, !staff);
     if (up.error) errors.idProof = up.error;
-    if (!errors.email && db.prepare("SELECT 1 FROM staff WHERE email = ? AND id != ?").get(values.email, staff?.id || "")) {
-      errors.email = "Another staff member already uses this email.";
-    }
-    if (!errors.email && userByEmail(values.email) && userByEmail(values.email).id !== login?.id) {
-      errors.email = "This email is already used by another dashboard user.";
-    }
+    // An email can be shared: someone without their own login whose email already signs in to the
+    // dashboard uses that login (its access and password stay as they are).
+    const sharedLogin = !errors.email && userByEmail(values.email);
+    const shared = sharedLogin && sharedLogin.id !== login?.id ? sharedLogin : null;
+    if (shared && login) errors.email = "This person has their own dashboard login, so their email can't change to one another login uses.";
+    if (shared) values.access = shared.level;
     // Dashboard password set by the admin: required when adding someone with access, optional
     // when editing (blank keeps the current one). Your own password is changed in Settings instead.
     const isSelf = !!login && login.id === me.id;
     const password = String(text.password || ""), confirm = String(text.confirm || "");
-    const setsPassword = values.access !== "none" && !isSelf && !!password;
-    if (values.access !== "none" && !isSelf) {
+    const setsPassword = values.access !== "none" && !isSelf && !shared && !!password;
+    if (values.access !== "none" && !isSelf && !shared) {
       if (!staff && !password) errors.password = "Enter a password, or click “Generate password”.";
       else if (password) {
         const pe = passwordError(password, values.email);
@@ -1429,14 +1443,14 @@ export function createAdmin({ store, db, meals, enrollForm, campFile, clientIp =
       }
     } catch (err) {
       if (saved) await removeFile(proofsDir, saved);
-      if (/UNIQUE constraint failed: staff\.email/.test(err.message)) throw httpError(409, "Another staff member already uses this email.", { email: "Another staff member already uses this email." });
       throw err;
     }
     if (saved && staff) await removeFile(proofsDir, staff.id_proof_path);
     log(me, staff ? "Edited staff member" : "Added staff member", `${values.firstName} ${values.lastName}`, `${values.role} · ${values.location}`);
 
-    const warning = await setAccess(me, staffById(id), values.access, { password: setsPassword ? password : null });
-    return send(res, staff ? 200 : 201, { staff: publicStaff(staffById(id), me), warning });
+    const warning = shared ? null : await setAccess(me, staffById(id), values.access, { password: setsPassword ? password : null });
+    const note = shared && !staff ? `${values.email} already signs in to the dashboard (${LEVEL_NAMES[shared.level]}). ${values.firstName} shares that login and its password.` : null;
+    return send(res, staff ? 200 : 201, { staff: publicStaff(staffById(id), me), warning, note });
   }
 
   // ---------- staff / tutor portal: their own details (Settings) ----------
@@ -1445,7 +1459,7 @@ export function createAdmin({ store, db, meals, enrollForm, campFile, clientIp =
   // dashboard shows, and to their GHL contact.
   const selfView = (s) => ({
     firstName: s.first_name, lastName: s.last_name, email: s.email, gender: s.gender, role: s.role,
-    phone: s.phone, location: s.location, idProofFileName: s.id_proof_file_name, access: userByStaff(s.id)?.level || "none", updatedAt: s.updated_at,
+    phone: s.phone, location: s.location, idProofFileName: s.id_proof_file_name, access: loginOf(s).login?.level || "none", updatedAt: s.updated_at,
   });
   async function profile(req, res, url, email) {
     const staff = db.prepare("SELECT * FROM staff WHERE email = ? COLLATE NOCASE").get(email);
