@@ -13,6 +13,7 @@ const ICONS = {
   send: svg('<path d="m4 12 16-8-6 16-2.5-6.5z"/><path d="M11.5 13.5 20 4"/>'),
   plus: svg('<path d="M12 5v14M5 12h14"/>'),
   person: svg('<circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/>'),
+  flag: svg('<path d="M5 21V4"/><path d="M5 4h11l-2 4 2 4H5"/>'),
   up: svg('<path d="M7 11v9H4v-9zM7 11l4-8a2 2 0 0 1 3 1.7V9h5a2 2 0 0 1 2 2.3l-1.2 7A2 2 0 0 1 17.8 20H7"/>'),
   down: svg('<path d="M7 13V4H4v9zM7 13l4 8a2 2 0 0 0 3-1.7V15h5a2 2 0 0 0 2-2.3l-1.2-7A2 2 0 0 0 17.8 4H7"/>'),
   mic: svg('<rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/>'),
@@ -79,14 +80,15 @@ export function mountChat({ language } = {}) {
         <button type="submit" class="askb__send" data-send>${ICONS.send}</button>
       </form>
       <div class="askb__foot">
-        <button type="button" class="askb__human" data-human>${ICONS.person}<span></span></button>
+        <div class="askb__acts"><button type="button" class="askb__human" data-human>${ICONS.person}<span></span></button>
+          <button type="button" class="askb__human askb__concern" data-concern>${ICONS.flag}<span></span></button></div>
         <small data-disclaimer></small>
       </div>
     </section>`;
 
   const q = (sel) => root.querySelector(sel);
   const fab = q(".askb__fab"), panel = q(".askb__panel"), log = q("[data-log]"), input = q("[data-input]"), form = q("[data-form]");
-  const langSel = q("#askb-lang"), confirmBox = q("[data-confirm]"), humanBtn = q("[data-human]");
+  const langSel = q("#askb-lang"), confirmBox = q("[data-confirm]"), humanBtn = q("[data-human]"), concernBtn = q("[data-concern]");
   langSel.value = s.lang;
 
   function labels() {
@@ -118,12 +120,14 @@ export function mountChat({ language } = {}) {
     const handedOff = s.conv?.status === "handoff", closed = s.conv?.status === "handled";
     humanBtn.querySelector("span").textContent = handedOff ? x.humanSent : closed ? x.humanClosed : x.human;
     humanBtn.disabled = handedOff || closed || s.busy;
+    concernBtn.querySelector("span").textContent = x.concern;
+    concernBtn.disabled = s.busy;
     panel.dir = LANGS[s.lang].dir;
   }
 
   function bubble(m) {
     const x = t();
-    if (m.role === "event") return `<p class="askb__event ${m.text.startsWith("Voice") ? "askb__event--voice" : ""}">${esc(m.text === "Voice call started" ? x.voiceStarted : m.text === "Voice call ended" ? x.voiceEnded : m.text === "Closed by the Blackmon team" ? x.humanClosed : x.humanSent)}</p>`;
+    if (m.role === "event") return `<p class="askb__event ${m.text.startsWith("Voice") ? "askb__event--voice" : ""}">${esc(m.text === "Voice call started" ? x.voiceStarted : m.text === "Voice call ended" ? x.voiceEnded : m.text === "Closed by the Blackmon team" ? x.humanClosed : m.text === "Raised a concern" ? x.concernEvent : x.humanSent)}</p>`;
     if (m.role === "parent") return `<div class="askb__msg askb__msg--me"><p>${esc(m.text)}</p></div>`;
     const sources = m.sources?.length ? `<p class="askb__src">${esc(x.from)}: ${m.sources.map(esc).join(" · ")}</p>` : "";
     const fb = m.id ? `<div class="askb__fb">
@@ -152,9 +156,18 @@ export function mountChat({ language } = {}) {
     q("[data-voice]").hidden = !s.call;
 
     confirmBox.hidden = !s.confirming;
-    confirmBox.innerHTML = s.confirming ? `<p>${esc(x.humanConfirm)}</p>
+    confirmBox.classList.toggle("askb__confirm--concern", s.confirming === "concern");
+    // Redrawn only when it opens, so what the parent is typing in it isn't wiped.
+    if (s.confirming && confirmBox.dataset.mode !== s.confirming) confirmBox.innerHTML = s.confirming === "concern"
+      ? `<p><label for="askb-concern">${esc(x.concernPrompt)}</label></p>
+        <textarea id="askb-concern" rows="3" maxlength="1000" placeholder="${esc(x.concernPlaceholder)}" data-concerntext></textarea>
+        <div><button type="button" class="btn btn--sm" data-concernsend>${esc(x.concernSend)}</button>
+        <button type="button" class="btn btn--sm btn--ghost" data-no>${esc(x.cancel)}</button></div>`
+      : `<p>${esc(x.humanConfirm)}</p>
       <div><button type="button" class="btn btn--sm" data-yes>${esc(x.humanYes)}</button>
-      <button type="button" class="btn btn--sm btn--ghost" data-no>${esc(x.cancel)}</button></div>` : "";
+      <button type="button" class="btn btn--sm btn--ghost" data-no>${esc(x.cancel)}</button></div>`;
+    if (!s.confirming) confirmBox.innerHTML = "";
+    confirmBox.dataset.mode = s.confirming || "";
   }
 
   async function load() {
@@ -196,6 +209,20 @@ export function mountChat({ language } = {}) {
     draw();
     try {
       const d = await call("/api/chat/handoff", { language: s.lang });
+      s.messages.push(...d.messages);
+      s.conv = d.conversation;
+    } catch (err) { if (signedOut(err)) return; s.error = err.message || t().error; }
+    s.busy = false;
+    draw();
+  }
+
+  async function concern(text) {
+    text = String(text || "").trim();
+    if (!text || s.busy) return;
+    s.confirming = false; s.busy = true; s.error = "";
+    draw();
+    try {
+      const d = await call("/api/chat/concern", { text, language: s.lang });
       s.messages.push(...d.messages);
       s.conv = d.conversation;
     } catch (err) { if (signedOut(err)) return; s.error = err.message || t().error; }
@@ -276,15 +303,21 @@ export function mountChat({ language } = {}) {
   form.onsubmit = (e) => { e.preventDefault(); ask(input.value); };
   input.addEventListener("input", resize);
   input.addEventListener("keydown", (e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); ask(input.value); } });
-  humanBtn.onclick = () => { s.confirming = true; draw(); confirmBox.querySelector("[data-yes]")?.focus(); };
+  humanBtn.onclick = () => { s.confirming = "human"; draw(); confirmBox.querySelector("[data-yes]")?.focus(); };
+  concernBtn.onclick = () => { s.confirming = "concern"; draw(); confirmBox.querySelector("[data-concerntext]")?.focus(); };
   confirmBox.addEventListener("click", (e) => {
     if (e.target.closest("[data-yes]")) handoff();
+    if (e.target.closest("[data-concernsend]")) {
+      const box = confirmBox.querySelector("[data-concerntext]");
+      if (!box.value.trim()) { box.focus(); return; }
+      concern(box.value);
+    }
     if (e.target.closest("[data-no]")) { s.confirming = false; draw(); }
   });
   log.addEventListener("click", async (e) => {
     const starter = e.target.closest("[data-starter]");
     if (starter) return ask(starter.textContent);
-    if (e.target.closest("[data-offer]")) { s.confirming = true; draw(); return; }
+    if (e.target.closest("[data-offer]")) { s.confirming = "human"; draw(); return; }
     const fb = e.target.closest("[data-fb]");
     if (fb) {
       const m = s.messages.find((x) => String(x.id) === fb.dataset.id);

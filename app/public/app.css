@@ -50,6 +50,7 @@ textarea.input { min-height: 84px; resize: vertical; line-height: 1.45; }
 .pill--ok { background: var(--ok-bg); color: var(--ok); }
 .pill--todo { background: var(--seg); color: var(--muted); }
 .pill--warn { background: var(--warn-bg); color: var(--warn); }
+.pill--err { background: var(--err); color: #fff; }
 .pill--sky { background: #E3F1FB; color: #1A5D8F; }
 
 /* ---------- sign-in ---------- */
@@ -453,6 +454,11 @@ textarea.input { min-height: 84px; resize: vertical; line-height: 1.45; }
 .askb__human { display: inline-flex; align-items: center; align-self: flex-start; gap: 6px; padding: 6px 2px; border: 0; background: none; color: var(--link); font: 600 14px var(--body); cursor: pointer; }
 .askb__human:disabled { color: var(--ok); cursor: default; }
 .askb__human .ico { width: 18px; height: 18px; }
+.askb__acts { display: flex; flex-wrap: wrap; gap: 4px 18px; }
+.askb__concern { color: var(--err); }
+.askb__confirm--concern { background: var(--err-bg); }
+.askb__confirm textarea { width: 100%; margin: 0 0 10px; padding: 10px 12px; border: 1.5px solid var(--field); border-radius: 12px; font: 15px/1.4 var(--body); color: var(--text); resize: vertical; background: #fff; }
+.askb__confirm textarea:focus { outline: none; border-color: var(--link); box-shadow: 0 0 0 3px rgba(31,111,174,.15); }
 .askb__foot small { font-size: 12px; line-height: 1.4; color: var(--muted); }
 @media (max-width: 600px) {
   .askb { right: 16px; bottom: 16px; }

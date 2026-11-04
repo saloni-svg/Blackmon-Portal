@@ -641,7 +641,7 @@ function setBadge(n) {
 }
 
 async function notificationsView(el, me) {
-  el.innerHTML = `${header("Notifications", "Waivers parents sign, training acknowledgments camp staff sign, and “talk to a person” requests from the Ask Blackmon chat show up here.", '<button class="btn btn--ghost" data-all>Mark all as read</button>')}
+  el.innerHTML = `${header("Notifications", "Waivers parents sign, training acknowledgments camp staff sign, and “talk to a person” requests and concerns (in red) from the Ask Blackmon chat show up here.", '<button class="btn btn--ghost" data-all>Mark all as read</button>')}
     <section class="card" data-list><p class="hint">Loading…</p></section>`;
   const box = el.querySelector("[data-list]");
   let list = [];
@@ -649,8 +649,8 @@ async function notificationsView(el, me) {
 
   function draw() {
     if (!list.length) { box.innerHTML = `<div class="empty"><h2>No notifications yet</h2><p>When a parent signs a waiver, a camp staff member signs their training acknowledgment, or someone asks to talk to a person, you'll see it here.</p></div>`; return; }
-    box.innerHTML = `<ul class="anotes">${list.map((n) => `<li class="${n.read ? "" : "is-unread"}">
-      <div><b>${esc(n.title)}</b><span class="sub">${esc(when(n.at))}</span>
+    box.innerHTML = `<ul class="anotes">${list.map((n) => `<li class="${n.read ? "" : "is-unread"} ${n.kind === "concern" ? "is-concern" : ""}">
+      <div>${n.kind === "concern" ? '<span class="pill pill--err">Concern</span> ' : ""}<b>${esc(n.title)}</b><span class="sub">${esc(when(n.at))}</span>
         <span class="links">${n.conversationId ? `<a href="#/chats/${encodeURIComponent(n.conversationId)}">View chat</a>` : ""}
         ${n.contactId ? `<a href="#/parents/${encodeURIComponent(n.contactId)}">Parent details</a>` : ""}
         ${n.signedActive && me.canManage ? `<a href="/api/admin/parents/${encodeURIComponent(n.contactId)}/documents/${encodeURIComponent(n.docId)}/signed" target="_blank" rel="noopener">View signed PDF</a>` : ""}
@@ -1495,7 +1495,9 @@ async function checkHandoffs() {
   try { r = await api("/api/admin/notifications"); } catch { return; }
   setBadge(r.unread);
   const seen = seenHandoffs();
-  const n = r.notifications.find((x) => x.kind === "chat_handoff" && !x.read && x.conversationId && !seen.has(x.id));
+  // Only requests from the last 24 hours pop up; older ones stay in Notifications.
+  const since = Date.now() - 24 * 60 * 60_000;
+  const n = r.notifications.find((x) => x.kind === "chat_handoff" && !x.read && x.conversationId && !seen.has(x.id) && Date.parse(x.at) > since);
   if (!n) return;
   markHandoffSeen(n.id);
   // Seen once = read for this admin on the server, so it doesn't pop up again in another tab or

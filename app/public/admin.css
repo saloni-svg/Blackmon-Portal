@@ -149,6 +149,8 @@
 .anotes { display: grid; gap: 10px; margin: 0; padding: 0; list-style: none; }
 .anotes li { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; padding: 14px 16px; border: 1px solid var(--line); border-radius: var(--r); }
 .anotes li.is-unread { border-color: var(--sky); box-shadow: 0 0 0 3px rgba(91,171,224,.18); }
+.anotes li.is-concern { background: var(--err-bg); border-color: var(--err); }
+.anotes li.is-concern.is-unread { box-shadow: 0 0 0 3px rgba(168,64,31,.2); }
 .anotes li.is-unread b::before { content: ""; display: inline-block; width: 8px; height: 8px; margin-right: 8px; border-radius: 50%; background: var(--coral); vertical-align: middle; }
 .anotes .links { display: flex; gap: 14px; margin-top: 6px; font-size: 14px; }
 @media (max-width: 760px) { .dl { grid-template-columns: 1fr; gap: 2px; } .dl dd { margin-bottom: 8px; } }
