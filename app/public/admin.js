@@ -1463,7 +1463,7 @@ async function chatView(el, me, id) {
   const draw = () => {
     const c = d.conversation;
     el.innerHTML = `${header(`Chat with ${esc(c.parentName)}`, "From the Ask Blackmon chat in the parent portal.",
-        c.status === "handoff" && me.canManage ? '<button class="btn" data-handled>Mark as handled</button>' : "")}
+        c.status === "handoff" && me.canManage ? '<button class="btn" data-handled>Close chat</button>' : "")}
       <div class="stack">
         <section class="card"><div class="card__h"><div><h2>Parent</h2></div>${chatStatus(c)}</div>${chatFactsHtml(c)}
           <p class="hint" style="margin-top:14px"><a href="#/parents/${encodeURIComponent(c.contactId)}">Parent details</a></p></section>
@@ -1471,7 +1471,7 @@ async function chatView(el, me, id) {
           ${transcriptHtml(c, d.messages)}</section>
       </div>`;
     el.querySelector("[data-handled]")?.addEventListener("click", async (e) => {
-      try { d = await busy(e.currentTarget, "Saving…", () => api(`/api/admin/chats/${encodeURIComponent(id)}/handled`, { method: "POST" })); toast("Marked as handled."); draw(); }
+      try { d = await busy(e.currentTarget, "Saving…", () => api(`/api/admin/chats/${encodeURIComponent(id)}/handled`, { method: "POST" })); toast("Chat closed. The parent is told the team isn't available."); draw(); }
       catch (err) { toast(err.message, "err"); }
     });
   };
@@ -1498,9 +1498,13 @@ async function checkHandoffs() {
   const n = r.notifications.find((x) => x.kind === "chat_handoff" && !x.read && x.conversationId && !seen.has(x.id));
   if (!n) return;
   markHandoffSeen(n.id);
+  // Seen once = read for this admin on the server, so it doesn't pop up again in another tab or
+  // after signing in again; a chat already closed doesn't pop up at all.
+  const read = () => api("/api/admin/notifications", { method: "POST", body: JSON.stringify({ ids: [n.id] }) }).then((x) => setBadge(x.unread)).catch(() => {});
   let d;
   try { d = await api(`/api/admin/chats/${encodeURIComponent(n.conversationId)}`); } catch { return; }
   const c = d.conversation;
+  if (c.status !== "handoff") return read();
   const dlg = document.createElement("dialog");
   dlg.className = "chatpop";
   dlg.setAttribute("aria-labelledby", "chatpop-title");
@@ -1509,12 +1513,16 @@ async function checkHandoffs() {
       <h2 id="chatpop-title">${esc(c.parentName)} wants to talk to a person</h2><p>${esc(when(c.handoffAt))} · from the Ask Blackmon chat</p></div>
     ${chatFactsHtml(c)}
     <h3>Full chat</h3><div class="chatpop__log">${transcriptHtml(c, d.messages)}</div>
-    <div class="confirm__bar"><button class="btn btn--ghost" value="close">Close</button><button class="btn" value="open" autofocus>Open chat</button></div></form>`;
+    <div class="confirm__bar"><button class="btn btn--ghost" value="close">${state.me.canManage ? "Close chat" : "Close"}</button><button class="btn" value="open" autofocus>Open chat</button></div></form>`;
   document.body.append(dlg);
   handoffOpen = true;
   dlg.showModal();
   dlg.addEventListener("close", () => {
     handoffOpen = false;
+    read();
+    // Close chat: the parent's chat is closed and they're told the team isn't available.
+    if (dlg.returnValue === "close" && state.me.canManage) api(`/api/admin/chats/${encodeURIComponent(c.id)}/handled`, { method: "POST" })
+      .then(() => toast(`Chat closed. ${c.parentName} is told the team isn't available.`)).catch((err) => toast(err.message, "err"));
     if (dlg.returnValue === "open") location.hash = `#/chats/${encodeURIComponent(c.id)}`;
     dlg.remove();
   });

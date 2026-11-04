@@ -44,6 +44,8 @@ const TOP_K = 8;
 const HISTORY = 12;                 // earlier messages sent along for follow-up questions
 const RATE = { max: 20, windowMs: 10 * 60_000 };
 const MAX_QUESTION = 1000;
+// After the team closes a parent's chat, "Talk to a person" tells them the team isn't available for this long.
+const CLOSED_FOR_MS = 24 * 60 * 60_000;
 
 const sha = (s) => crypto.createHash("sha256").update(s).digest("hex");
 const now = () => new Date().toISOString();
@@ -464,21 +466,35 @@ export function createAssistant({ db, root, dataDir, campFile, loadContent, stor
         .map((c) => (typeof c === "string" ? c : c.source === "Camp info" || c.source === "A day at camp" || c.source === "Camp locations" ? `${c.source} · ${c.title}` : c.source)))];
       const bot = addMessage(conv.id, {
         role: "bot", text: out.answer, textEn: language !== "en" ? out.answer_en : null, sources: out.answered ? labels : [],
-        answered: out.answered, offerHandoff: out.wants_human && conv.status !== "handoff",
+        answered: out.answered, offerHandoff: out.wants_human && conv.status !== "handoff" && conv.status !== "handled",
       });
       if (!out.answered) console.log(`  Ask Blackmon: unanswered question from ${contact.email}: ${out.question_en || question}`);
       return { conversation: rowToConv(openConv(contact.id)), messages: [parentMsg, bot] };
     },
 
     // "Talk to a person": records it, notifies the admin dashboard, and emails + texts the admin.
+    // One request per parent: while one is waiting, asking again (even in a new chat) sends nothing
+    // new; once the team has closed their chat, they're told the team isn't available (for 24 hours,
+    // in any chat of theirs) and nothing reaches the dashboard.
     async handoff(contact, facts, language) {
       language = chatLang(language);
       const conv = ensureConv(contact, facts, language);
       if (conv.status === "handoff") return { conversation: rowToConv(conv), messages: [] };
+      const t = chatText(language), reply = (key) => {
+        db.prepare("UPDATE chat_messages SET offer_handoff = 0 WHERE conversation_id = ?").run(conv.id);
+        const bot = addMessage(conv.id, { role: "bot", text: t[key], textEn: language !== "en" ? chatText("en")[key] : null });
+        return { conversation: rowToConv(db.prepare("SELECT * FROM chat_conversations WHERE id = ?").get(conv.id)), messages: [bot] };
+      };
+      const closed = conv.status === "handled" || db.prepare(`SELECT 1 FROM chat_conversations WHERE contact_id = ? AND status = 'handled' AND handled_at > ?`)
+        .get(contact.id, new Date(Date.now() - CLOSED_FOR_MS).toISOString());
+      if (closed) {
+        console.log(`  Ask Blackmon: ${contact.email} asked for a person again after the team closed their chat; told the team isn't available.`);
+        return reply("humanUnavailable");
+      }
+      if (db.prepare("SELECT 1 FROM chat_conversations WHERE contact_id = ? AND status = 'handoff' AND id != ?").get(contact.id, conv.id)) return reply("humanDone");
       db.prepare("UPDATE chat_conversations SET status = 'handoff', handoff_at = ?, handled_at = NULL, handled_by = NULL, updated_at = ? WHERE id = ?").run(now(), now(), conv.id);
       db.prepare("UPDATE chat_messages SET offer_handoff = 0 WHERE conversation_id = ?").run(conv.id);
       const event = addMessage(conv.id, { role: "event", text: "Asked to talk to a person" });
-      const t = chatText(language);
       const bot = addMessage(conv.id, { role: "bot", text: t.humanDone, textEn: language !== "en" ? chatText("en").humanDone : null });
       const fresh = rowToConv(db.prepare("SELECT * FROM chat_conversations WHERE id = ?").get(conv.id));
       notify("chat_handoff", `${fresh.parentName} wants to talk to a person`, { contactId: contact.id, conversationId: conv.id });
@@ -515,9 +531,20 @@ export function createAssistant({ db, root, dataDir, campFile, loadContent, stor
       if (!c) return null;
       return { conversation: { ...rowToConv(c), contactId: c.contact_id, languageName: LANG_EN[c.language] || c.language }, messages: messagesOf(id) };
     },
+    // Closes the chat for the parent too: they see it was closed and that the team isn't available.
     markHandled(id, by) {
       const r = db.prepare("UPDATE chat_conversations SET status = 'handled', handled_at = ?, handled_by = ?, updated_at = ? WHERE id = ? AND status = 'handoff'").run(now(), by, now(), id);
-      return r.changes > 0;
+      if (!r.changes) return false;
+      const c = db.prepare("SELECT language, contact_id FROM chat_conversations WHERE id = ?").get(id);
+      const language = c?.language || "en";
+      // The chat the parent has open now: this one, or a newer one they started since.
+      const shown = openConv(c.contact_id)?.id || id;
+      for (const conv of new Set([id, shown])) {
+        db.prepare("UPDATE chat_messages SET offer_handoff = 0 WHERE conversation_id = ?").run(conv);
+        addMessage(conv, { role: "event", text: "Closed by the Blackmon team" });
+        addMessage(conv, { role: "bot", text: chatText(language).humanUnavailable, textEn: language !== "en" ? chatText("en").humanUnavailable : null });
+      }
+      return true;
     },
   };
 }
