@@ -137,6 +137,9 @@ export function createDemoStore() {
       return clone(c);
     },
     async addTags(id, tags) { const c = byId(id); c.tags = [...new Set([...(c.tags || []), ...tags])]; },
+    async removeTags(id, tags) { const c = byId(id); c.tags = (c.tags || []).filter((t) => !tags.includes(t)); },
+    async deleteOpportunity(id) { const i = OPPORTUNITIES.findIndex((o) => o.id === id); if (i < 0) return false; OPPORTUNITIES.splice(i, 1); return true; },
+    async setOpportunityStatus(id, status) { const o = OPPORTUNITIES.find((x) => x.id === id); if (o) o.status = status; },
     async uploadToField(id, key, file) { byId(id).fields[key] = file.name; },
     async links() {
       return {

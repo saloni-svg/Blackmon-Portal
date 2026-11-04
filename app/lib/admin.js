@@ -144,6 +144,7 @@ export function createAdmin({ store, db, meals, enrollForm, campFile, clientIp =
   const secureCookie = /^https:/i.test(portalUrl);
 
   const sessions = createSessions(db, "admin"); // in the database, so a restart keeps admins signed in
+  const portalSessions = createSessions(db, "portal"); // parents' portal sign-ins (ended when an admin removes them)
   const failures = new Map(); // "ip:..." / "email:..." -> [failed login timestamps]
   const resets = new Map();   // "ip:..." / "email:..." -> [forgot-password request timestamps]
   let parentsCache = { at: 0, list: null };
@@ -392,6 +393,27 @@ export function createAdmin({ store, db, meals, enrollForm, campFile, clientIp =
   }
 
   // ---------- parents ----------
+  // Opportunities an admin removed (deleted or set to Lost) stay out even while GHL's search still
+  // lists them, and so do Lost / Abandoned ones.
+  function stillPaid(opps) {
+    const gone = new Set(db.prepare("SELECT opportunity_id FROM removed_opportunities").all().map((r) => r.opportunity_id));
+    return opps.filter((o) => !gone.has(o.id) && !/^(lost|abandoned)$/i.test(o.status || ""));
+  }
+  // A removed parent who pays again (a new Paid (won) opportunity created after they were removed) is a
+  // new parent: removed_at is cleared. (Portal - Access Granted stays No until an admin sends the invite.)
+  function rejoin(opps) {
+    const removed = new Map(db.prepare("SELECT contact_id, removed_at FROM parent_access WHERE removed_at IS NOT NULL").all().map((r) => [r.contact_id, r.removed_at]));
+    for (const o of opps) {
+      const at = removed.get(o.contactId);
+      if (!at || !o.createdAt || o.createdAt <= at) continue;
+      upsertParent(o.contactId, { removed_at: null, removed_by: null, removed_how: null, hidden_at: null });
+      removed.delete(o.contactId);
+      log(null, "Parent paid again after being removed", o.contactName || o.contactId, `opportunity ${o.id}`);
+      console.log(`  Parents: ${o.contactId} paid again (opportunity ${o.id}) after being removed; shown as a new parent.`);
+    }
+  }
+  const isRemoved = (id) => !!parentState(id)?.removed_at;
+
   async function paidParents(force = false) {
     if (!force && parentsCache.list && Date.now() - parentsCache.at < PARENTS_CACHE_MS) return parentsCache.list;
     let opps, oppDefs;
@@ -401,6 +423,8 @@ export function createAdmin({ store, db, meals, enrollForm, campFile, clientIp =
       console.error(`  Admin parents: GHL opportunity search failed: ${err.message}`);
       throw httpError(502, `Couldn't load the Winter Camp 2026 Paid (won) opportunities from GHL: ${err.message}`);
     }
+    opps = stillPaid(opps);
+    rejoin(opps);
     opps.sort((a, b) => (Date.parse(b.updatedAt || b.createdAt || "") || 0) - (Date.parse(a.updatedAt || a.createdAt || "") || 0));
     const oppOf = new Map(); // contact -> their newest of these opportunities (documents, invites)
     for (const o of opps) if (!oppOf.has(o.contactId)) oppOf.set(o.contactId, o);
@@ -505,6 +529,9 @@ export function createAdmin({ store, db, meals, enrollForm, campFile, clientIp =
       console.error(`  Parent detail ${id}: GHL read failed: ${err.message}`);
       throw httpError(502, `Couldn't load this parent from GHL: ${err.message}`);
     }
+    opps = stillPaid(opps);
+    rejoin(opps);
+    if (isRemoved(id)) throw httpError(404, "This parent was removed from Winter Camp 2026.");
     if (!opps.length) throw httpError(404, "This contact has no Paid (won) opportunity in Winter Camp 2026.");
     opps.sort((a, b) => (Date.parse(b.updatedAt || b.createdAt || "") || 0) - (Date.parse(a.updatedAt || a.createdAt || "") || 0));
     const syncedAt = now();
@@ -529,7 +556,7 @@ export function createAdmin({ store, db, meals, enrollForm, campFile, clientIp =
       enrollment: submitted ? { camp: "Winter Camp 2026", submittedAt: sub?.createdAt || null, source, columns: ROSTER,
         children: source ? familyRows(rows[0], answered) : [] } : null,
       syncedAt,
-      parent: { ...rows[0], inviteSentAt: state?.invite_sent_at || null, inviteTestAt: state?.test_invite_at || null, hidden: !!state?.hidden_at,
+      parent: { ...rows[0], inviteSentAt: state?.invite_sent_at || null, inviteTestAt: state?.test_invite_at || null, hidden: !!state?.removed_at,
         inviteCount: invites?.count || (state?.invite_sent_at ? 1 : 0), inviteMessageId: invites?.last?.message_id || null,
         inviteSms: invites?.last?.sms_status || null, inviteSmsNote: invites?.last?.sms_note || null },
       meals: mealsOf(plan.choices), mealsSavedAt: plan.savedAt, mealsSource: plan.source,
@@ -538,18 +565,62 @@ export function createAdmin({ store, db, meals, enrollForm, campFile, clientIp =
     };
   }
   const parentState = (id) => db.prepare("SELECT * FROM parent_access WHERE contact_id = ?").get(id);
+  // cols: parent_access columns to set (names from this file only).
   function upsertParent(id, cols) {
-    const row = { invite_sent_at: null, hidden_at: null, test_invite_at: null, ...parentState(id), ...cols };
-    db.prepare(`INSERT INTO parent_access (contact_id, invite_sent_at, hidden_at, test_invite_at, updated_at) VALUES (?, ?, ?, ?, ?)
-      ON CONFLICT (contact_id) DO UPDATE SET invite_sent_at = excluded.invite_sent_at, hidden_at = excluded.hidden_at,
-        test_invite_at = excluded.test_invite_at, updated_at = excluded.updated_at`)
-      .run(id, row.invite_sent_at, row.hidden_at, row.test_invite_at, now());
+    const keys = Object.keys(cols);
+    db.prepare("INSERT INTO parent_access (contact_id, updated_at) VALUES (?, ?) ON CONFLICT (contact_id) DO NOTHING").run(id, now());
+    db.prepare(`UPDATE parent_access SET ${keys.map((k) => `${k} = ?`).join(", ")}, updated_at = ? WHERE contact_id = ?`).run(...keys.map((k) => cols[k]), now(), id);
   }
   // A parent the admin may act on: in the paid list (re-checked against GHL if not cached) and not removed.
   async function findParent(id) {
     const p = (await paidParents()).find((x) => x.contactId === id) || (await paidParents(true)).find((x) => x.contactId === id);
-    if (!p || parentState(id)?.hidden_at) throw httpError(404, "This parent isn't in the Winter Camp 2026 paid list.");
+    if (!p || isRemoved(id)) throw httpError(404, "This parent isn't in the Winter Camp 2026 paid list.");
     return p;
+  }
+
+  // ---------- removing a parent (Parents → Delete / Remove from camp) ----------
+  // In this order: (a) every Winter Camp 2026 opportunity of theirs is deleted in GHL (how "lost": set
+  // to Lost), (b) their contact loses the portal-parent and winter 2026 tags and gets Portal - Access
+  // Granted = No (the contact itself stays: it holds invoices, payments and other programs), (c) the
+  // portal marks them removed and signs them out. Any GHL failure stops it before (c), so the portal
+  // never says removed while GHL still has them; the opportunities already handled are remembered
+  // (GHL's search lags) and a retry carries on from there.
+  const REMOVE_TAGS = ["portal-parent", "winter 2026"];
+  async function removeParent(me, pa, how) {
+    const id = pa.contactId;
+    const ghlFailed = (step, err) => {
+      console.error(`  Remove parent ${id} (${how}): ${step} failed: ${err.message}`);
+      return httpError(502, `GHL didn't accept the change (${step}): ${err.body?.message || err.message}. ${pa.name} was not removed; please try again.`);
+    };
+    let found;
+    try { found = await store.searchOpportunities({ pipelineId: ADMIN_PAID.pipelineId, contactId: id, live: false }); }
+    catch (err) { throw ghlFailed("finding their Winter Camp 2026 opportunities", err); }
+    // The Parents list's copy too, in case the search hasn't caught up with a new one yet.
+    const known = (parentsCache.list || []).filter((x) => x.contactId === id).map((x) => x.opportunityId);
+    const done = new Set(db.prepare("SELECT opportunity_id FROM removed_opportunities WHERE contact_id = ?").all(id).map((r) => r.opportunity_id));
+    const ids = [...new Set([...found.filter((o) => how === "deleted" || !/^lost$/i.test(o.status || "")).map((o) => o.id), ...known])].filter((o) => o && !done.has(o));
+    const remember = db.prepare(`INSERT INTO removed_opportunities (opportunity_id, contact_id, how, removed_at, removed_by) VALUES (?, ?, ?, ?, ?)
+      ON CONFLICT (opportunity_id) DO UPDATE SET how = excluded.how, removed_at = excluded.removed_at, removed_by = excluded.removed_by`);
+    for (const oid of ids) {
+      try {
+        if (how === "deleted") await store.deleteOpportunity(oid);
+        else await store.setOpportunityStatus(oid, "lost");
+      } catch (err) { throw ghlFailed(how === "deleted" ? `deleting opportunity ${oid}` : `setting opportunity ${oid} to Lost`, err); }
+      remember.run(oid, id, how, now(), me.email);
+    }
+    try { await store.removeTags(id, REMOVE_TAGS); } catch (err) { throw ghlFailed("removing the portal-parent / winter 2026 tags", err); }
+    try {
+      await store.updateFields(id, { portal__access_granted: "No" });
+      console.log(`  GHL PUT /contacts/${id} Portal - Access Granted = No -> ok`);
+    } catch (err) { throw ghlFailed("setting Portal - Access Granted to No", err); }
+
+    upsertParent(id, { removed_at: now(), removed_by: me.email, removed_how: how, invite_sent_at: null });
+    portalSessions.removeFor(id);
+    if (parentsCache.list) parentsCache.list = parentsCache.list.filter((x) => x.contactId !== id);
+    const what = how === "deleted" ? `deleted ${ids.length} Winter Camp 2026 opportunit${ids.length === 1 ? "y" : "ies"} in GHL` : `set ${ids.length} Winter Camp 2026 opportunit${ids.length === 1 ? "y" : "ies"} to Lost in GHL`;
+    log(me, how === "deleted" ? "Deleted parent from Winter Camp 2026" : "Removed parent from camp (Lost)", pa.name, `${pa.email} · ${what}; tags removed, portal access off`);
+    console.log(`  Removed parent ${id} (${pa.email}) by ${me.email}: ${what}; tags ${REMOVE_TAGS.join(", ")} removed; Access Granted = No; signed out.`);
+    return { ok: true, how, opportunities: ids.length };
   }
 
   // ---------- messages to parents (lib/outreach.js) ----------
@@ -557,7 +628,7 @@ export function createAdmin({ store, db, meals, enrollForm, campFile, clientIp =
   // One entry per family (a contact with two of these opportunities is messaged once).
   async function activeParents(force = false) {
     const list = await paidParents(force);
-    const hidden = new Set(db.prepare("SELECT contact_id FROM parent_access WHERE hidden_at IS NOT NULL").all().map((r) => r.contact_id));
+    const hidden = new Set(db.prepare("SELECT contact_id FROM parent_access WHERE removed_at IS NOT NULL").all().map((r) => r.contact_id));
     const seen = new Set();
     return list.filter((p) => !hidden.has(p.contactId) && !seen.has(p.contactId) && seen.add(p.contactId));
   }
@@ -719,7 +790,7 @@ export function createAdmin({ store, db, meals, enrollForm, campFile, clientIp =
       const contact = parentsCache.contacts.get(p.contactId), state = parentState(p.contactId);
       if (!contact) { skip(p, "couldn't load the GHL contact"); continue; }
       if (!contact.email) { skip(p, "the contact has no email"); continue; }
-      if (state?.hidden_at) { skip(p, "removed from the portal by an admin"); continue; }
+      if (state?.removed_at) { skip(p, "removed from Winter Camp 2026 by an admin"); continue; }
       if (p.accessGranted === "No") { skip(p, "Portal - Access Granted = No"); continue; }
       if (p.role && p.role !== "Parent") { skip(p, `Portal - Role is ${p.role}`); continue; }
       if (PAID_SINCE && p.stageChangedAt && p.stageChangedAt.slice(0, 10) < PAID_SINCE) { skip(p, `reached Paid (won) ${p.stageChangedAt.slice(0, 10)}, before PAID_SINCE ${PAID_SINCE}`); continue; }
@@ -956,7 +1027,7 @@ export function createAdmin({ store, db, meals, enrollForm, campFile, clientIp =
         if (at && e && (!invitedAt.has(e) || at < invitedAt.get(e))) invitedAt.set(e, at);
       }
       return send(res, 200, {
-        parents: list.filter((x) => !states.get(x.contactId)?.hidden_at).map((x) => {
+        parents: list.filter((x) => !states.get(x.contactId)?.removed_at).map((x) => {
           const own = states.get(x.contactId)?.invite_sent_at || null, first = invitedAt.get(String(x.email || "").toLowerCase()) || null;
           const paidAt = [x.stageChangedAt, x.createdAt].filter(Boolean).sort().pop() || null;
           const log = byContact.get(x.contactId);
@@ -1307,12 +1378,11 @@ export function createAdmin({ store, db, meals, enrollForm, campFile, clientIp =
         return send(res, 200, { ok: true, inviteSentAt: parentState(id).invite_sent_at, inviteCount: last?.count || 1, inviteMessageId: last?.last?.message_id || null,
           inviteSms: last?.last?.sms_status || null, inviteSmsNote: last?.last?.sms_note || null, sentTo: to });
       }
+      // Delete (deletes their Winter Camp 2026 opportunities in GHL) or ?how=lost (Remove from camp:
+      // sets them to Lost, keeping them in GHL for history).
       if (m === "DELETE" && !action) {
-        await store.updateFields(id, { portal__access_granted: "No" });
-        upsertParent(id, { hidden_at: now(), invite_sent_at: null });
-        pa.accessGranted = "No";
-        log(me, "Removed parent's portal access", pa.name, pa.email);
-        return send(res, 200, { ok: true });
+        const how = url.searchParams.get("how") === "lost" ? "lost" : "deleted";
+        return send(res, 200, await removeParent(me, pa, how));
       }
       return send(res, 405, { error: "Method not allowed" });
     }

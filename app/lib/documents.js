@@ -25,7 +25,7 @@ export const PAID_PIPELINES = [...new Set(PAID_STAGES.map((s) => s.pipelineId))]
 // automatic portal invites need before they go to real families (lib/admin.js).
 export const PAID_SINCE = Date.parse(process.env.PAID_SINCE || "") || null;
 const paidAt = (o) => Date.parse(o.stageChangedAt || o.createdAt || "") || 0;
-export const isPaidOpp = (o) => !!o && PAID_STAGES.some((s) => s.pipelineId === o.pipelineId && s.stageId === o.stageId)
+export const isPaidOpp = (o) => !!o && !/^(lost|abandoned)$/i.test(o.status || "") && PAID_STAGES.some((s) => s.pipelineId === o.pipelineId && s.stageId === o.stageId)
   && (!PAID_SINCE || paidAt(o) >= PAID_SINCE);
 // Paid opportunities across every paid stage, newest first. extra: { contactId } or { q }.
 export async function searchPaid(store, extra = {}) {
@@ -253,16 +253,18 @@ export function createDocuments({ db, store, root, base }) {
     db.prepare("INSERT INTO admin_notifications (at, kind, title, contact_id, doc_id, signature_id, conversation_id) VALUES (?, ?, ?, ?, ?, ?, ?)")
       .run(now(), kind, title, contactId, docId, signatureId, conversationId);
   }
+  // Parents an admin removed (Parents → Delete / Remove from camp) are left out.
+  const NOT_REMOVED = "(n.contact_id IS NULL OR n.contact_id NOT IN (SELECT contact_id FROM parent_access WHERE removed_at IS NOT NULL))";
   function notifications(userId, limit = 200) {
     return db.prepare(`SELECT n.*, r.read_at FROM admin_notifications n
-      LEFT JOIN admin_notification_reads r ON r.notification_id = n.id AND r.user_id = ? ORDER BY n.id DESC LIMIT ?`).all(userId, limit)
+      LEFT JOIN admin_notification_reads r ON r.notification_id = n.id AND r.user_id = ? WHERE ${NOT_REMOVED} ORDER BY n.id DESC LIMIT ?`).all(userId, limit)
       .map((n) => ({ id: n.id, at: n.at, kind: n.kind, title: n.title, contactId: n.contact_id, docId: n.doc_id, conversationId: n.conversation_id, read: !!n.read_at,
         ackId: n.kind === "acknowledgment_signed" ? n.signature_id : null, // camp staff training acknowledgment (lib/acknowledgment.js)
         // only link to a signed copy while that signature is still the active one
         signedActive: !!(n.signature_id && db.prepare("SELECT 1 FROM doc_signatures WHERE id = ? AND reset_at IS NULL").get(n.signature_id)) }));
   }
   const unreadCount = (userId) => db.prepare(`SELECT COUNT(*) AS n FROM admin_notifications n
-    WHERE NOT EXISTS (SELECT 1 FROM admin_notification_reads r WHERE r.notification_id = n.id AND r.user_id = ?)`).get(userId).n;
+    WHERE ${NOT_REMOVED} AND NOT EXISTS (SELECT 1 FROM admin_notification_reads r WHERE r.notification_id = n.id AND r.user_id = ?)`).get(userId).n;
   function markRead(userId, ids) {
     const all = ids === "all" ? db.prepare("SELECT id FROM admin_notifications").all().map((r) => r.id) : ids;
     const ins = db.prepare("INSERT OR IGNORE INTO admin_notification_reads (notification_id, user_id, read_at) VALUES (?, ?, ?)");

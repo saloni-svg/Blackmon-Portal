@@ -296,6 +296,27 @@ export function createGhlStore({ token, locationId }) {
     async addTags(id, tags) {
       await call("POST", `/contacts/${encodeURIComponent(id)}/tags`, { body: { tags } });
     },
+    // Removing a parent (admin Parents → Delete / Remove from camp): each call's GHL response is logged.
+    async removeTags(id, tags) {
+      const r = await call("DELETE", `/contacts/${encodeURIComponent(id)}/tags`, { body: { tags } });
+      console.log(`  GHL DELETE /contacts/${id}/tags ${JSON.stringify(tags)} -> ${JSON.stringify(r)}`);
+    },
+    // false if GHL no longer had it.
+    async deleteOpportunity(id) {
+      try {
+        const r = await call("DELETE", `/opportunities/${encodeURIComponent(id)}`);
+        console.log(`  GHL DELETE /opportunities/${id} -> ${JSON.stringify(r)}`);
+        return true;
+      } catch (err) {
+        if (err.status !== 404) throw err;
+        console.log(`  GHL DELETE /opportunities/${id} -> 404 (already gone)`);
+        return false;
+      }
+    },
+    async setOpportunityStatus(id, status) {
+      const r = await call("PUT", `/opportunities/${encodeURIComponent(id)}/status`, { body: { status } });
+      console.log(`  GHL PUT /opportunities/${id}/status ${status} -> ${JSON.stringify(r)}`);
+    },
 
     async uploadToField(id, key, file) {
       const { byKey } = await defs();
