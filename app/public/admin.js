@@ -302,6 +302,7 @@ const NAV = [
   { r: "staff", label: "Camp staff", icon: "id" },
   { r: "tutors", label: "Tutors", icon: "cap" },
   { r: "training", label: "Training videos", icon: "video" },
+  { r: "parentvideos", label: "Parent videos", icon: "play" },
   { r: "assessments", label: "Assessments", icon: "todo" },
   { r: "intros", label: "Intro videos", icon: "play" },
   { r: "notifications", label: "Notifications", icon: "bell", badge: true },
@@ -1234,12 +1235,15 @@ function weekView(el, me) {
 // ---------- Training videos (admins upload) and Intro videos (camp staff / tutors upload) ----------
 const mb = (n) => `${(n / 1048576).toFixed(n >= 104857600 ? 0 : 1)} MB`;
 
-async function trainingView(el, me) {
+// Training videos (camp staff / tutors) and, with parents = true, Parent videos: the same list and
+// upload, with audience "Parent", shown on every parent's Videos page (they can only watch them).
+async function trainingView(el, me, parents = false) {
   let saved = ""; try { saved = sessionStorage.getItem("trainingAudience") || ""; } catch {}
-  let audience = ["Tutor", "Both"].includes(saved) ? saved : "Camp Staff", lists = [];
-  el.innerHTML = `${header("Training videos", "Upload the training videos camp staff and tutors watch in their portal. Each group sees only its own list, in this order. When someone has watched every video, their onboarding status in GHL moves to “Training Complete”.")}
-    <div class="seg seg--loc" role="radiogroup" aria-label="Who the videos are for" style="margin:0 0 18px;max-width:560px">
-      ${AUDIENCE_TABS.map(([v, t]) => `<label><input type="radio" name="aud" value="${v}" ${v === audience ? "checked" : ""}><span>${t}</span></label>`).join("")}</div>
+  let audience = parents ? "Parent" : ["Tutor", "Both"].includes(saved) ? saved : "Camp Staff", lists = [];
+  el.innerHTML = `${parents ? header("Parent videos", "Upload videos for parents. Every paid parent sees them, in this order, on the Videos page of their portal, where they can only watch them. Changes show on their page straight away.")
+    : header("Training videos", "Upload the training videos camp staff and tutors watch in their portal. Each group sees only its own list, in this order. When someone has watched every video, their onboarding status in GHL moves to “Training Complete”.")}
+    ${parents ? "" : `<div class="seg seg--loc" role="radiogroup" aria-label="Who the videos are for" style="margin:0 0 18px;max-width:560px">
+      ${AUDIENCE_TABS.map(([v, t]) => `<label><input type="radio" name="aud" value="${v}" ${v === audience ? "checked" : ""}><span>${t}</span></label>`).join("")}</div>`}
     <div class="stack">
       ${me.canManage ? `<section class="card"><div class="card__h"><div><h2 data-uph></h2><p class="card__sub">MP4, MOV or WebM, up to 1 GB.</p></div></div>
         <form data-up novalidate><div class="grid">
@@ -1255,11 +1259,11 @@ async function trainingView(el, me) {
     </div>`;
   const lists$ = el.querySelector("[data-lists]");
   // "Both": uploads go to camp staff and tutors, and both lists are shown.
-  const name = (a = audience) => (a === "Both" ? "camp staff and tutors" : a === "Tutor" ? "tutors" : "camp staff");
+  const name = (a = audience) => (a === "Parent" ? "parents" : a === "Both" ? "camp staff and tutors" : a === "Tutor" ? "tutors" : "camp staff");
 
   async function load() {
     const uph = el.querySelector("[data-uph]");
-    if (uph) uph.textContent = `Upload a training video for ${name()}`;
+    if (uph) uph.textContent = parents ? "Upload a video for parents" : `Upload a training video for ${name()}`;
     try {
       lists = await Promise.all((audience === "Both" ? ["Camp Staff", "Tutor"] : [audience]).map((a) =>
         api(`/api/admin/training?audience=${encodeURIComponent(a)}`).then((d) => ({ audience: a, list: d.videos, people: d.people }))));
@@ -1269,15 +1273,17 @@ async function trainingView(el, me) {
   }
   // One group's list (camp staff or tutors).
   function drawList({ audience, list, people }, box) {
-    const name = () => (audience === "Tutor" ? "tutors" : "camp staff");
+    const isParent = audience === "Parent";
+    const name = () => (isParent ? "parents" : audience === "Tutor" ? "tutors" : "camp staff");
     const draw = () => drawList({ audience, list, people }, box);
-    box.closest(".card").querySelector("[data-sub]").textContent = list.length ? `${list.length} ${list.length === 1 ? "video" : "videos"} · ${people} ${people === 1 ? "person" : "people"} on the ${audience === "Tutor" ? "Tutors" : "Camp staff"} page` : "";
-    if (!list.length) { box.innerHTML = `<div class="empty">${ico("video")}<h2>No training videos for ${name()} yet</h2><p>${me.canManage ? "Upload one above." : "An admin can upload them."}</p></div>`; return; }
+    box.closest(".card").querySelector("[data-sub]").textContent = !list.length ? ""
+      : `${list.length} ${list.length === 1 ? "video" : "videos"} · ${people} ${isParent ? `paid ${people === 1 ? "family" : "families"} can watch them` : `${people === 1 ? "person" : "people"} on the ${audience === "Tutor" ? "Tutors" : "Camp staff"} page`}`;
+    if (!list.length) { box.innerHTML = `<div class="empty">${ico("video")}<h2>No ${isParent ? "" : "training "}videos for ${name()} yet</h2><p>${me.canManage ? "Upload one above." : "An admin can upload them."}</p></div>`; return; }
     box.innerHTML = `<ol class="vids">${list.map((v, i) => `<li data-id="${v.id}">
       <video controls preload="metadata" src="/api/admin/training/${v.id}/file"></video>
       <div class="vids__txt"><span class="muted">Video ${i + 1}</span><b>${esc(v.title)}</b>
-        <span class="pill ${v.both ? "pill--sky" : "pill--todo"}" style="justify-self:start;width:fit-content">${v.both ? "Camp staff and tutors" : audience === "Tutor" ? "Tutors" : "Camp staff"}</span>${v.description ? `<p>${esc(v.description)}</p>` : ""}
-        <span class="sub">${esc(v.fileName)} · ${mb(v.size)} · uploaded ${esc(day(v.createdAt))} by ${esc(v.uploadedBy)} · watched by ${v.watchedBy} of ${people}</span>
+        <span class="pill ${v.both ? "pill--sky" : "pill--todo"}" style="justify-self:start;width:fit-content">${v.both ? "Camp staff and tutors" : isParent ? "Parents" : audience === "Tutor" ? "Tutors" : "Camp staff"}</span>${v.description ? `<p>${esc(v.description)}</p>` : ""}
+        <span class="sub">${esc(v.fileName)} · ${mb(v.size)} · uploaded ${esc(day(v.createdAt))} by ${esc(v.uploadedBy)}${isParent ? "" : ` · watched by ${v.watchedBy} of ${people}`}</span>
         ${me.canManage ? `<div class="vids__acts">
           <button type="button" class="iconbtn" data-move="-1" aria-label="Move ${esc(v.title)} up" ${i === 0 ? "disabled" : ""}>${ico("up")}</button>
           <button type="button" class="iconbtn" data-move="1" aria-label="Move ${esc(v.title)} down" ${i === list.length - 1 ? "disabled" : ""}>${ico("down")}</button>
@@ -1290,7 +1296,7 @@ async function trainingView(el, me) {
     }));
     box.querySelectorAll("[data-del]").forEach((b) => (b.onclick = async () => {
       const v = of(b);
-      if (!(await confirmDialog(`Delete “${v.title}”?`, `It's removed from every ${audience === "Tutor" ? "tutor's" : "camp staff member's"} Training page.`, "Delete video"))) return;
+      if (!(await confirmDialog(`Delete “${v.title}”?`, isParent ? "It's removed from every parent's Videos page." : `It's removed from every ${audience === "Tutor" ? "tutor's" : "camp staff member's"} Training page.`, "Delete video"))) return;
       try { await busy(b, "Deleting…", () => api(`/api/admin/training/${v.id}`, { method: "DELETE" })); toast("Video deleted."); await load(); }
       catch (err) { toast(err.message, "err"); }
     }));
@@ -1355,7 +1361,7 @@ async function trainingView(el, me) {
         finish();
         let d = {}; try { d = JSON.parse(xhr.responseText); } catch {}
         if (xhr.status === 201) {
-          toast(`“${d.video.title}” uploaded for ${target === "Both" ? "camp staff and tutors" : target === "Tutor" ? "tutors" : "camp staff"}.`);
+          toast(`“${d.video.title}” uploaded for ${name(target)}.`);
           form.reset(); pick(null); await load();
         }
         else if (xhr.status === 401) renderLogin("Your session ended. Please sign in again.");
@@ -1935,6 +1941,6 @@ async function settingsView(el, me) {
   }
 }
 
-const VIEWS = { roster: rosterView, parents: parentsView, parent: parentDetailView, followups: followupsView, staff: staffView, tutors: tutorsView, training: trainingView, assessments: assessmentsView, intros: introVideosView, notifications: notificationsView, announcements: announcementsView, camp: campInfoView, week: weekView, chat: chatView, settings: settingsView };
+const VIEWS = { roster: rosterView, parents: parentsView, parent: parentDetailView, followups: followupsView, staff: staffView, tutors: tutorsView, training: trainingView, parentvideos: (el, me) => trainingView(el, me, true), assessments: assessmentsView, intros: introVideosView, notifications: notificationsView, announcements: announcementsView, camp: campInfoView, week: weekView, chat: chatView, settings: settingsView };
 
 boot();

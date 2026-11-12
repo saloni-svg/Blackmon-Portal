@@ -17,7 +17,7 @@ import { inAudience, afterJoin, saveJoinedAt, validateAnnouncement, ATTACHMENT }
 import { LANG_EN } from "../public/chat-i18n.js";
 import { createContent } from "./content.js";
 import { aiProblem } from "./aistatus.js";
-import { serveVideo, AUDIENCES } from "./videos.js";
+import { serveVideo, AUDIENCES, PARENT_AUDIENCE } from "./videos.js";
 
 const SESSION_MS = 12 * 3600_000;
 const SETUP_MS = 24 * 3600_000;
@@ -1093,10 +1093,16 @@ export function createAdmin({ store, db, live = { send() {}, drop() {} }, parent
         return send(res, 200, { unread: docs.unreadCount(me.id) });
       }
     }
-    // ----- training videos (admins upload; camp staff / tutors watch them on their Training page) -----
+    // ----- training videos (admins upload; camp staff / tutors watch them on their Training page) and
+    // parent videos (audience "Parent": every parent watches them on their portal's Videos page) -----
+    const groupName = (a) => (a === PARENT_AUDIENCE ? "Parents" : a === "Tutor" ? "Tutors" : "Camp staff");
+    // Parents' pages update straight away when their videos change (lib/live.js).
+    const parentsChanged = (audience) => { if (audience === PARENT_AUDIENCE) live.send("content"); };
     if (p === "/api/admin/training") {
       if (m === "GET") {
-        const audience = AUDIENCES.includes(url.searchParams.get("audience")) ? url.searchParams.get("audience") : "Camp Staff";
+        const q = url.searchParams.get("audience");
+        if (q === PARENT_AUDIENCE) return send(res, 200, { videos: videos.trainingList(PARENT_AUDIENCE), people: (await activeParents().catch(() => [])).length });
+        const audience = AUDIENCES.includes(q) ? q : "Camp Staff";
         return send(res, 200, { videos: videos.trainingList(audience), people: db.prepare("SELECT COUNT(*) AS n FROM staff WHERE role = ?").get(audience).n });
       }
       if (m === "POST") { // the video itself is the request body; the details come in the URL
@@ -1106,7 +1112,8 @@ export function createAdmin({ store, db, live = { send() {}, drop() {} }, parent
         const added = await videos.addTraining(req, { audience: q.get("audience"), title: q.get("title"), description: q.get("description"),
           fileName: decodeURIComponent(String(req.headers["x-file-name"] || "")), by: fullName(me) || me.email });
         const v = added[0];
-        log(me, "Uploaded training video", v.title, `${added.length > 1 ? "Camp staff and tutors" : v.audience === "Tutor" ? "Tutors" : "Camp staff"} · ${(v.size / 1048576).toFixed(1)} MB`);
+        log(me, v.audience === PARENT_AUDIENCE ? "Uploaded parent video" : "Uploaded training video", v.title, `${added.length > 1 ? "Camp staff and tutors" : groupName(v.audience)} · ${(v.size / 1048576).toFixed(1)} MB`);
+        parentsChanged(v.audience);
         return send(res, 201, { video: v, videos: added });
       }
     }
@@ -1118,15 +1125,21 @@ export function createAdmin({ store, db, live = { send() {}, drop() {} }, parent
         return serveVideo(req, res, f.file, f.mime, f.name, url.searchParams.get("download") === "1");
       }
       manage();
-      if (m === "POST" && tr[2] === "/move") { videos.moveTraining(tr[1], Number((await readJson(req)).dir)); return send(res, 200, { ok: true }); }
+      if (m === "POST" && tr[2] === "/move") {
+        videos.moveTraining(tr[1], Number((await readJson(req)).dir));
+        parentsChanged(videos.trainingFile(tr[1])?.audience);
+        return send(res, 200, { ok: true });
+      }
       if (m === "PUT" && !tr[2]) {
         const v = videos.updateTraining(tr[1], await readJson(req));
-        log(me, "Edited training video", v.title);
+        log(me, v.audience === PARENT_AUDIENCE ? "Edited parent video" : "Edited training video", v.title);
+        parentsChanged(v.audience);
         return send(res, 200, { video: v });
       }
       if (m === "DELETE" && !tr[2]) {
         const v = videos.removeTraining(tr[1]);
-        log(me, "Deleted training video", v.title, v.audience === "Tutor" ? "Tutors" : "Camp staff");
+        log(me, v.audience === PARENT_AUDIENCE ? "Deleted parent video" : "Deleted training video", v.title, groupName(v.audience));
+        parentsChanged(v.audience);
         return send(res, 200, { ok: true });
       }
     }

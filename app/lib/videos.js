@@ -1,5 +1,5 @@
 // Videos: training videos admins upload (a list for camp staff and a list for tutors, which they
-// watch on their Training page) and the intro video each camp staff member / tutor uploads (kept
+// watch on their Training page, and a list for parents, on their Videos page) and the intro video each camp staff member / tutor uploads (kept
 // here so admins can watch it, and also sent to their GHL contact). Files live in <data>/training/
 // and <data>/intro-videos/, are streamed to disk as they arrive, and are played with seeking support.
 
@@ -10,7 +10,8 @@ import crypto from "node:crypto";
 export const VIDEO_TYPES = { "video/mp4": "mp4", "video/quicktime": "mov", "video/webm": "webm" };
 export const TRAINING_MAX = 1024 * 1024 * 1024; // 1 GB
 export const INTRO_MAX = 200 * 1024 * 1024;
-export const AUDIENCES = ["Camp Staff", "Tutor"];
+export const AUDIENCES = ["Camp Staff", "Tutor"]; // training ("Both" = these two)
+export const PARENT_AUDIENCE = "Parent"; // the parents' Videos page
 const now = () => new Date().toISOString();
 const httpError = (status, message) => Object.assign(new Error(message), { httpStatus: status });
 const clean = (v, max) => String(v ?? "").replace(/\s+/g, " ").trim().slice(0, max);
@@ -87,7 +88,7 @@ export function createVideos(db, dataDir) {
     // audience "Both": the file is stored once and added to the end of both lists. Returns the new videos.
     async addTraining(req, { audience, title, description, fileName, by }) {
       const audiences = audience === "Both" ? AUDIENCES : [audience];
-      if (!audiences.every((a) => AUDIENCES.includes(a))) throw httpError(400, "Choose camp staff, tutors, or both.");
+      if (!audiences.every((a) => AUDIENCES.includes(a) || a === PARENT_AUDIENCE)) throw httpError(400, "Choose camp staff, tutors, or both.");
       title = clean(title, 120); description = String(description ?? "").trim().slice(0, 1000);
       if (!title) throw httpError(400, "Give the video a title.");
       const f = await receive(req, trainingDir, TRAINING_MAX);
@@ -125,6 +126,9 @@ export function createVideos(db, dataDir) {
       return v;
     },
     trainingFile(id) { const v = row(id); return v && { file: path.join(trainingDir, v.stored), mime: v.mime, name: v.file_name, audience: v.audience }; },
+
+    // ----- parents' Videos page (watch only) -----
+    parentVideos() { return listRows(PARENT_AUDIENCE).map((v) => ({ id: v.id, title: v.title, description: v.description, size: v.size, createdAt: v.created_at })); },
 
     // ----- training (camp staff / tutors) -----
     trainingFor(audience, contactId) {

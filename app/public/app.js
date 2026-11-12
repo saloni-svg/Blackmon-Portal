@@ -71,6 +71,7 @@ const PARENT_NAV = [
   { r: "documents", label: "Documents", icon: "doc", docBadge: true },
   { r: "notifications", label: "Notifications", icon: "bell", badge: true },
   { r: "camp", label: "Camp info", icon: "info" },
+  { r: "videos", label: "Videos", icon: "video" },
   { r: "week", label: "This week", icon: "cal", locked: true },
   { r: "schedule", label: "A day at camp", icon: "clock", locked: true },
   { r: "team", label: "Camp team", icon: "team", locked: true },
@@ -250,7 +251,7 @@ async function signOut() {
 // server says so on /api/events. Pages that only show that content are redrawn in place; on the
 // others (forms, documents, the enrollment form) only the menu badges change, so nothing the parent
 // is typing is lost.
-const LIVE_VIEWS = new Set(["home", "notifications", "camp", "week", "schedule", "team"]);
+const LIVE_VIEWS = new Set(["home", "notifications", "camp", "videos", "week", "schedule", "team"]);
 let liveSource = null, liveOpened = false, liveTimer = null;
 function startLive() {
   if (liveSource || !window.EventSource) return;
@@ -272,7 +273,9 @@ async function refreshLive() {
   try { me = await api("/api/me"); } catch (e) { if (e.status === 401) location.reload(); return; }
   if (!state.me || state.me.role !== "parent") return;
   state.me = me;
-  if (LIVE_VIEWS.has(route()) && !document.querySelector("dialog[open]")) {
+  // Not while a dialog is open or a video is playing (redrawing would stop it).
+  const playing = [...document.querySelectorAll("video")].some((v) => !v.paused && !v.ended);
+  if (LIVE_VIEWS.has(route()) && !document.querySelector("dialog[open]") && !playing) {
     const y = window.scrollY;
     renderShell();
     window.scrollTo(0, y);
@@ -664,6 +667,20 @@ VIEWS.parent = {
   },
 
   // Winter Camp facts, activities, packages and prices (content/camp.json -> winterCamp).
+  // Videos Blackmon Tutoring uploads for parents (admin → Parent videos). Watch only.
+  async videos(el) {
+    const sub = "Videos from Blackmon Tutoring about camp. Watch them any time.";
+    el.innerHTML = header("Videos", sub) + '<p class="hint">Loading…</p>';
+    let list;
+    try { list = (await api("/api/parent-videos")).videos; }
+    catch (err) { el.innerHTML = header("Videos") + `<p class="alert alert--err" role="alert">${esc(err.message)}</p>`; return; }
+    if (!el.isConnected) return;
+    el.innerHTML = header("Videos", sub) + (list.length
+      ? `<section class="card"><ol class="tvids">${list.map((v) => `<li>
+          <video controls controlslist="nodownload" preload="metadata" playsinline src="/api/parent-videos/${v.id}/file" aria-label="${esc(v.title)}"></video>
+          <div><h3>${esc(v.title)}</h3>${v.description ? `<p>${esc(v.description)}</p>` : ""}</div></li>`).join("")}</ol></section>`
+      : `<div class="card locked">${ico("video")}<h2>No videos yet</h2><p>Blackmon Tutoring will post camp videos here. Check back soon.</p></div>`);
+  },
   camp(el, me) {
     const c = me.campInfo;
     if (!c) { el.innerHTML = header("Camp info") + `<div class="card locked">${ico("info")}<h2>Camp details coming soon</h2></div>`; return; }
