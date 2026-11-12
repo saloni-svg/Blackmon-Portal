@@ -10,7 +10,7 @@ import { fileURLToPath } from "node:url";
 import { createGhlStore } from "./lib/ghl.js";
 import { createDemoStore } from "./lib/demo.js";
 import { buildView, roleOf, nextInstallment, campPackage, campInclusions, yesNo, MEAL_FIELDS, ENROLLMENT_TAG, ONBOARDING } from "./lib/portal.js";
-import { createVideos, serveVideo } from "./lib/videos.js";
+import { createVideos, serveVideo, PARENT_AUDIENCE } from "./lib/videos.js";
 import { createAssessment } from "./lib/assessment.js";
 import { createAcknowledgments, ACK_STATEMENT, ACK_TITLE } from "./lib/acknowledgment.js";
 import { createAdmin } from "./lib/admin.js";
@@ -576,6 +576,18 @@ async function api(req, res, url) {
   if (url.pathname === "/api/profile" || url.pathname === "/api/profile/id-proof") {
     if (role !== "staff" && role !== "tutor") return send(res, 403, { error: "This page isn't available for your account." });
     return admin.profile(req, res, url, normEmail(contact.email));
+  }
+
+  // Parents' Videos page: the videos admins upload under Parent videos. Watch only.
+  if (route === "GET /api/parent-videos") {
+    if (role !== "parent") return send(res, 403, { error: "This page isn't available for your account." });
+    return send(res, 200, { videos: videos.parentVideos() });
+  }
+  const pv = /^\/api\/parent-videos\/(\d+)\/file$/.exec(url.pathname);
+  if (pv && req.method === "GET") {
+    const f = videos.trainingFile(pv[1]);
+    if (role !== "parent" || !f || f.audience !== PARENT_AUDIENCE) return send(res, 404, { error: "Video not found." });
+    return serveVideo(req, res, f.file, f.mime, f.name);
   }
 
   // Live updates for parents (lib/live.js): stays open; the page reloads what an admin changed.
