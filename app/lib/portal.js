@@ -17,9 +17,15 @@ export const ENROLLMENT_TAG = "enrollment-submitted";
 export const ONBOARDING =["Not Started", "Training", "Training Complete", "Contract Signed", "Video Submitted", "Group/Wise Link Sent"];
 
 const ROLE = { Parent: "parent", "Camp Staff": "staff", Tutor: "tutor" };
-// Blackmon Tutoring runs one camp, Little Elm (content/camp.json -> locations.littleelm). Everyone sees
-// it, whatever their GHL Portal - Location says (older contacts may still say "Plano").
-const CAMP = { key: "littleelm", name: "Little Elm" };
+// Blackmon Tutoring runs two camps (content/camp.json -> locations.<key>): Little Elm (520 Lobo Lane)
+// and Dallas (8494 Stults Rd). A person's camp is their enrollment's WC26 - Camp Location (parents), else
+// GHL Portal - Location; anyone else (none set, or an old "Plano") sees Little Elm.
+const CAMPS = { littleelm: "Little Elm", dallas: "Dallas" };
+const campKey = (v) => (/dallas|stults/i.test(String(v || "")) ? "dallas" : /little\s*elm|lobo/i.test(String(v || "")) ? "littleelm" : null);
+export function campOf(f = {}) {
+  const key = campKey(f.wc26__camp_location) || campKey(f.portal__location) || "littleelm";
+  return { key, name: CAMPS[key] };
+}
 
 const filled = (v) => v !== null && v !== undefined && String(v).trim() !== "";
 const num = (v) => (filled(v) && !isNaN(Number(v)) ? Number(v) : null);
@@ -105,6 +111,7 @@ export function roleOf(contact) {
 export async function buildView(contact, store, content) {
   const f = contact.fields;
   const role = roleOf(contact);
+  const CAMP = campOf(role === "parent" ? f : { portal__location: f.portal__location });
   const location = CAMP.key;
   const links = await store.links();
   const base = {
@@ -173,7 +180,7 @@ export async function buildView(contact, store, content) {
     const at = (name) => stage >= ONBOARDING.indexOf(name);
     const groupLink = role === "tutor"
       ? links.wiseInvite
-      : links.whatsappLittleElm;
+      : location === "dallas" ? links.whatsappDallas || links.whatsappLittleElm : links.whatsappLittleElm;
     return {
       ...base,
       approved,
