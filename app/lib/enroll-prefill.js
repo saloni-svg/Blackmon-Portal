@@ -17,7 +17,7 @@ const NEVER = new Set(["wc26__parent_signature", "wc26__signature_date", "wc26__
 const OPTION = {
   fullCamp: "Full camp (Dec 21 – Jan 1)", lunchYes: "Lunch included", lunchNo: "Will pack lunch",
   early: "2 hours before camp (7:00 AM)", late: "2 hours after camp (6:00 PM)", none: "None",
-  locations: [[/little\s*elm/i, "Little Elm – 520 Lobo Lane"]],
+  locations: [[/little\s*elm|lobo/i, "Little Elm – 520 Lobo Lane"], [/dallas|stults/i, "Dallas – 8494 Stults Rd"]],
 };
 const queryKey = (name) => String(name).trim().toLowerCase().replace(/\s+/g, "_");
 const text = (v) => String(v ?? "").trim();

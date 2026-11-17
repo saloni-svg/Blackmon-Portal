@@ -8,6 +8,11 @@
       "name": "Little Elm camp",
       "address": "520 Lobo Lane, Little Elm, TX",
       "photo": "/img/littleelm-camp.jpg"
+    },
+    "dallas": {
+      "name": "Dallas camp",
+      "address": "8494 Stults Rd, Dallas, TX 75243",
+      "photo": "/img/gallery/camp-3.jpg"
     }
   },
   "schedule": {
@@ -128,6 +133,46 @@
           "tag": "Closed"
         }
       ]
+    },
+    "dallas": {
+      "label": "Week of December 21",
+      "days": [
+        {
+          "day": "Monday",
+          "date": "December 21",
+          "title": "[MONDAY_TITLE]",
+          "description": "[Short description of Monday's activity of the day.]",
+          "tag": ""
+        },
+        {
+          "day": "Tuesday",
+          "date": "December 22",
+          "title": "[TUESDAY_TITLE]",
+          "description": "[Short description of Tuesday's activity.]",
+          "tag": ""
+        },
+        {
+          "day": "Wednesday",
+          "date": "December 23",
+          "title": "[WEDNESDAY_TITLE]",
+          "description": "[Short description of Wednesday's activity.]",
+          "tag": ""
+        },
+        {
+          "day": "Thursday",
+          "date": "December 24",
+          "title": "[THURSDAY_TITLE]",
+          "description": "[Short description of Thursday's activity.]",
+          "tag": ""
+        },
+        {
+          "day": "Friday",
+          "date": "December 25",
+          "title": "Camp closed: Christmas Day",
+          "description": "No camp today. Merry Christmas!",
+          "tag": "Closed"
+        }
+      ]
     }
   },
   "winterCamp": {
@@ -139,7 +184,7 @@
     "closed": "Closed December 25 and January 1",
     "ages": "Ages 3–16",
     "hours": "9:00 AM–4:00 PM",
-    "location": "520 Lobo Lane, Little Elm, Texas",
+    "location": "Two camps: 520 Lobo Lane, Little Elm, Texas, and 8494 Stults Rd, Dallas, Texas 75243",
     "gallery": [
       {
         "src": "/img/gallery/camp-1.jpg",
@@ -385,6 +430,23 @@
   },
   "teams": {
     "littleelm": [
+      {
+        "name": "[STAFF_NAME]",
+        "role": "Supervisor",
+        "phone": "[STAFF_PHONE]"
+      },
+      {
+        "name": "[STAFF_NAME]",
+        "role": "Counselor",
+        "phone": "[STAFF_PHONE]"
+      },
+      {
+        "name": "[STAFF_NAME]",
+        "role": "Counselor",
+        "phone": "[STAFF_PHONE]"
+      }
+    ],
+    "dallas": [
       {
         "name": "[STAFF_NAME]",
         "role": "Supervisor",

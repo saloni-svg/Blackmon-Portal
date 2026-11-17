@@ -58,6 +58,10 @@
         {
           "value": "Little Elm",
           "label": "Little Elm – 520 Lobo Lane"
+        },
+        {
+          "value": "Dallas",
+          "label": "Dallas – 8494 Stults Rd"
         }
       ],
       "earlyDropoff": [
@@ -86,6 +90,10 @@
         {
           "value": "Little Elm",
           "label": "Little Elm – 520 Lobo Lane"
+        },
+        {
+          "value": "Dallas",
+          "label": "Dallas – 8494 Stults Rd"
         }
       ],
       "earlyDropoff": [
@@ -114,6 +122,10 @@
         {
           "value": "Little Elm",
           "label": "Little Elm – 520 Lobo Lane"
+        },
+        {
+          "value": "Dallas",
+          "label": "Dallas – 8494 Stults Rd"
         }
       ],
       "earlyDropoff": [

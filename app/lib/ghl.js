@@ -9,6 +9,7 @@ const LINK_NAMES = {
   "Portal Payment Link": "payment",
   "Portal Intro Video Form Link": "introVideoForm",
   "Portal WhatsApp Little Elm Link": "whatsappLittleElm",
+  "Portal WhatsApp Dallas Link": "whatsappDallas",
   "Portal Wise Invite Link": "wiseInvite",
 };
 

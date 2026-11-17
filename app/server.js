@@ -9,7 +9,7 @@ import { execFileSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 import { createGhlStore } from "./lib/ghl.js";
 import { createDemoStore } from "./lib/demo.js";
-import { buildView, roleOf, nextInstallment, campPackage, campInclusions, yesNo, MEAL_FIELDS, ENROLLMENT_TAG, ONBOARDING } from "./lib/portal.js";
+import { buildView, roleOf, campOf, nextInstallment, campPackage, campInclusions, yesNo, MEAL_FIELDS, ENROLLMENT_TAG, ONBOARDING } from "./lib/portal.js";
 import { createVideos, serveVideo, PARENT_AUDIENCE } from "./lib/videos.js";
 import { createAssessment } from "./lib/assessment.js";
 import { createAcknowledgments, ACK_STATEMENT, ACK_TITLE } from "./lib/acknowledgment.js";
@@ -106,6 +106,19 @@ if (!fs.existsSync(CAMP_FILE)) {
     for (const k of had) delete camp[k].plano;
     fs.writeFileSync(CAMP_FILE, JSON.stringify(camp, null, 2) + "\n");
     console.log(`  Camp content: removed Plano (${had.join(", ")}) from ${CAMP_FILE}.`);
+  }
+}
+// Second camp, Dallas (8494 Stults Rd): added to the live camp.json once, from content/camp.json
+// (its location, week and team); admins' other edits stay as they are.
+{
+  const camp = JSON.parse(fs.readFileSync(CAMP_FILE, "utf8"));
+  const seed = JSON.parse(fs.readFileSync(path.join(ROOT, "content", "camp.json"), "utf8"));
+  const missing = ["locations", "weeks", "teams"].filter((k) => !camp[k]?.dallas && seed[k]?.dallas);
+  if (missing.length) {
+    for (const k of missing) camp[k] = { ...(camp[k] || {}), dallas: seed[k].dallas };
+    if (camp.winterCamp && /^520 Lobo Lane, Little Elm, Texas$/.test(String(camp.winterCamp.location || "").trim())) camp.winterCamp.location = seed.winterCamp.location;
+    fs.writeFileSync(CAMP_FILE, JSON.stringify(camp, null, 2) + "\n");
+    console.log(`  Camp content: added Dallas (${missing.join(", ")}) to ${CAMP_FILE}.`);
   }
 }
 const docs = createDocuments({ db, store, root: ROOT, base: DATA_BASE });
@@ -291,7 +304,7 @@ async function joinedAtOf(contact) {
   return joined;
 }
 // Who the parent is for announcements: audience (location) and when they joined.
-const announcementParent = async (contact) => ({ contactId: contact.id, location: contact.fields.portal__location || "", joinedAt: await joinedAtOf(contact) });
+const announcementParent = async (contact) => ({ contactId: contact.id, location: campOf(contact.fields).name, joinedAt: await joinedAtOf(contact) });
 
 async function parentDocuments(contact, { force = false } = {}) {
   try {
